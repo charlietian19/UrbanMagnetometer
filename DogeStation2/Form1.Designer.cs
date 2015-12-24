@@ -28,25 +28,25 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new System.Windows.Forms.Button();
+            this.AuthButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // button1
+            // AuthButton
             // 
-            this.button1.Location = new System.Drawing.Point(95, 63);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(138, 58);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.AuthButton.Location = new System.Drawing.Point(12, 12);
+            this.AuthButton.Name = "AuthButton";
+            this.AuthButton.Size = new System.Drawing.Size(201, 58);
+            this.AuthButton.TabIndex = 0;
+            this.AuthButton.Text = "Authenticate";
+            this.AuthButton.UseVisualStyleBackColor = true;
+            this.AuthButton.Click += new System.EventHandler(this.AuthButton_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(308, 212);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(593, 369);
+            this.Controls.Add(this.AuthButton);
             this.Name = "Form1";
             this.Text = "Form1";
             this.ResumeLayout(false);
@@ -55,7 +55,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button AuthButton;
     }
 }
 

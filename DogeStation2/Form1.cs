@@ -7,28 +7,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using GDriveWriter;
+using GDriveNURI;
 
 namespace DogeStation2
 {
     public partial class Form1 : Form
     {
+        private GDriveNURI.Writer GoogleWriter = null;
+
         public Form1()
         {
             InitializeComponent();
+            TryAuthenticate();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void TryAuthenticate()
         {
             try
             {
-                var writer = new GDriveWriter.GDriveWriter("nuri-station", "nuri-station.json");
-                writer.ListFiles();
+                GoogleWriter = new GDriveNURI.Writer("nuri-station", "nuri-station.json");
             }
             catch (Exception exception)
             {
-                // Do nothing.
+                MessageBox.Show("Can't authenticate: " + exception.Message);
             }
         }
+
+        private void AuthButton_Click(object sender, EventArgs e)
+        {
+            TryAuthenticate();
+        }
+        
     }
 }
