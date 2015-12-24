@@ -13,7 +13,7 @@ namespace DogeStation2
 {
     public partial class Form1 : Form
     {
-        private GDriveNURI.Writer GoogleWriter = null;
+        private GDriveNURI.Uploader GoogleWriter = null;
 
         public Form1()
         {
@@ -25,7 +25,7 @@ namespace DogeStation2
         {
             try
             {
-                GoogleWriter = new GDriveNURI.Writer("nuri-station", "nuri-station.json");
+                GoogleWriter = new GDriveNURI.Uploader("nuri-station", "nuri-station.json");
             }
             catch (Exception exception)
             {

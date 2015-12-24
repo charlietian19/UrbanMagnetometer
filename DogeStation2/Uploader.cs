@@ -18,23 +18,24 @@ using System.Threading.Tasks;
 
 */
 
+    // TODO: proper exception handling
+
 namespace GDriveNURI
 {
-    public class Writer
+    public class Uploader
     {
         private UserCredential credential;
         private DriveService service;
-        private static string[] Scopes = { DriveService.Scope.Drive };
-        private static string credentialDirectory, dataCacheFolder, 
-            filesMimeType, folderMimeType, googleAuthUser;
-        private static int maxListResults;
+        private string[] Scopes = { DriveService.Scope.Drive };
+        private string credentialDirectory, filesMimeType, folderMimeType, 
+            googleAuthUser;
+        private int maxListResults;
 
         /* Initializes settings from the configuration file. */
         private void ReadAppConfig()
         {
             var settings = System.Configuration.ConfigurationManager.AppSettings;
             credentialDirectory = settings["CredentialDirectory"];
-            dataCacheFolder = settings["DataCacheFolder"];
             filesMimeType = settings["FilesMimeType"];
             folderMimeType = settings["FoldersMimeType"];
             googleAuthUser = settings["GoogleAuthUser"];
@@ -42,7 +43,7 @@ namespace GDriveNURI
         }
 
         /* Initializes Google DriveService object given application name and the credential. */
-        public Writer(string ApplicationName, string secretPath)
+        public Uploader(string ApplicationName, string secretPath)
         {
             ReadAppConfig();
             using (var stream = new FileStream(secretPath, FileMode.Open, FileAccess.Read))
@@ -126,10 +127,10 @@ namespace GDriveNURI
             insertRequest.Execute();
         }
 
-        /* Stores the data from the sensor. */
-        public void Write(double[] dataX, double[] dataY, double[] dataZ, double systemSeconds, DateTime time)
-        {
 
+        public void UploadData(string path, DateTime time)
+        {
+            // TODO: put queuing, folder creation, and resuming code here
         }
     }
 
