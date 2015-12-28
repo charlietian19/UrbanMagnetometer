@@ -17,10 +17,12 @@ using System.Collections.Concurrent;
 
     https://developers.google.com/drive/v2/web/quickstart/dotnet 
     https://developers.google.com/api-client-library/dotnet/guide/media_upload
+    https://msdn.microsoft.com/en-us/library/dd997371(v=vs.110).aspx
 
 */
 
-    // TODO: proper exception handling
+// TODO: proper exception handling
+// TODO: split the class in two
 
 namespace GDriveNURI
 {
@@ -51,6 +53,7 @@ namespace GDriveNURI
             ReadAppConfig();
             GoogleDriveInit(ApplicationName, secretPath);
             queue = new BlockingCollection<DatasetInfo>();
+            // TODO: Start worker threads
         }
 
         /* Creates an uploader with a pre-defined queue bound. */
@@ -208,7 +211,7 @@ namespace GDriveNURI
 
         /* Retrieves the arriving data in background. */
         // TODO: kill the worker threads more cleanly?
-        // https://msdn.microsoft.com/en-us/library/dd997371(v=vs.110).aspx
+    
         private void Worker()
         {
             while (!queue.IsCompleted)
@@ -222,17 +225,11 @@ namespace GDriveNURI
 
                 if (info != null)
                 {
-                    Process(info);
+                    String filePath = Archive(info);
+                    String parentId = CreateDirectoryTree(info);
+                    Upload(filePath, parentId);
                 }
             }
-        }
-
-        /* Uploads the data to Google Drive. */
-        private void Process(DatasetInfo info)
-        {
-            String filePath = Archive(info);
-            String parentId = CreateDirectoryTree(info);
-            Upload(filePath, parentId);
         }
 
         /* Queues uploading a single magnetic field dataset to be uploaded. */
