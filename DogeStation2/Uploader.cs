@@ -127,9 +127,9 @@ namespace GDriveNURI
             insertRequest.Execute();
         }
 
-        /* Uploads a single file to the Google Drive. The parent folder
-        is chosen based on the file creation time. */
-        public void UploadData(string path, DatasetInfo info)
+        /* Uploads a single magnetic field dataset to the Google Drive.
+        The parent folder is chosen based on the creation time. */
+        public void UploadMagneticData(DatasetInfo info)
         {
             // TODO: put queuing, folder creation, and resuming code here
         }

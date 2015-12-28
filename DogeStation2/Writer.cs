@@ -16,7 +16,6 @@ namespace GDriveNURI
         private DatasetInfo info;
 
         private BinaryWriter x, y, z, t;
-        private string xPath, yPath, zPath, tPath;
         private bool isWriting = false;
         private long offset;
 
@@ -89,14 +88,14 @@ namespace GDriveNURI
         private void CreateFiles(DateTime time)
         {
             info = new DatasetInfo(time);
-            xPath = Path.Combine(dataCacheFolder, info.XFileName );
-            yPath = Path.Combine(dataCacheFolder, info.YFileName);
-            zPath = Path.Combine(dataCacheFolder, info.ZFileName);
-            tPath = Path.Combine(dataCacheFolder, info.TFileName);
-            x = new BinaryWriter(File.Open(xPath, FileMode.Append, FileAccess.Write));
-            y = new BinaryWriter(File.Open(yPath, FileMode.Append, FileAccess.Write));
-            z = new BinaryWriter(File.Open(zPath, FileMode.Append, FileAccess.Write));
-            t = new BinaryWriter(File.Open(tPath, FileMode.Append, FileAccess.Write));
+            x = new BinaryWriter(File.Open(info.FullPath(info.XFileName), 
+                FileMode.Append, FileAccess.Write));
+            y = new BinaryWriter(File.Open(info.FullPath(info.YFileName), 
+                FileMode.Append, FileAccess.Write));
+            z = new BinaryWriter(File.Open(info.FullPath(info.ZFileName), 
+                FileMode.Append, FileAccess.Write));
+            t = new BinaryWriter(File.Open(info.FullPath(info.TFileName), 
+                FileMode.Append, FileAccess.Write));
             offset = 0;
             isWriting = true;
         }
@@ -104,19 +103,11 @@ namespace GDriveNURI
         /* Closes the data files and sends them to the Google Drive. */
         private void CloseAndUploadAll()
         {
-            CloseAndUpload(x, xPath);
-            CloseAndUpload(y, yPath);
-            CloseAndUpload(z, zPath);
-            CloseAndUpload(t, tPath);
-        }
-
-        /* Closes and uploads a single file. */
-        private void CloseAndUpload(BinaryWriter writer, string path)
-        {
-            writer.Close();
-            // TODO: make sure the file is not given to the uploader if
-            // it can be still appended.
-            uploader.UploadData(path, info);
+            x.Close();
+            y.Close();
+            z.Close();
+            t.Close();
+            uploader.UploadMagneticData(info);
         }
     }
 

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace GDriveNURI
 {
@@ -35,6 +32,7 @@ namespace GDriveNURI
             channelNameTime = settings["ChannelNameTime"];
             timeFileNameFormat = settings["TimeFileNameFormat"];
             dataFileNameFormat = settings["DataFileNameFormat"];
+            dataCacheFolder = settings["DataCacheFolder"];
         }
 
         public DatasetInfo(DateTime time)
@@ -89,6 +87,12 @@ namespace GDriveNURI
                 return String.Format(timeFileNameFormat,
                     Year, Month, Day, Hour, channelNameTime);
             }
+        }
+
+        /* Returns full path to a data file. */
+        public String FullPath(String file)
+        {
+            return Path.Combine(dataCacheFolder, file);
         }
 
     }
