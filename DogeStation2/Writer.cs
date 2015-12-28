@@ -13,7 +13,8 @@ namespace GDriveNURI
     {
         private Uploader uploader;
         private string dataCacheFolder;
-        private DatasetInfo info;
+        private DatasetInfo info = null;
+        private DatasetInfo postponedInfo = null;
 
         private BinaryWriter x, y, z, t;
         private bool isWriting = false;
@@ -46,7 +47,7 @@ namespace GDriveNURI
 
             if (info.StartDate.Hour != time.Hour)
             {
-                CloseAndUploadAll();
+                CloseAndUploadAll(time);
                 CreateFiles(time);
             }
 
@@ -100,14 +101,30 @@ namespace GDriveNURI
             isWriting = true;
         }
 
-        /* Closes the data files and sends them to the Google Drive. */
-        private void CloseAndUploadAll()
+        /* Closes the data files and sends them to the Google Drive.
+        time indicates when the latest chunk of data was received. */
+        private void CloseAndUploadAll(DateTime time)
         {
             x.Close();
             y.Close();
             z.Close();
             t.Close();
-            uploader.UploadMagneticData(info);
+
+            /* Upload the latest postponed dataset, if any. */
+            if ((postponedInfo != null) && !postponedInfo.SameFile(info))
+            {
+                uploader.UploadMagneticData(postponedInfo);
+                postponedInfo = null;
+            }
+
+            if (!info.SameFile(time))
+            {
+                uploader.UploadMagneticData(info);
+            }
+            else
+            {
+                postponedInfo = info;
+            }
         }
     }
 

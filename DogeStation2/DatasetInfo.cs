@@ -95,5 +95,36 @@ namespace GDriveNURI
             return Path.Combine(dataCacheFolder, file);
         }
 
+        /* Returns true if the data is supposed to be in the same file. */
+        public bool SameFile(DatasetInfo other)
+        {
+            // If parameter is null return false.
+            if (other == null)
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            return (StartDate.Year == other.StartDate.Year) &&
+                (StartDate.Month == other.StartDate.Month) &&
+                (StartDate.Day == other.StartDate.Day) && 
+                (StartDate.Hour == other.StartDate.Hour);
+        }
+
+        /* Returns true if the data is supposed to be in the same file. */
+        public bool SameFile(DateTime other)
+        {
+            // If parameter is null return false.
+            if (other == null)
+            {
+                return false;
+            }
+
+            // Return true if the fields match:
+            return (StartDate.Year == other.Year) &&
+                (StartDate.Month == other.Month) &&
+                (StartDate.Day == other.Day) &&
+                (StartDate.Hour == other.Hour);
+        }
     }
 }
