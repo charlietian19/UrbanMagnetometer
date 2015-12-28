@@ -33,7 +33,7 @@ namespace GDriveNURI
         private string[] Scopes = { DriveService.Scope.Drive };
         private string credentialDirectory, filesMimeType, folderMimeType, 
             googleAuthUser;
-        private int maxListResults;
+        private int maxListResults, maxActiveUploads;
         private BlockingCollection<DatasetInfo> queue;
 
         /* Initializes settings from the configuration file. */
@@ -45,6 +45,16 @@ namespace GDriveNURI
             folderMimeType = settings["FoldersMimeType"];
             googleAuthUser = settings["GoogleAuthUser"];
             maxListResults = Convert.ToInt32(settings["MaxListResults"]);
+            maxActiveUploads = Convert.ToInt32(settings["MaxActiveUploads"]);
+        }
+
+        /* Starts the worker threads. */
+        private void StartWorkerThreads()
+        {
+            for (int i = 0; i < maxActiveUploads; i++)
+            {
+                Task.Run(() => Worker());
+            }
         }
 
         /* Creates an uploader with no queue bound. */
@@ -53,7 +63,7 @@ namespace GDriveNURI
             ReadAppConfig();
             GoogleDriveInit(ApplicationName, secretPath);
             queue = new BlockingCollection<DatasetInfo>();
-            // TODO: Start worker threads
+            StartWorkerThreads();
         }
 
         /* Creates an uploader with a pre-defined queue bound. */
@@ -62,6 +72,7 @@ namespace GDriveNURI
             ReadAppConfig();
             GoogleDriveInit(ApplicationName, secretPath);
             queue = new BlockingCollection<DatasetInfo>(maxQueueLength);
+            StartWorkerThreads();
         }
 
         /* Initializes Google DriveService object given application name and the credential. */
@@ -210,8 +221,6 @@ namespace GDriveNURI
         }
 
         /* Retrieves the arriving data in background. */
-        // TODO: kill the worker threads more cleanly?
-    
         private void Worker()
         {
             while (!queue.IsCompleted)
