@@ -11,7 +11,7 @@ namespace GDriveNURI
 {
     class Writer
     {
-        private Uploader uploader;
+        private UploadScheduler uploader;
         private string dataCacheFolder;
         private DatasetInfo info = null;
         private DatasetInfo postponedInfo = null;
@@ -21,7 +21,7 @@ namespace GDriveNURI
         private long offset;
 
         /* Constructs the data writer given a Google Drive connection. */
-        public Writer(Uploader uploader)
+        public Writer(UploadScheduler uploader)
         {
             this.uploader = uploader;
             ReadAppConfig();

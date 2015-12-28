@@ -119,8 +119,10 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="GDrive.cs" />
     <Compile Include="IDatasetName.cs" />
-    <Compile Include="Uploader.cs" />
+    <Compile Include="IUploader.cs" />
+    <Compile Include="UploadScheduler.cs" />
     <Compile Include="Writer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
