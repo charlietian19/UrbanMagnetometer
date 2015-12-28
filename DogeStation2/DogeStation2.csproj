@@ -111,12 +111,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DatasetInfo.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="IDatasetName.cs" />
     <Compile Include="Uploader.cs" />
     <Compile Include="Writer.cs" />
     <Compile Include="Program.cs" />

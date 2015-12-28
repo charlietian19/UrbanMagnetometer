@@ -12,13 +12,11 @@ namespace GDriveNURI
     class Writer
     {
         private Uploader uploader;
-        private string dataCacheFolder, stationName, dataUnits, samplingRate,
-            channelNameX, channelNameY, channelNameZ, channelNameTime,
-            dataFileNameFormat, timeFileNameFormat;
+        private string dataCacheFolder;
+        private DatasetInfo info;
 
         private BinaryWriter x, y, z, t;
         private string xPath, yPath, zPath, tPath;
-        private DateTime startDate;
         private bool isWriting = false;
         private long offset;
 
@@ -36,33 +34,8 @@ namespace GDriveNURI
         {
             var settings = System.Configuration.ConfigurationManager.AppSettings;
             dataCacheFolder = settings["DataCacheFolder"];
-            stationName = settings["StationName"];
-            samplingRate = settings["SamplingRate"];
-            dataUnits = settings["DataUnits"];
-            channelNameX = settings["ChannelNameX"];
-            channelNameY = settings["ChannelNameY"];
-            channelNameZ = settings["ChannelNameZ"];
-            channelNameTime = settings["ChannelNameTime"];
-            timeFileNameFormat = settings["TimeFileNameFormat"];
-            dataFileNameFormat = settings["DataFileNameFormat"];
         }
-
-        /* Returns the file name given the channel and the date. */
-        private string GetFileName(string channel, DateTime time)
-        {
-            if (channel != channelNameTime)
-            {
-                return String.Format(dataFileNameFormat,
-                    time.Year, time.Month, time.Day, time.Hour, channel, 
-                    dataUnits, samplingRate);
-            }
-            else
-            {
-                return String.Format(dataFileNameFormat,
-                    time.Year, time.Month, time.Day, time.Hour, channel);
-            }
-        }
-
+        
         /* Stores the data from the sensor. */
         public void Write(double[] dataX, double[] dataY, double[] dataZ, 
             double systemSeconds, DateTime time)
@@ -72,7 +45,7 @@ namespace GDriveNURI
                 CreateFiles(time);
             }
 
-            if (startDate.Hour != time.Hour)
+            if (info.StartDate.Hour != time.Hour)
             {
                 CloseAndUploadAll();
                 CreateFiles(time);
@@ -115,11 +88,11 @@ namespace GDriveNURI
         /* Creates the data files in cache folder. */
         private void CreateFiles(DateTime time)
         {
-            startDate = time;
-            xPath = Path.Combine(dataCacheFolder, GetFileName(channelNameX, time));
-            yPath = Path.Combine(dataCacheFolder, GetFileName(channelNameY, time));
-            zPath = Path.Combine(dataCacheFolder, GetFileName(channelNameZ, time));
-            tPath = Path.Combine(dataCacheFolder, GetFileName(channelNameTime, time));
+            info = new DatasetInfo(time);
+            xPath = Path.Combine(dataCacheFolder, info.XFileName );
+            yPath = Path.Combine(dataCacheFolder, info.YFileName);
+            zPath = Path.Combine(dataCacheFolder, info.ZFileName);
+            tPath = Path.Combine(dataCacheFolder, info.TFileName);
             x = new BinaryWriter(File.Open(xPath, FileMode.Append, FileAccess.Write));
             y = new BinaryWriter(File.Open(yPath, FileMode.Append, FileAccess.Write));
             z = new BinaryWriter(File.Open(zPath, FileMode.Append, FileAccess.Write));
@@ -141,7 +114,9 @@ namespace GDriveNURI
         private void CloseAndUpload(BinaryWriter writer, string path)
         {
             writer.Close();
-            uploader.UploadData(path, startDate);
+            // TODO: make sure the file is not given to the uploader if
+            // it can be still appended.
+            uploader.UploadData(path, info);
         }
     }
 

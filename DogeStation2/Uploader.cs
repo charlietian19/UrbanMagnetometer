@@ -75,7 +75,7 @@ namespace GDriveNURI
             return files;
         }
 
-        /* Uploads a file to Google drive. */
+        /* Uploads a file to the Google Drive. */
         private void Upload(string path, string parentId)
         {
             string fileName = Path.GetFileName(path);
@@ -127,8 +127,9 @@ namespace GDriveNURI
             insertRequest.Execute();
         }
 
-
-        public void UploadData(string path, DateTime time)
+        /* Uploads a single file to the Google Drive. The parent folder
+        is chosen based on the file creation time. */
+        public void UploadData(string path, DatasetInfo info)
         {
             // TODO: put queuing, folder creation, and resuming code here
         }
