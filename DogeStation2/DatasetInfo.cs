@@ -7,7 +7,8 @@ namespace GDriveNURI
     public class DatasetInfo
     {
         private string dataCacheFolder, channelNameX, channelNameY, channelNameZ, 
-            channelNameTime, dataFileNameFormat, timeFileNameFormat;
+            channelNameTime, dataFileNameFormat, timeFileNameFormat,
+            zipFileNameFormat;
         
         public String Hour { get; set; }
         public String Year { get; set; }
@@ -30,6 +31,7 @@ namespace GDriveNURI
             channelNameY = settings["ChannelNameY"];
             channelNameZ = settings["ChannelNameZ"];
             channelNameTime = settings["ChannelNameTime"];
+            zipFileNameFormat = settings["ZipFileNameFormat"];
             timeFileNameFormat = settings["TimeFileNameFormat"];
             dataFileNameFormat = settings["DataFileNameFormat"];
             dataCacheFolder = settings["DataCacheFolder"];
@@ -89,10 +91,29 @@ namespace GDriveNURI
             }
         }
 
+        /* Returns the archive name for this dataset. */
+        public String ZipFileName
+        {
+            get
+            {
+                return String.Format(timeFileNameFormat,
+                    Year, Month, Day, Hour);
+            }
+        }
+
+        /* Returns full path to the folder containing the data. */
+        public String FolderPath
+        {
+            get
+            {
+                return dataCacheFolder;
+            }
+        }
+
         /* Returns full path to a data file. */
         public String FullPath(String file)
         {
-            return Path.Combine(dataCacheFolder, file);
+            return Path.Combine(FolderPath, file);
         }
 
         /* Returns true if the data is supposed to be in the same file. */
