@@ -16,16 +16,17 @@ using System.Threading;
 
 */
 
-
 namespace GDriveNURI
 {
     public class GDrive : IUploader
     {
         private UserCredential credential;
         private DriveService service;
+        private GDrivePathHelper pathHelper;
         private string[] Scopes = { DriveService.Scope.Drive };
-        private string credentialDirectory, filesMimeType, folderMimeType,
+        private string credentialDirectory,
             googleAuthUser;
+        public string filesMimeType, folderMimeType;
         private int maxListResults;
 
         /* Initializes settings from the configuration file. */
@@ -43,6 +44,7 @@ namespace GDriveNURI
         {
             ReadAppConfig();
             GoogleDriveInit(ApplicationName, secretPath);
+            pathHelper = new GDrivePathHelper(this);
         }
 
         /* Initializes Google DriveService object given application name and the credential. */
@@ -83,16 +85,18 @@ namespace GDriveNURI
         }
 
         /* Returns the list of files in the given folder */
-        public IList<ChildReference> ChildList(string folderId)
+        // TODO: make a batch request that returns a list of Files instead
+        public IList<ChildReference> ChildList(
+            Google.Apis.Drive.v2.Data.File file)
         {
-            var listRequest = service.Children.List(folderId);
+            var listRequest = service.Children.List(file.Id);
             listRequest.MaxResults = maxListResults;
             IList<ChildReference> files = listRequest.Execute().Items;
             return files;
         }
 
         /* Synchronously uploads a file given by path to Google Drive. 
-        parent is in the form of /foo/bar, rather than Google IDs.
+        parent is in the form of \foo\bar\file.bin, rather than Google IDs.
         Recursively creates the parent folder if it doesn't exist. */
         public async void Upload(string path, string parent)
         {
@@ -100,50 +104,29 @@ namespace GDriveNURI
 
             using (var uploadStream = new FileStream(path, FileMode.Open, FileAccess.Read))
             {
+                string parentId = pathHelper.CreateFolderRecursively(parent).Id;
                 var insertRequest = service.Files.Insert(
                     new Google.Apis.Drive.v2.Data.File
                     {
                         Title = fileName,
                         Parents = new List<ParentReference>
-                            { new ParentReference() { Id = parent } }
+                            { new ParentReference() { Id = parentId } }
                     },
                     uploadStream,
                     filesMimeType);
 
-                insertRequest.ResponseReceived += Upload_ResponseReceived;
-                insertRequest.ProgressChanged += Upload_ProgressChanged;
-
-                await insertRequest.UploadAsync();
+                Google.Apis.Upload.IUploadProgress progress = 
+                    await insertRequest.UploadAsync();
+                if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
+                {
+                    string msg = String.Format("Can't upload {0} to {1}", path, parent);
+                    throw new System.IO.IOException(msg);
+                }
             }
         }
 
-        public bool FileExists(string path)
-        {
-            // TODO: implement me
-            return false;
-        }
-
-        public bool FolderExists(string path)
-        {
-            // TODO: implement me
-            return false;
-        }
-
-        /* Receives notifications on the upload status. */
-        private void Upload_ProgressChanged(Google.Apis.Upload.IUploadProgress progress)
-        {
-            // Console.WriteLine(progress.Status + " " + progress.BytesSent);
-        }
-
-        /* Receives notification on upload completion. */
-        private void Upload_ResponseReceived(Google.Apis.Drive.v2.Data.File file)
-        {
-            // Console.WriteLine(file.Title + " was uploaded successfully");
-            // Throw an exception if the upload failed
-        }
-
         /* Creates a new folder. */
-        public void NewFolder(string name, string parent)
+        public void NewFolder(string name, Google.Apis.Drive.v2.Data.File parent)
         {
             var insertRequest = service.Files.Insert(
                 new Google.Apis.Drive.v2.Data.File
@@ -151,7 +134,7 @@ namespace GDriveNURI
                     Title = name,
                     MimeType = folderMimeType,
                     Parents = new List<ParentReference>
-                        { new ParentReference() { Id = parent } }
+                        { new ParentReference() { Id = parent.Id } }
                 });
             insertRequest.Execute();
         }

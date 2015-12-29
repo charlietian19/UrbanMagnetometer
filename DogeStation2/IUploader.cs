@@ -9,8 +9,5 @@ namespace GDriveNURI
     public interface IUploader
     {
         void Upload(string fileNameToUpload, string parent);
-        void NewFolder(string name, string parent);
-        bool FolderExists(string fullPath);
-        bool FileExists(string fullPath);
     }
 }
