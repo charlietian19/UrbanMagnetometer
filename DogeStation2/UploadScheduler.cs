@@ -12,7 +12,6 @@ using System.Collections.Concurrent;
 */
 
 // TODO: proper exception handling
-// TODO: split the class in two
 
 namespace GDriveNURI
 {
@@ -55,7 +54,6 @@ namespace GDriveNURI
             queue = new BlockingCollection<DatasetInfo>(maxQueueLength);
             StartWorkerThreads();
         }
-
 
         /* Creates a new temporary directory in the folder containing data. */
         private Mutex tmpDirMutex = new Mutex();

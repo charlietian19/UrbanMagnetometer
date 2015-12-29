@@ -4,6 +4,7 @@ using Google.Apis.Drive.v2.Data;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -27,7 +28,6 @@ namespace GDriveNURI
             googleAuthUser;
         private int maxListResults;
 
-
         /* Initializes settings from the configuration file. */
         private void ReadAppConfig()
         {
@@ -44,7 +44,6 @@ namespace GDriveNURI
             ReadAppConfig();
             GoogleDriveInit(ApplicationName, secretPath);
         }
-
 
         /* Initializes Google DriveService object given application name and the credential. */
         private void GoogleDriveInit(string ApplicationName, string secretPath)
@@ -69,8 +68,22 @@ namespace GDriveNURI
             }
         }
 
+
+        /* Returns the root folder ID. */
+        public string GetRootFolderId()
+        {
+            About about = service.About.Get().Execute();
+            return about.RootFolderId;
+        }
+
+        /* Returns a file metadata given file ID. */
+        public Google.Apis.Drive.v2.Data.File GetFileInfo(string id)
+        {
+            return service.Files.Get(id).Execute();
+        }
+
         /* Returns the list of files in the given folder */
-        private IList<ChildReference> FileList(string folderId)
+        public IList<ChildReference> ChildList(string folderId)
         {
             var listRequest = service.Children.List(folderId);
             listRequest.MaxResults = maxListResults;
@@ -78,66 +91,55 @@ namespace GDriveNURI
             return files;
         }
 
-        /* Uploads a file to the Google Drive. */
-        public void UploadAsync(string path, string parent)
+        /* Synchronously uploads a file given by path to Google Drive. 
+        parent is in the form of /foo/bar, rather than Google IDs.
+        Recursively creates the parent folder if it doesn't exist. */
+        public async void Upload(string path, string parent)
         {
             string fileName = Path.GetFileName(path);
 
-            var uploadStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-            var insertRequest = service.Files.Insert(
-                new Google.Apis.Drive.v2.Data.File
-                {
-                    Title = fileName,
-                    Parents = new List<ParentReference>
-                        { new ParentReference() { Id = parent } }
-                },
-                uploadStream,
-                filesMimeType);
-
-            insertRequest.ResponseReceived += Upload_ResponseReceived;
-            insertRequest.ProgressChanged += Upload_ProgressChanged;
-
-            var task = insertRequest.UploadAsync();
-            task.ContinueWith(t =>
+            using (var uploadStream = new FileStream(path, FileMode.Open, FileAccess.Read))
             {
-                uploadStream.Dispose();
-            });
-        }
+                var insertRequest = service.Files.Insert(
+                    new Google.Apis.Drive.v2.Data.File
+                    {
+                        Title = fileName,
+                        Parents = new List<ParentReference>
+                            { new ParentReference() { Id = parent } }
+                    },
+                    uploadStream,
+                    filesMimeType);
 
-        /* Synchronously uploads a file to Google Drive. */
-        public void UploadSync(string path, string parent)
-        {
-            // TODO: implement me
-        }
+                insertRequest.ResponseReceived += Upload_ResponseReceived;
+                insertRequest.ProgressChanged += Upload_ProgressChanged;
 
-        /* Uploads a file given by path to Google Drive. 
-        parent is in the form of /foo/bar, rather than Google IDs.
-        Recursively creates the parent folder if it doesn't exist. */
-        public void Upload(string path, string parent)
-        {
-            UploadSync(path, parent);
+                await insertRequest.UploadAsync();
+            }
         }
 
         public bool FileExists(string path)
         {
+            // TODO: implement me
             return false;
         }
 
         public bool FolderExists(string path)
         {
+            // TODO: implement me
             return false;
         }
 
         /* Receives notifications on the upload status. */
         private void Upload_ProgressChanged(Google.Apis.Upload.IUploadProgress progress)
         {
-            Console.WriteLine(progress.Status + " " + progress.BytesSent);
+            // Console.WriteLine(progress.Status + " " + progress.BytesSent);
         }
 
         /* Receives notification on upload completion. */
         private void Upload_ResponseReceived(Google.Apis.Drive.v2.Data.File file)
         {
-            Console.WriteLine(file.Title + " was uploaded successfully");
+            // Console.WriteLine(file.Title + " was uploaded successfully");
+            // Throw an exception if the upload failed
         }
 
         /* Creates a new folder. */
