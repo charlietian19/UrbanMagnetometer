@@ -112,19 +112,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DatasetInfo.cs" />
+    <Compile Include="DataManager\DatasetInfo.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="GDrive.cs" />
-    <Compile Include="GDrivePathHelper.cs" />
-    <Compile Include="IDatasetName.cs" />
-    <Compile Include="IUploader.cs" />
-    <Compile Include="UploadScheduler.cs" />
-    <Compile Include="Writer.cs" />
+    <Compile Include="GDrive\GDrive.cs" />
+    <Compile Include="GDrive\GDrivePathHelper.cs" />
+    <Compile Include="DataManager\IUploader.cs" />
+    <Compile Include="DataManager\UploadScheduler.cs" />
+    <Compile Include="DataManager\Writer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
