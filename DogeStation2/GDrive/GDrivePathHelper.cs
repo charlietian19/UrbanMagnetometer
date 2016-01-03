@@ -26,8 +26,8 @@ namespace GDriveNURI
             this.google = google;
             root = google.GetFileInfo(google.GetRootFolderId());
             dict = new Dictionary<string, Google.Apis.Drive.v2.Data.File>();
-            dict.Add("", root);
-            dict.Add(separators[0], root);
+            dict[""] = root;
+            dict[separators[0]] = root;
         }
 
         /* Recursively creates a folder with the given absolute path
@@ -46,13 +46,13 @@ namespace GDriveNURI
 
         /* Returns a child reference from the list that has the file name,
         or null if none exists. */
-        private File getFileReference(IList<ChildReference> children, 
+        private File GetFileReference(IList<ChildReference> children, 
             string name, string parent)
         {
             foreach (var child in children)
             {
                 var file = google.GetFileInfo(child.Id);
-                dict.Add(System.IO.Path.Combine(parent, file.Title), file);
+                dict[System.IO.Path.Combine(parent, file.Title)] = file;
                 if (file.Title == name)
                 {
                     return file;
@@ -73,7 +73,7 @@ namespace GDriveNURI
             }
             else
             {
-                file = getFileReference(files, dir, parentPath);
+                file = GetFileReference(files, dir, parentPath);
                 if (file == null)
                 {
                     if (createIfDoesNotExists)
@@ -85,7 +85,7 @@ namespace GDriveNURI
                         throw new System.IO.FileNotFoundException(currentPath);
                     }
                 }
-                dict.Add(currentPath, file);
+                dict[currentPath] = file;
                 return file;
             }
         }
