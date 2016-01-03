@@ -6,7 +6,7 @@ using Google.Apis.Drive.v2.Data;
 using GDriveNURI;
 using Moq;
 
-namespace UnitTests
+namespace UnitTests.GDriveTests
 {
     [TestClass]
     public class GDrivePathHelperTest

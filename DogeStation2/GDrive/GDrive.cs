@@ -18,58 +18,84 @@ using System.Threading;
 
 namespace GDriveNURI
 {
+    /* Provide the interface to enable service mocking. */
+    public interface IService
+    {
+        AboutResource About { get; }
+        FilesResource Files { get; }
+        ChildrenResource Children { get; }
+    }
+
+    /* The adapter class makes DriveService conform to the testing interface */
+    public class DriveServiceAdapter : IService
+    {
+        private DriveService service;
+
+        public DriveServiceAdapter(DriveService service)
+        {
+            this.service = service;
+        }
+
+        public AboutResource About { get { return service.About; } }
+        public FilesResource Files { get { return service.Files; } }
+        public ChildrenResource Children { get { return service.Children; } }
+    }
+
     public class GDrive : IUploader, IGDrive
     {
-        private UserCredential credential;
-        private DriveService service;
+        //private DriveService service;
+        private IService service;
         private IGDrivePathHelper pathHelper;
-        private string[] Scopes = { DriveService.Scope.Drive };
-        private string credentialDirectory,
+        private static string[] Scopes = { DriveService.Scope.Drive };
+        private static string credentialDirectory, ApplicationName,
             googleAuthUser;
-        public string filesMimeType, folderMimeType;
-        private int maxListResults;
+        public static string filesMimeType, folderMimeType;
+        private static int maxListResults;
 
         /* Initializes settings from the configuration file. */
-        private void ReadAppConfig()
+        private static void ReadAppConfig()
         {
-            var settings = System.Configuration.ConfigurationManager.AppSettings;
+            var settings = System.Configuration.ConfigurationManager
+                .AppSettings;
             credentialDirectory = settings["CredentialDirectory"];
             filesMimeType = settings["FilesMimeType"];
             folderMimeType = settings["FoldersMimeType"];
             googleAuthUser = settings["GoogleAuthUser"];
             maxListResults = Convert.ToInt32(settings["MaxListResults"]);
+            ApplicationName = settings["GoogleApplicationName"];
         }
 
-        public GDrive(string ApplicationName, string secretPath)
+        public GDrive(IService service)
         {
-            ReadAppConfig();
-            GoogleDriveInit(ApplicationName, secretPath);
+            this.service = service;
             pathHelper = new GDrivePathHelper(this);
         }
 
-        /* Initializes Google DriveService object given application name and the credential. */
-        private void GoogleDriveInit(string ApplicationName, string secretPath)
+        /* Initializes Google DriveService object given the credential. */
+        public static DriveServiceAdapter GoogleDriveInit(string secretPath)
         {
-            using (var stream = new FileStream(secretPath, FileMode.Open, FileAccess.Read))
+            ReadAppConfig();
+            using (var stream = new FileStream(secretPath, FileMode.Open,
+                FileAccess.Read))
             {
                 string credName = Path.GetFileNameWithoutExtension(secretPath);
                 string credPath = Path.Combine(
                     Path.GetFullPath(credentialDirectory),
                     credName);
-                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+                UserCredential credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
                     Scopes,
                     googleAuthUser,
                     CancellationToken.None,
                     new FileDataStore(credPath, true)).Result;
-                service = new DriveService(new BaseClientService.Initializer()
+                var service = new DriveService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = credential,
                     ApplicationName = ApplicationName,
                 });
+                return new DriveServiceAdapter(service);
             }
         }
-
 
         /* Returns the root folder ID. */
         public string GetRootFolderId()
@@ -121,7 +147,7 @@ namespace GDriveNURI
                     await insertRequest.UploadAsync();
                 if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
                 {
-                    string msg = String.Format("Can't upload {0} to {1}", 
+                    string msg = String.Format("Can't upload {0} into {1}", 
                         path, remotePath);
                     throw new IOException(msg);
                 }

@@ -124,7 +124,7 @@
     <Compile Include="GDrive\GDrivePathHelper.cs" />
     <Compile Include="DataManager\IUploader.cs" />
     <Compile Include="DataManager\UploadScheduler.cs" />
-    <Compile Include="DataManager\Writer.cs" />
+    <Compile Include="DataManager\Storage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="UI\Form1.resx">

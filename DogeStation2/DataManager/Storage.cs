@@ -9,7 +9,14 @@ using System.Threading.Tasks;
 
 namespace GDriveNURI
 {
-    class Writer
+    public interface IStorage
+    {
+        void Store(double[] dataX, double[] dataY, double[] dataZ, double systemSeconds, 
+            DateTime time);
+        void Flush();
+    }
+
+    class Storage : IStorage
     {
         private UploadScheduler uploader;
         private string dataCacheFolder;
@@ -21,7 +28,7 @@ namespace GDriveNURI
         private long offset;
 
         /* Constructs the data writer given a Google Drive connection. */
-        public Writer(UploadScheduler uploader)
+        public Storage(UploadScheduler uploader)
         {
             this.uploader = uploader;
             ReadAppConfig();
@@ -29,15 +36,8 @@ namespace GDriveNURI
             // and upload them as well
         }
 
-        /* Initializes settings from the configuration file. */
-        private void ReadAppConfig()
-        {
-            var settings = System.Configuration.ConfigurationManager.AppSettings;
-            dataCacheFolder = settings["DataCacheFolder"];
-        }
-        
         /* Stores the data from the sensor. */
-        public void Write(double[] dataX, double[] dataY, double[] dataZ, 
+        public void Store(double[] dataX, double[] dataY, double[] dataZ,
             double systemSeconds, DateTime time)
         {
             if (!isWriting)
@@ -52,6 +52,19 @@ namespace GDriveNURI
             }
 
             Append(dataX, dataY, dataZ, systemSeconds, time);
+        }
+
+        /* Forces the writer to send out the data. */
+        public void Flush()
+        {
+            CloseAndUploadAll(DateTime.Now);
+        }
+
+        /* Initializes settings from the configuration file. */
+        private void ReadAppConfig()
+        {
+            var settings = System.Configuration.ConfigurationManager.AppSettings;
+            dataCacheFolder = settings["DataCacheFolder"];
         }
 
         /* Appends the data into existing streams. */
