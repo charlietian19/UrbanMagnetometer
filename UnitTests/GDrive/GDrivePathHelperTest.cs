@@ -117,7 +117,7 @@ namespace UnitTests
         
         [TestMethod]
         /* Checks that absolute path conversions are cached. */
-        public void LookupAbsolutePathCaching()
+        public void AbsolutePathCaching()
         {
             google.Setup(o => o.ChildList(root))
                 .Returns(new ChildReference[] { fooChild.Object });
@@ -143,7 +143,7 @@ namespace UnitTests
 
         [TestMethod]
         /* Checks that parts of the path resolution are cached. */
-        public void LookupPartialPathCaching()
+        public void PartialPathCaching()
         {
             google.Setup(o => o.ChildList(root))
                 .Returns(new ChildReference[] { fooChild.Object });
