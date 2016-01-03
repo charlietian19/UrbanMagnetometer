@@ -6,14 +6,20 @@ namespace GDriveNURI
 {
     public interface IGDrivePathHelper
     {
-        File CreateFolderRecursively(string path);
+        /* Creates a directory tree given absolute path. Doesn't support . and ..
+        If any of the subpath can't be touched after creation, throws 
+        System.IO.IOException() */
+        File CreateDirectoryTree(string path);
+
+        /* Returns Google file corresponding to the absolute path.
+        If the file can't be found throws System.IO.FileNotFoundException(). */
         File PathToGoogleFile(string path);
     }
 
     public class GDrivePathHelper : IGDrivePathHelper
     {
         private IGDrive google;
-        private Dictionary<String, Google.Apis.Drive.v2.Data.File> dict;
+        private Dictionary<String, File> dict;
         private char separator = System.IO.Path.DirectorySeparatorChar;
         private string[] separators = 
             {
@@ -25,14 +31,14 @@ namespace GDriveNURI
         {
             this.google = google;
             root = google.GetFileInfo(google.GetRootFolderId());
-            dict = new Dictionary<string, Google.Apis.Drive.v2.Data.File>();
+            dict = new Dictionary<string, File>();
             dict[""] = root;
             dict[separators[0]] = root;
         }
 
         /* Recursively creates a folder with the given absolute path
         and returns the corresponding Google File. */
-        public File CreateFolderRecursively(string path)
+        public File CreateDirectoryTree(string path)
         {
             return LookupPath(path, true);
         }
@@ -65,7 +71,7 @@ namespace GDriveNURI
         private File LookupPathHelper(IList<ChildReference> files, string dir, 
             File parent, string parentPath, bool createIfDoesNotExists)
         {
-            Google.Apis.Drive.v2.Data.File file = null;
+            File file = null;
             string currentPath = System.IO.Path.Combine(parentPath, dir);
             if (dict.ContainsKey(currentPath))
             {
@@ -78,11 +84,19 @@ namespace GDriveNURI
                 {
                     if (createIfDoesNotExists)
                     {
-                        google.NewFolder(currentPath, parent);
+                        google.NewFolder(dir, parent);
+                        file = GetFileReference(google.ChildList(parent),
+                            dir, parentPath);
+                        if (file == null)
+                        {
+                            string msg = System.IO.Path.Combine(parentPath, dir);
+                            throw new System.IO.IOException(msg);
+                        }
                     }
                     else
                     {
-                        throw new System.IO.FileNotFoundException(currentPath);
+                        throw new System.IO
+                            .FileNotFoundException(currentPath);
                     }
                 }
                 dict[currentPath] = file;

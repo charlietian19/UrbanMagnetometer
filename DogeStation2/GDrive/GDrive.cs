@@ -98,13 +98,15 @@ namespace GDriveNURI
         /* Synchronously uploads a file given by path to Google Drive. 
         parent is in the form of \foo\bar\file.bin, rather than Google IDs.
         Recursively creates the parent folder if it doesn't exist. */
-        public async void Upload(string path, string parent)
+        public async void Upload(string path, string remotePath)
         {
             string fileName = Path.GetFileName(path);
+            string parent = Path.GetDirectoryName(path);
 
-            using (var uploadStream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            using (var uploadStream = new FileStream(path, FileMode.Open,
+                FileAccess.Read))
             {
-                string parentId = pathHelper.CreateFolderRecursively(parent).Id;
+                string parentId = pathHelper.CreateDirectoryTree(parent).Id;
                 var insertRequest = service.Files.Insert(
                     new Google.Apis.Drive.v2.Data.File
                     {
@@ -119,14 +121,16 @@ namespace GDriveNURI
                     await insertRequest.UploadAsync();
                 if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
                 {
-                    string msg = String.Format("Can't upload {0} to {1}", path, parent);
-                    throw new System.IO.IOException(msg);
+                    string msg = String.Format("Can't upload {0} to {1}", 
+                        path, remotePath);
+                    throw new IOException(msg);
                 }
             }
         }
 
         /* Creates a new folder. */
-        public void NewFolder(string name, Google.Apis.Drive.v2.Data.File parent)
+        public void NewFolder(string name, 
+            Google.Apis.Drive.v2.Data.File parent)
         {
             var insertRequest = service.Files.Insert(
                 new Google.Apis.Drive.v2.Data.File
