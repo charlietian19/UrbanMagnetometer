@@ -22,7 +22,7 @@ namespace GDriveNURI
     {
         private UserCredential credential;
         private DriveService service;
-        private GDrivePathHelper pathHelper;
+        private IGDrivePathHelper pathHelper;
         private string[] Scopes = { DriveService.Scope.Drive };
         private string credentialDirectory,
             googleAuthUser;

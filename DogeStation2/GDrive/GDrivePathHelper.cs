@@ -4,7 +4,13 @@ using Google.Apis.Drive.v2.Data;
 
 namespace GDriveNURI
 {
-    public class GDrivePathHelper
+    public interface IGDrivePathHelper
+    {
+        File CreateFolderRecursively(string path);
+        File PathToGoogleFile(string path);
+    }
+
+    public class GDrivePathHelper : IGDrivePathHelper
     {
         private GDrive google;
         private Dictionary<String, Google.Apis.Drive.v2.Data.File> dict;
@@ -27,7 +33,7 @@ namespace GDriveNURI
         }
 
         /* Converts absolute path to Google File, if one exists.
-        Otherwise thwoes  FileNotFound exception. */
+        Otherwise thwoes FileNotFound exception. */
         public File PathToGoogleFile(string path)
         {
             return LookupPath(path, false);
