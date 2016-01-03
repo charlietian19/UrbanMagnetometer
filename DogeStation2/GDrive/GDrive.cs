@@ -18,7 +18,7 @@ using System.Threading;
 
 namespace GDriveNURI
 {
-    public class GDrive : IUploader
+    public class GDrive : IUploader, IGDrive
     {
         private UserCredential credential;
         private DriveService service;

@@ -12,17 +12,22 @@ namespace GDriveNURI
 
     public class GDrivePathHelper : IGDrivePathHelper
     {
-        private GDrive google;
+        private IGDrive google;
         private Dictionary<String, Google.Apis.Drive.v2.Data.File> dict;
-        private char separator = System.IO.Path.PathSeparator;
-        private string[] separators = { System.IO.Path.PathSeparator.ToString() };
+        private char separator = System.IO.Path.DirectorySeparatorChar;
+        private string[] separators = 
+            {
+                System.IO.Path.DirectorySeparatorChar.ToString()
+            };
         private File root;
 
-        public GDrivePathHelper(GDrive google)
+        public GDrivePathHelper(IGDrive google)
         {
             this.google = google;
             root = google.GetFileInfo(google.GetRootFolderId());
             dict = new Dictionary<string, Google.Apis.Drive.v2.Data.File>();
+            dict.Add("", root);
+            dict.Add(separators[0], root);
         }
 
         /* Recursively creates a folder with the given absolute path
@@ -33,7 +38,7 @@ namespace GDriveNURI
         }
 
         /* Converts absolute path to Google File, if one exists.
-        Otherwise thwoes FileNotFound exception. */
+        Otherwise throws FileNotFound exception. */
         public File PathToGoogleFile(string path)
         {
             return LookupPath(path, false);
