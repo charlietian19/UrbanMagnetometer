@@ -18,8 +18,7 @@ namespace DogeStation2
         {
             try
             {
-                var service = GDrive.GoogleDriveInit("nuri-station.json");
-                var google = new GDrive(service);
+                var google = new GDrive("nuri-station.json");
                 GoogleWriter = new UploadScheduler(google);
             }
             catch (Exception exception)
