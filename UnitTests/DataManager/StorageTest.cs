@@ -68,10 +68,10 @@ namespace UnitTests.DataManager
             settings["ChannelNameY"] = "y";
             settings["ChannelNameZ"] = "z";
             settings["ChannelNameTime"] = "t";
-            settings["ZipFileNameFormat"] =
+            settings["DataFileNameFormat"] =
                 "{0}-{1}-{2}_{3}:xx_{4}_{5}_{6}Hz.bin";
             settings["TimeFileNameFormat"] = "{0}-{1}-{2}_{3}:xx_{4}.bin";
-            settings["DataFileNameFormat"] = "{0}-{1}-{2}_{3}:xx.zip";
+            settings["ZipFileNameFormat"] = "{0}-{1}-{2}_{3}:xx.zip";
 
             factory = new BinaryWriterMockFactory();
             FileMock = new Mock<IFileWrap>();

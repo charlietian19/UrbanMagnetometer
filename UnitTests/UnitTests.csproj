@@ -69,6 +69,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DataManager\StorageTest.cs" />
+    <Compile Include="DataManager\DatasetInfoTest.cs" />
     <Compile Include="GDriveTests\GDrivePathHelperTest.cs" />
     <Compile Include="GDriveTests\GDriveTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

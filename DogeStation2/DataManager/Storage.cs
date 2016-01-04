@@ -42,7 +42,7 @@ namespace GDriveNURI
         private IDatasetInfo info = null;
 
         private bool isWriting = false;
-        private long offset;
+        private long index;
 
         /* Constructs the data writer given a Google Drive connection. */
         public Storage(IUploadScheduler scheduler)
@@ -68,7 +68,7 @@ namespace GDriveNURI
 
         /* Stores the data from the sensor. */
         public void Store(double[] dataX, double[] dataY, double[] dataZ,
-            double systemSeconds, DateTime time)
+            double precisionCounter, DateTime time)
         {
             if (!isWriting)
             {
@@ -81,7 +81,7 @@ namespace GDriveNURI
                 CreateFiles(time);
             }
 
-            Append(dataX, dataY, dataZ, systemSeconds, time);
+            Append(dataX, dataY, dataZ, precisionCounter, time);
         }
 
         /* Initializes settings from the configuration file. */
@@ -93,14 +93,14 @@ namespace GDriveNURI
 
         /* Appends the data into existing streams. */
         private void Append(double[] dataX, double[] dataY, double[] dataZ,
-            double systemSeconds, DateTime time)
+            double precisionCounter, DateTime time)
         {
             int length = dataX.Length;
             WriteArray(x, dataX);
             WriteArray(y, dataY);
             WriteArray(z, dataZ);
-            WriteTime(t, systemSeconds, time, offset, length);
-            offset += length;
+            WriteTime(t, precisionCounter, time, index, length);
+            index += length;
         }
 
         /* Writes an array of doubles into a binary file. */
@@ -114,12 +114,12 @@ namespace GDriveNURI
 
         /* Writes time data into a binary file. */
         private static void WriteTime(IBinaryWriterWrap writer, 
-            double systemSeconds, DateTime time, long offset, int length)
+            double precisionCounter, DateTime time, long index, int length)
         {
-            writer.Write(offset);
+            writer.Write(index);
             writer.Write(length);
             writer.Write(time.ToFileTimeUtc());
-            writer.Write(systemSeconds);
+            writer.Write(precisionCounter);
         }
 
         /* Creates the data files in cache folder. */
@@ -134,7 +134,7 @@ namespace GDriveNURI
                 FileMode.Append, FileAccess.Write));
             t = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.TFileName),
                 FileMode.Append, FileAccess.Write));
-            offset = 0;
+            index = 0;
             isWriting = true;
         }
 

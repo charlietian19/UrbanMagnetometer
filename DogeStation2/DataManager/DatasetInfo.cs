@@ -119,7 +119,7 @@ namespace GDriveNURI
         {
             get
             {
-                return String.Format(timeFileNameFormat,
+                return String.Format(zipFileNameFormat,
                     Year, Month, Day, Hour);
             }
         }
