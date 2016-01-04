@@ -17,13 +17,13 @@ namespace GDriveNURI
 {
     public interface IUploadScheduler
     {
-        void UploadMagneticData(DatasetInfo info);
+        void UploadMagneticData(IDatasetInfo info);
     }
 
     public class UploadScheduler : IUploadScheduler
     {
         private int maxActiveUploads;
-        private BlockingCollection<DatasetInfo> queue;
+        private BlockingCollection<IDatasetInfo> queue;
         private IUploader uploader;
 
         /* Initializes settings from the configuration file. */
@@ -47,7 +47,7 @@ namespace GDriveNURI
         {
             ReadAppConfig();
             this.uploader = uploader;
-            queue = new BlockingCollection<DatasetInfo>();
+            queue = new BlockingCollection<IDatasetInfo>();
             StartWorkerThreads();
         }
 
@@ -56,13 +56,13 @@ namespace GDriveNURI
         {
             ReadAppConfig();
             this.uploader = uploader;
-            queue = new BlockingCollection<DatasetInfo>(maxQueueLength);
+            queue = new BlockingCollection<IDatasetInfo>(maxQueueLength);
             StartWorkerThreads();
         }
 
         /* Creates a new temporary directory in the folder containing data. */
         private Mutex tmpDirMutex = new Mutex();
-        private string CreateTemporaryDirectory(DatasetInfo info)
+        private string CreateTemporaryDirectory(IDatasetInfo info)
         {
             string name = null;
             bool success = false;
@@ -91,7 +91,7 @@ namespace GDriveNURI
 
         /* Adds the magnetic field dataset to an archive and returns full path
         to the archive. */
-        private String Archive(DatasetInfo info)
+        private String Archive(IDatasetInfo info)
         {
             String tmpDirFullPath, newXFileName, newYFileName, newZFileName,
                 newTFileName, archiveName;
@@ -115,7 +115,7 @@ namespace GDriveNURI
 
         /* Creates a directory tree corresponding to the dataset information
         and returns the id of the folder to place the file into. */
-        private String CreateDirectoryTree(DatasetInfo info)
+        private String CreateDirectoryTree(IDatasetInfo info)
         {
             // TODO: implement this
             return null;
@@ -126,7 +126,7 @@ namespace GDriveNURI
         {
             while (!queue.IsCompleted)
             {
-                DatasetInfo info = null;
+                IDatasetInfo info = null;
                 try
                 {
                     info = queue.Take();
@@ -143,7 +143,7 @@ namespace GDriveNURI
         }
 
         /* Queues uploading a single magnetic field dataset to be uploaded. */
-        public void UploadMagneticData(DatasetInfo info)
+        public void UploadMagneticData(IDatasetInfo info)
         {
             queue.Add(info);
         }

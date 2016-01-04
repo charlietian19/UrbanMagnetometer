@@ -31,17 +31,17 @@ namespace GDriveNURI
 
     // TODO: scan the data cache folder for files that haven't been uploaded
     // and upload them as well
-    class Storage : IStorage
+    public class Storage : IStorage
     {
         private IUploadScheduler scheduler;
         private IBinaryWriterWrap x, y, z, t;
-        public readonly IBinaryWriterFactory IBinaryWriter;
+        public readonly IBinaryWriterFactory _BinaryWriterFactory;
         public readonly IFileWrap IFile;
         public readonly IConfigurationManagerWrap ConfigurationManager;
 
         private string dataCacheFolder;
-        private DatasetInfo info = null;
-        private DatasetInfo postponedInfo = null;
+        private IDatasetInfo info = null;
+        private IDatasetInfo postponedInfo = null;
 
         private bool isWriting = false;
         private long offset;
@@ -51,7 +51,7 @@ namespace GDriveNURI
         {
             this.scheduler = scheduler;
             IFile = new FileWrap();
-            IBinaryWriter = new BinaryWriterFactory();
+            _BinaryWriterFactory = new BinaryWriterFactory();
             ConfigurationManager = new ConfigurationManagerWrap();
             ReadAppConfig();
         }
@@ -63,7 +63,7 @@ namespace GDriveNURI
         {
             this.scheduler = scheduler;
             IFile = file;
-            IBinaryWriter = binaryWriterFactory;
+            _BinaryWriterFactory = binaryWriterFactory;
             ConfigurationManager = configManager;
             ReadAppConfig();
         }
@@ -105,8 +105,8 @@ namespace GDriveNURI
         {
             int length = dataX.Length;
             WriteArray(x, dataX);
-            WriteArray(y, dataX);
-            WriteArray(z, dataX);
+            WriteArray(y, dataY);
+            WriteArray(z, dataZ);
             WriteTime(t, systemSeconds, time, offset, length);
             offset += length;
         }
@@ -133,14 +133,14 @@ namespace GDriveNURI
         /* Creates the data files in cache folder. */
         private void CreateFiles(DateTime time)
         {
-            info = new DatasetInfo(time);
-            x = new BinaryWriterWrap(File.Open(info.FullPath(info.XFileName),
+            info = new DatasetInfo(time, ConfigurationManager);
+            x = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.XFileName),
                 FileMode.Append, FileAccess.Write));
-            y = new BinaryWriterWrap(File.Open(info.FullPath(info.YFileName),
+            y = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.YFileName),
                 FileMode.Append, FileAccess.Write));
-            z = new BinaryWriterWrap(File.Open(info.FullPath(info.ZFileName),
+            z = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.ZFileName),
                 FileMode.Append, FileAccess.Write));
-            t = new BinaryWriterWrap(File.Open(info.FullPath(info.TFileName),
+            t = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.TFileName),
                 FileMode.Append, FileAccess.Write));
             offset = 0;
             isWriting = true;

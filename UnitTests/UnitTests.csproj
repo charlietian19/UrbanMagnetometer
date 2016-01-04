@@ -68,7 +68,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="DataManager\Storage.cs" />
+    <Compile Include="DataManager\StorageTest.cs" />
     <Compile Include="GDriveTests\GDrivePathHelperTest.cs" />
     <Compile Include="GDriveTests\GDriveTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
