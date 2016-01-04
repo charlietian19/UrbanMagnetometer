@@ -118,6 +118,7 @@
   <ItemGroup>
     <Compile Include="DataManager\DatasetInfo.cs" />
     <Compile Include="GDrive\IGDrive.cs" />
+    <Compile Include="GDrive\IUploader.cs" />
     <Compile Include="UI\Form1.cs">
       <SubType>Form</SubType>
     </Compile>

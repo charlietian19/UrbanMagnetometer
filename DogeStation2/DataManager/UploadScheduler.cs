@@ -4,6 +4,9 @@ using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using SystemWrapper.Threading;
+using SystemWrapper.IO;
+
 
 /* Example code taken from 
 
@@ -23,6 +26,7 @@ namespace GDriveNURI
     public class UploadScheduler : IUploadScheduler
     {
         private int maxActiveUploads;
+        private string remoteFileName;
         private BlockingCollection<IDatasetInfo> queue;
         private IUploader uploader;
 
@@ -31,6 +35,7 @@ namespace GDriveNURI
         {
             var settings = System.Configuration.ConfigurationManager.AppSettings;
             maxActiveUploads = Convert.ToInt32(settings["MaxActiveUploads"]);
+            remoteFileName = settings["RemoteFileNameFormat"];
         }
 
         /* Starts the worker threads. */
@@ -81,7 +86,7 @@ namespace GDriveNURI
         }
 
         /* Removes the temporary directory. */
-        private void DeleteTemporaryDirectory(String name)
+        private void DeleteTemporaryDirectory(string name)
         {
             tmpDirMutex.WaitOne();
             Directory.Delete(name, true);
@@ -91,9 +96,9 @@ namespace GDriveNURI
 
         /* Adds the magnetic field dataset to an archive and returns full path
         to the archive. */
-        private String Archive(IDatasetInfo info)
+        private string Archive(IDatasetInfo info)
         {
-            String tmpDirFullPath, newXFileName, newYFileName, newZFileName,
+            string tmpDirFullPath, newXFileName, newYFileName, newZFileName,
                 newTFileName, archiveName;
 
             tmpDirFullPath = CreateTemporaryDirectory(info);
@@ -115,7 +120,7 @@ namespace GDriveNURI
 
         /* Creates a directory tree corresponding to the dataset information
         and returns the id of the folder to place the file into. */
-        private String CreateDirectoryTree(IDatasetInfo info)
+        private string CreateDirectoryTree(IDatasetInfo info)
         {
             // TODO: implement this
             return null;
@@ -135,8 +140,8 @@ namespace GDriveNURI
 
                 if (info != null)
                 {
-                    String filePath = Archive(info);
-                    String parentId = CreateDirectoryTree(info);
+                    string filePath = Archive(info);
+                    string parentId = CreateDirectoryTree(info);
                     uploader.Upload(filePath, parentId);
                 }
             }
