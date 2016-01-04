@@ -117,7 +117,7 @@ namespace GDriveNURI
         }
 
         /* Returns true if the data is supposed to be in the same file. */
-        public bool SameFile(DatasetInfo other)
+        public bool isSameFile(DatasetInfo other)
         {
             // If parameter is null return false.
             if (other == null)
@@ -133,7 +133,7 @@ namespace GDriveNURI
         }
 
         /* Returns true if the data is supposed to be in the same file. */
-        public bool SameFile(DateTime other)
+        public bool isSameFile(DateTime other)
         {
             // If parameter is null return false.
             if (other == null)

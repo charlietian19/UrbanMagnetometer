@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SystemWrapper.IO;
+using SystemWrapper.Configuration;
 
 // TODO: proper exception handling
 
@@ -16,24 +14,58 @@ namespace GDriveNURI
         void Flush();
     }
 
+    /* Interface for IBinaryWriterWrap object factory */
+    public interface IBinaryWriterFactory
+    {
+        IBinaryWriterWrap Create(IFileStreamWrap stream);
+    }
+
+    /* Factory for IBinaryWriterWrap objects */
+    public class BinaryWriterFactory : IBinaryWriterFactory
+    {
+        public IBinaryWriterWrap Create(IFileStreamWrap stream)
+        {
+            return new BinaryWriterWrap(stream);
+        }
+    }
+
+    // TODO: scan the data cache folder for files that haven't been uploaded
+    // and upload them as well
     class Storage : IStorage
     {
         private IUploadScheduler scheduler;
+        private IBinaryWriterWrap x, y, z, t;
+        public readonly IBinaryWriterFactory IBinaryWriter;
+        public readonly IFileWrap IFile;
+        public readonly IConfigurationManagerWrap ConfigurationManager;
+
         private string dataCacheFolder;
         private DatasetInfo info = null;
         private DatasetInfo postponedInfo = null;
 
-        private BinaryWriter x, y, z, t;
         private bool isWriting = false;
         private long offset;
 
         /* Constructs the data writer given a Google Drive connection. */
-        public Storage(IUploadScheduler uploader)
+        public Storage(IUploadScheduler scheduler)
         {
-            this.scheduler = uploader;
+            this.scheduler = scheduler;
+            IFile = new FileWrap();
+            IBinaryWriter = new BinaryWriterFactory();
+            ConfigurationManager = new ConfigurationManagerWrap();
             ReadAppConfig();
-            // TODO: scan the data cache folder for files that haven't been uploaded
-            // and upload them as well
+        }
+
+        /* Constructs the object with custom filesystem wrappers. */
+        public Storage(IUploadScheduler scheduler, IFileWrap file, 
+            IBinaryWriterFactory binaryWriterFactory,
+            IConfigurationManagerWrap configManager)
+        {
+            this.scheduler = scheduler;
+            IFile = file;
+            IBinaryWriter = binaryWriterFactory;
+            ConfigurationManager = configManager;
+            ReadAppConfig();
         }
 
         /* Stores the data from the sensor. */
@@ -63,7 +95,7 @@ namespace GDriveNURI
         /* Initializes settings from the configuration file. */
         private void ReadAppConfig()
         {
-            var settings = System.Configuration.ConfigurationManager.AppSettings;
+            var settings = ConfigurationManager.AppSettings;
             dataCacheFolder = settings["DataCacheFolder"];
         }
 
@@ -80,7 +112,7 @@ namespace GDriveNURI
         }
 
         /* Writes an array of doubles into a binary file. */
-        private static void WriteArray(BinaryWriter writer, double[] data)
+        private static void WriteArray(IBinaryWriterWrap writer, double[] data)
         {
             foreach (double value in data)
             {
@@ -89,7 +121,7 @@ namespace GDriveNURI
         }
 
         /* Writes time data into a binary file. */
-        private static void WriteTime(BinaryWriter writer, 
+        private static void WriteTime(IBinaryWriterWrap writer, 
             double systemSeconds, DateTime time, long offset, int length)
         {
             writer.Write(offset);
@@ -102,13 +134,13 @@ namespace GDriveNURI
         private void CreateFiles(DateTime time)
         {
             info = new DatasetInfo(time);
-            x = new BinaryWriter(File.Open(info.FullPath(info.XFileName), 
+            x = new BinaryWriterWrap(File.Open(info.FullPath(info.XFileName),
                 FileMode.Append, FileAccess.Write));
-            y = new BinaryWriter(File.Open(info.FullPath(info.YFileName), 
+            y = new BinaryWriterWrap(File.Open(info.FullPath(info.YFileName),
                 FileMode.Append, FileAccess.Write));
-            z = new BinaryWriter(File.Open(info.FullPath(info.ZFileName), 
+            z = new BinaryWriterWrap(File.Open(info.FullPath(info.ZFileName),
                 FileMode.Append, FileAccess.Write));
-            t = new BinaryWriter(File.Open(info.FullPath(info.TFileName), 
+            t = new BinaryWriterWrap(File.Open(info.FullPath(info.TFileName),
                 FileMode.Append, FileAccess.Write));
             offset = 0;
             isWriting = true;
@@ -124,13 +156,13 @@ namespace GDriveNURI
             t.Close();
 
             /* Upload the latest postponed dataset, if any. */
-            if ((postponedInfo != null) && !postponedInfo.SameFile(info))
+            if ((postponedInfo != null) && !postponedInfo.isSameFile(info))
             {
                 scheduler.UploadMagneticData(postponedInfo);
                 postponedInfo = null;
             }
 
-            if (!info.SameFile(time))
+            if (!info.isSameFile(time))
             {
                 scheduler.UploadMagneticData(info);
             }
