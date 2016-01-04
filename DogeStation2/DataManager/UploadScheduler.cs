@@ -20,6 +20,8 @@ namespace GDriveNURI
     public interface IUploadScheduler
     {
         void UploadMagneticData(IDatasetInfo info);
+        EventWaitHandle UploadStarted { get; }
+        EventWaitHandle UploadFinished { get; }
     }
 
     public interface IZipFile
@@ -40,12 +42,26 @@ namespace GDriveNURI
     {
         private int maxActiveUploads;
         private string remoteFileName;
+        private int ActiveUploads = 0;
+        private readonly EventWaitHandle UploadStartedEventHandle
+            = new EventWaitHandle(false, EventResetMode.AutoReset);
+        private readonly EventWaitHandle UploadFinishedEventHandle
+            = new EventWaitHandle(false, EventResetMode.AutoReset);
         private BlockingCollection<IDatasetInfo> queue;
         private IUploader uploader;
         private IConfigurationManagerWrap ConfigurationManager;
         private IFileWrap File;
         private IDirectoryWrap Directory;
         private IZipFile zip;
+        private IPathWrap Path;
+        public EventWaitHandle UploadStarted
+        {
+            get { return UploadStartedEventHandle; }
+        }
+        public EventWaitHandle UploadFinished
+        {
+            get { return UploadFinishedEventHandle; }
+        }
 
         /* Creates an uploader with no queue bound. */
         public UploadScheduler(IUploader uploader)
@@ -64,18 +80,18 @@ namespace GDriveNURI
         /* Creates an uploader that uses provided wrappers and no queue bound*/
         public UploadScheduler(IUploader uploader, 
             IConfigurationManagerWrap config, IFileWrap file, IDirectoryWrap dir,
-            IZipFile zip)
+            IZipFile zip, IPathWrap path)
         {
-            UseCustomWrapper(config, file, dir, zip);
+            UseCustomWrapper(config, file, dir, zip, path);
             InitNoQueueBound(uploader);
         }
 
         /* Creates an uploader that uses provided wrappers and a queue bound*/
         public UploadScheduler(IUploader uploader, int maxQueueLength,
             IConfigurationManagerWrap config, IFileWrap file, IDirectoryWrap dir,
-            IZipFile zip)
+            IZipFile zip, IPathWrap path)
         {
-            UseCustomWrapper(config, file, dir, zip);
+            UseCustomWrapper(config, file, dir, zip, path);
             InitWithQueueBound(uploader, maxQueueLength);
         }
 
@@ -86,16 +102,18 @@ namespace GDriveNURI
             File = new FileWrap();
             Directory = new DirectoryWrap();
             zip = new ZipFileWrapper();
+            Path = new PathWrap();
         }
 
         /* Assigns the wrappers to use the provided objects. */
         private void UseCustomWrapper(IConfigurationManagerWrap config, 
-            IFileWrap file, IDirectoryWrap dir, IZipFile zip)
+            IFileWrap file, IDirectoryWrap dir, IZipFile zip, IPathWrap path)
         {
             ConfigurationManager = config;
             File = file;
             Directory = dir;
             this.zip = zip;
+            Path = path;
         }
 
         /* Initializes uploader with no queue bound. */
@@ -141,8 +159,7 @@ namespace GDriveNURI
             tmpDirMutex.WaitOne();
             while (!success)
             {
-                name = System.IO.Path.Combine(info.FolderPath, 
-                    System.IO.Path.GetRandomFileName());
+                name = Path.Combine(info.FolderPath, Path.GetRandomFileName());
                 if (!Directory.Exists(name))
                 {
                     Directory.CreateDirectory(name);
@@ -170,23 +187,18 @@ namespace GDriveNURI
                 newTFileName, archiveName;
 
             tmpDirFullPath = CreateTemporaryDirectory(info);
-            newXFileName = System.IO.Path.Combine(tmpDirFullPath,
-                info.XFileName);
-            newYFileName = System.IO.Path.Combine(tmpDirFullPath,
-                info.YFileName);
-            newZFileName = System.IO.Path.Combine(tmpDirFullPath,
-                info.ZFileName);
-            newTFileName = System.IO.Path.Combine(tmpDirFullPath,
-                info.TFileName);
-            archiveName = System.IO.Path.Combine(info.FolderPath,
-                info.ZipFileName);
+            newXFileName = Path.Combine(tmpDirFullPath, info.XFileName);
+            newYFileName = Path.Combine(tmpDirFullPath, info.YFileName);
+            newZFileName = Path.Combine(tmpDirFullPath, info.ZFileName);
+            newTFileName = Path.Combine(tmpDirFullPath, info.TFileName);
+            archiveName = Path.Combine(info.FolderPath, info.ZipFileName);
 
             File.Move(info.FullPath(info.XFileName), newXFileName);
             File.Move(info.FullPath(info.YFileName), newYFileName);
             File.Move(info.FullPath(info.ZFileName), newZFileName);
             File.Move(info.FullPath(info.TFileName), newTFileName);
 
-            ZipFile.CreateFromDirectory(tmpDirFullPath, archiveName);
+            zip.CreateFromDirectory(tmpDirFullPath, archiveName);
             DeleteTemporaryDirectory(tmpDirFullPath);
             return archiveName;
         }
@@ -206,10 +218,15 @@ namespace GDriveNURI
 
                 if (info != null)
                 {
+                    Interlocked.Increment(ref ActiveUploads);
+                    UploadStartedEventHandle.Set();
                     string filePath = Archive(info);
                     string parent = string.Format(remoteFileName, info.Year,
-                        info.Hour, info.StationName);
+                        info.Month, info.Day, info.Hour, info.StationName);
                     uploader.Upload(filePath, parent);
+                    File.Delete(filePath);
+                    Interlocked.Decrement(ref ActiveUploads);
+                    UploadFinishedEventHandle.Set();
                 }
             }
         }

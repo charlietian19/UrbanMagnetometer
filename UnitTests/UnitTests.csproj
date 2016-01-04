@@ -70,8 +70,9 @@
   <ItemGroup>
     <Compile Include="DataManager\StorageTest.cs" />
     <Compile Include="DataManager\DatasetInfoTest.cs" />
-    <Compile Include="GDriveTests\GDrivePathHelperTest.cs" />
-    <Compile Include="GDriveTests\GDriveTest.cs" />
+    <Compile Include="DataManager\UploadSchedulerTest.cs" />
+    <Compile Include="GDrive\GDrivePathHelperTest.cs" />
+    <Compile Include="GDrive\GDriveTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -151,7 +151,7 @@ namespace GDriveNURI
                     await insertRequest.UploadAsync();
                 if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
                 {
-                    string msg = String.Format("Can't upload {0} into {1}", 
+                    string msg = string.Format("Can't upload {0} into {1}", 
                         path, remotePath);
                     throw new IOException(msg);
                 }
