@@ -1,11 +1,10 @@
 ﻿using System;
-using System.IO;
-using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using SystemWrapper.Threading;
+using SystemWrapper.Configuration;
 using SystemWrapper.IO;
+using System.IO.Compression;
 
 
 /* Example code taken from 
@@ -23,17 +22,103 @@ namespace GDriveNURI
         void UploadMagneticData(IDatasetInfo info);
     }
 
+    public interface IZipFile
+    {
+        void CreateFromDirectory(string src, string dst);
+    }
+
+    /* Adapter to wrap ZipFile class. */
+    public class ZipFileWrapper : IZipFile
+    {
+        public void CreateFromDirectory(string src, string dst)
+        {
+            ZipFile.CreateFromDirectory(src, dst);
+        }
+    }
+
     public class UploadScheduler : IUploadScheduler
     {
         private int maxActiveUploads;
         private string remoteFileName;
         private BlockingCollection<IDatasetInfo> queue;
         private IUploader uploader;
+        private IConfigurationManagerWrap ConfigurationManager;
+        private IFileWrap File;
+        private IDirectoryWrap Directory;
+        private IZipFile zip;
 
+        /* Creates an uploader with no queue bound. */
+        public UploadScheduler(IUploader uploader)
+        {
+            UseSystemWrapper();
+            InitNoQueueBound(uploader);
+        }
+
+        /* Creates an uploader with a pre-defined queue bound. */
+        public UploadScheduler(IUploader uploader, int maxQueueLength)
+        {
+            UseSystemWrapper();
+            InitWithQueueBound(uploader, maxQueueLength);
+        }
+
+        /* Creates an uploader that uses provided wrappers and no queue bound*/
+        public UploadScheduler(IUploader uploader, 
+            IConfigurationManagerWrap config, IFileWrap file, IDirectoryWrap dir,
+            IZipFile zip)
+        {
+            UseCustomWrapper(config, file, dir, zip);
+            InitNoQueueBound(uploader);
+        }
+
+        /* Creates an uploader that uses provided wrappers and a queue bound*/
+        public UploadScheduler(IUploader uploader, int maxQueueLength,
+            IConfigurationManagerWrap config, IFileWrap file, IDirectoryWrap dir,
+            IZipFile zip)
+        {
+            UseCustomWrapper(config, file, dir, zip);
+            InitWithQueueBound(uploader, maxQueueLength);
+        }
+
+        /* Assigns the wrappers to use the system objects. */
+        private void UseSystemWrapper()
+        {
+            ConfigurationManager = new ConfigurationManagerWrap();
+            File = new FileWrap();
+            Directory = new DirectoryWrap();
+            zip = new ZipFileWrapper();
+        }
+
+        /* Assigns the wrappers to use the provided objects. */
+        private void UseCustomWrapper(IConfigurationManagerWrap config, 
+            IFileWrap file, IDirectoryWrap dir, IZipFile zip)
+        {
+            ConfigurationManager = config;
+            File = file;
+            Directory = dir;
+            this.zip = zip;
+        }
+
+        /* Initializes uploader with no queue bound. */
+        private void InitNoQueueBound(IUploader uploader)
+        {
+            ReadAppConfig();
+            this.uploader = uploader;
+            queue = new BlockingCollection<IDatasetInfo>();
+            StartWorkerThreads();
+        }
+
+        /* Initializes uploader with a queue bound. */
+        private void InitWithQueueBound(IUploader uploader, int maxQueueLength)
+        {
+            ReadAppConfig();
+            this.uploader = uploader;
+            queue = new BlockingCollection<IDatasetInfo>(maxQueueLength);
+            StartWorkerThreads();
+        }
         /* Initializes settings from the configuration file. */
         private void ReadAppConfig()
         {
-            var settings = System.Configuration.ConfigurationManager.AppSettings;
+            var settings = ConfigurationManager.AppSettings;
             maxActiveUploads = Convert.ToInt32(settings["MaxActiveUploads"]);
             remoteFileName = settings["RemoteFileNameFormat"];
         }
@@ -47,24 +132,6 @@ namespace GDriveNURI
             }
         }
 
-        /* Creates an uploader with no queue bound. */
-        public UploadScheduler(IUploader uploader)
-        {
-            ReadAppConfig();
-            this.uploader = uploader;
-            queue = new BlockingCollection<IDatasetInfo>();
-            StartWorkerThreads();
-        }
-
-        /* Creates an uploader with a pre-defined queue bound. */
-        public UploadScheduler(IUploader uploader, int maxQueueLength)
-        {
-            ReadAppConfig();
-            this.uploader = uploader;
-            queue = new BlockingCollection<IDatasetInfo>(maxQueueLength);
-            StartWorkerThreads();
-        }
-
         /* Creates a new temporary directory in the folder containing data. */
         private Mutex tmpDirMutex = new Mutex();
         private string CreateTemporaryDirectory(IDatasetInfo info)
@@ -74,7 +141,8 @@ namespace GDriveNURI
             tmpDirMutex.WaitOne();
             while (!success)
             {
-                name = Path.Combine(info.FolderPath, Path.GetRandomFileName());
+                name = System.IO.Path.Combine(info.FolderPath, 
+                    System.IO.Path.GetRandomFileName());
                 if (!Directory.Exists(name))
                 {
                     Directory.CreateDirectory(name);
@@ -102,11 +170,16 @@ namespace GDriveNURI
                 newTFileName, archiveName;
 
             tmpDirFullPath = CreateTemporaryDirectory(info);
-            newXFileName = Path.Combine(tmpDirFullPath, info.XFileName);
-            newYFileName = Path.Combine(tmpDirFullPath, info.YFileName);
-            newZFileName = Path.Combine(tmpDirFullPath, info.ZFileName);
-            newTFileName = Path.Combine(tmpDirFullPath, info.TFileName);
-            archiveName = Path.Combine(info.FolderPath, info.ZipFileName);
+            newXFileName = System.IO.Path.Combine(tmpDirFullPath,
+                info.XFileName);
+            newYFileName = System.IO.Path.Combine(tmpDirFullPath,
+                info.YFileName);
+            newZFileName = System.IO.Path.Combine(tmpDirFullPath,
+                info.ZFileName);
+            newTFileName = System.IO.Path.Combine(tmpDirFullPath,
+                info.TFileName);
+            archiveName = System.IO.Path.Combine(info.FolderPath,
+                info.ZipFileName);
 
             File.Move(info.FullPath(info.XFileName), newXFileName);
             File.Move(info.FullPath(info.YFileName), newYFileName);
@@ -118,13 +191,6 @@ namespace GDriveNURI
             return archiveName;
         }
 
-        /* Creates a directory tree corresponding to the dataset information
-        and returns the id of the folder to place the file into. */
-        private string CreateDirectoryTree(IDatasetInfo info)
-        {
-            // TODO: implement this
-            return null;
-        }
 
         /* Retrieves the arriving data in background. */
         private void Worker()
@@ -141,8 +207,9 @@ namespace GDriveNURI
                 if (info != null)
                 {
                     string filePath = Archive(info);
-                    string parentId = CreateDirectoryTree(info);
-                    uploader.Upload(filePath, parentId);
+                    string parent = string.Format(remoteFileName, info.Year,
+                        info.Hour, info.StationName);
+                    uploader.Upload(filePath, parent);
                 }
             }
         }

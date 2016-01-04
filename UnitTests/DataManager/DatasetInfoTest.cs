@@ -56,6 +56,7 @@ namespace UnitTests.DataManager
             Assert.AreEqual(settings["DataUnits"], data.Units);
             Assert.AreEqual(settings["SamplingRate"], data.SamplingRate);
             Assert.AreEqual(settings["DataCacheFolder"], data.FolderPath);
+            Assert.AreEqual(settings["StationName"], data.StationName);
         }
 
         [TestMethod]

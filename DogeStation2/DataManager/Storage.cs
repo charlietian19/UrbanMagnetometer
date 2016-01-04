@@ -34,9 +34,9 @@ namespace GDriveNURI
     {
         private IUploadScheduler scheduler;
         private IBinaryWriterWrap x, y, z, t;
-        public readonly IBinaryWriterFactory _BinaryWriterFactory;
-        public readonly IFileWrap IFile;
-        public readonly IConfigurationManagerWrap ConfigurationManager;
+        private IBinaryWriterFactory _BinaryWriterFactory;
+        private IFileWrap IFile;
+        private IConfigurationManagerWrap ConfigurationManager;
 
         private string dataCacheFolder;
         private IDatasetInfo info = null;
