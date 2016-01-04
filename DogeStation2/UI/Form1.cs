@@ -6,7 +6,7 @@ namespace DogeStation2
 {
     public partial class Form1 : Form
     {
-        private GDriveNURI.UploadScheduler GoogleWriter = null;
+        private IStorage storage;
 
         public Form1()
         {
@@ -19,11 +19,12 @@ namespace DogeStation2
             try
             {
                 var google = new GDrive("nuri-station.json");
-                GoogleWriter = new UploadScheduler(google);
+                var scheduler = new UploadScheduler(google);
+                storage = new Storage(scheduler);
             }
             catch (Exception exception)
             {
-                MessageBox.Show("Can't authenticate: " + exception.Message);
+                MessageBox.Show("Can't initialize: " + exception.Message);
             }
         }
 

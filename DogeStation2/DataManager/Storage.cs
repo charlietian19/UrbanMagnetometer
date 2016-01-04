@@ -18,7 +18,7 @@ namespace GDriveNURI
 
     class Storage : IStorage
     {
-        private UploadScheduler uploader;
+        private IUploadScheduler scheduler;
         private string dataCacheFolder;
         private DatasetInfo info = null;
         private DatasetInfo postponedInfo = null;
@@ -28,9 +28,9 @@ namespace GDriveNURI
         private long offset;
 
         /* Constructs the data writer given a Google Drive connection. */
-        public Storage(UploadScheduler uploader)
+        public Storage(IUploadScheduler uploader)
         {
-            this.uploader = uploader;
+            this.scheduler = uploader;
             ReadAppConfig();
             // TODO: scan the data cache folder for files that haven't been uploaded
             // and upload them as well
@@ -126,13 +126,13 @@ namespace GDriveNURI
             /* Upload the latest postponed dataset, if any. */
             if ((postponedInfo != null) && !postponedInfo.SameFile(info))
             {
-                uploader.UploadMagneticData(postponedInfo);
+                scheduler.UploadMagneticData(postponedInfo);
                 postponedInfo = null;
             }
 
             if (!info.SameFile(time))
             {
-                uploader.UploadMagneticData(info);
+                scheduler.UploadMagneticData(info);
             }
             else
             {

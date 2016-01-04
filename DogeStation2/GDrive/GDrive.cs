@@ -26,6 +26,11 @@ namespace GDriveNURI
         ChildrenResource Children { get; }
     }
 
+    public interface IUploader
+    {
+        void Upload(string fileNameToUpload, string parent);
+    }
+
     /* The adapter class makes DriveService conform to the testing interface */
     public class DriveServiceAdapter : IService
     {

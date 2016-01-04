@@ -15,7 +15,12 @@ using System.Collections.Concurrent;
 
 namespace GDriveNURI
 {
-    public class UploadScheduler
+    public interface IUploadScheduler
+    {
+        void UploadMagneticData(DatasetInfo info);
+    }
+
+    public class UploadScheduler : IUploadScheduler
     {
         private int maxActiveUploads;
         private BlockingCollection<DatasetInfo> queue;
