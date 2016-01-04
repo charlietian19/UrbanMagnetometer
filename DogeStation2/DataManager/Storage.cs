@@ -11,7 +11,6 @@ namespace GDriveNURI
     {
         void Store(double[] dataX, double[] dataY, double[] dataZ, double systemSeconds, 
             DateTime time);
-        void Flush();
     }
 
     /* Interface for IBinaryWriterWrap object factory */
@@ -41,7 +40,6 @@ namespace GDriveNURI
 
         private string dataCacheFolder;
         private IDatasetInfo info = null;
-        private IDatasetInfo postponedInfo = null;
 
         private bool isWriting = false;
         private long offset;
@@ -56,7 +54,7 @@ namespace GDriveNURI
             ReadAppConfig();
         }
 
-        /* Constructs the object with custom filesystem wrappers. */
+        /* Constructs the object with custom filesystem wrappers for testing. */
         public Storage(IUploadScheduler scheduler, IFileWrap file, 
             IBinaryWriterFactory binaryWriterFactory,
             IConfigurationManagerWrap configManager)
@@ -84,12 +82,6 @@ namespace GDriveNURI
             }
 
             Append(dataX, dataY, dataZ, systemSeconds, time);
-        }
-
-        /* Forces the writer to send out the data. */
-        public void Flush()
-        {
-            CloseAndUploadAll(DateTime.Now);
         }
 
         /* Initializes settings from the configuration file. */
@@ -155,21 +147,7 @@ namespace GDriveNURI
             z.Close();
             t.Close();
 
-            /* Upload the latest postponed dataset, if any. */
-            if ((postponedInfo != null) && !postponedInfo.isSameFile(info))
-            {
-                scheduler.UploadMagneticData(postponedInfo);
-                postponedInfo = null;
-            }
-
-            if (!info.isSameFile(time))
-            {
-                scheduler.UploadMagneticData(info);
-            }
-            else
-            {
-                postponedInfo = info;
-            }
+            scheduler.UploadMagneticData(info);
         }
     }
 
