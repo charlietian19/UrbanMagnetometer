@@ -76,9 +76,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DogeStation2\DogeStation2.csproj">
+    <ProjectReference Include="..\DogeStation2\DataGrabber.csproj">
       <Project>{bed00a72-9ede-402b-87d1-046b36f48385}</Project>
-      <Name>DogeStation2</Name>
+      <Name>DataGrabber</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
