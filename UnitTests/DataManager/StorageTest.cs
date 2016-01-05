@@ -52,9 +52,11 @@ namespace UnitTests.DataManager
         private Mock<IFileWrap> FileMock;
         private Mock<IConfigurationManagerWrap> ConfigMock;
         private Mock<IUploadScheduler> schedulerMock;
-        private IFileWrap File;
+        private Mock<IDirectoryWrap> directoryMock;
+        private IFileWrap file;
         private IConfigurationManagerWrap config;
         private IUploadScheduler scheduler;
+        private IDirectoryWrap dir;
 
         [TestInitialize]
         public void SetupMocks()
@@ -77,19 +79,25 @@ namespace UnitTests.DataManager
             FileMock = new Mock<IFileWrap>();
             ConfigMock = new Mock<IConfigurationManagerWrap>();
             schedulerMock = new Mock<IUploadScheduler>();
+            directoryMock = new Mock<IDirectoryWrap>();
             FileMock.Setup(o => o.Open(It.IsAny<string>(),
                 It.IsAny<FileMode>(), It.IsAny<FileAccess>()));
             ConfigMock.Setup(o => o.AppSettings).Returns(settings);
             schedulerMock.Setup(o => o.UploadMagneticData(It.IsAny<IDatasetInfo>()));
-            File = FileMock.Object;
+            directoryMock.Setup(o => o.Exists(It.IsAny<string>()))
+                .Returns(true);
+            directoryMock.Setup(o => o.CreateDirectory(It.IsAny<string>()))
+                .Throws(new NotSupportedException());
+            file = FileMock.Object;
             config = ConfigMock.Object;
             scheduler = schedulerMock.Object;
+            dir = directoryMock.Object;
         }
 
         [TestMethod]
         public void WriteSinglePoint()
         {
-            var storage = new Storage(scheduler, File, factory, config);
+            var storage = new Storage(scheduler, file, dir, factory, config);
             double[] x = { 0.0 }, y = { 2.0 }, z = { 3.0 };
             DateTime time = DateTime.Now;
             double seconds = 1245.0;
@@ -107,7 +115,7 @@ namespace UnitTests.DataManager
         [TestMethod]
         public void WriteSingleSample()
         {
-            var storage = new Storage(scheduler, File, factory, config);
+            var storage = new Storage(scheduler, file, dir, factory, config);
             double[] x = { 0.0, 1.42, 213, 23, 12, 234.12, 56 },
                 y = { 2.0, 21, 543.1, 23, 54, 22, 2.6 },
                 z = { 3.0, 1.2324, 2.3, 21.2, 21.3, 4.0, 5.44 };
@@ -134,7 +142,7 @@ namespace UnitTests.DataManager
         [TestMethod]
         public void WriteMultipleSamples()
         {
-            var storage = new Storage(scheduler, File, factory, config);
+            var storage = new Storage(scheduler, file, dir, factory, config);
             double[] x1 = { 0, 0, 0 }, y1 = { 0, 0, 0 }, z1 = { 0, 0, 0 };
             double[] x2 = { 0, 0 }, y2 = { 0, 0 }, z2 = { 0, 0 };
             double[] x3 = { 0, 0, 0, 0 }, y3 = { 0, 0, 0, 0 }, 
@@ -159,7 +167,7 @@ namespace UnitTests.DataManager
         [TestMethod]
         public void UploadWhenHourChanges()
         {
-            var storage = new Storage(scheduler, File, factory, config);
+            var storage = new Storage(scheduler, file, dir, factory, config);
             double[] x = { 123.532 }, y = { 21.2 }, z = { 2.0 };
             DateTime time1, time2, time3;
             time1 = new DateTime(2016, 1, 1, 0, 0, 0);
@@ -192,7 +200,7 @@ namespace UnitTests.DataManager
         [TestMethod]
         public void WriteToNextFileWhenHourChanges()
         {
-            var storage = new Storage(scheduler, File, factory, config);
+            var storage = new Storage(scheduler, file, dir, factory, config);
             double[] x = { 123.532 }, y = { 21.2 }, z = { 2.0 };
             DateTime time1, time2;
             time1 = new DateTime(2016, 1, 1, 0, 0, 0);

@@ -4,6 +4,8 @@ using SystemWrapper.IO;
 using SystemWrapper.Configuration;
 
 // TODO: proper exception handling
+// Throws IOException, FileNotFound, etc...
+// Handle DirectoryNotFound?
 
 namespace GDriveNURI
 {
@@ -11,6 +13,7 @@ namespace GDriveNURI
     {
         void Store(double[] dataX, double[] dataY, double[] dataZ, double systemSeconds, 
             DateTime time);
+        void Close();
     }
 
     /* Interface for IBinaryWriterWrap object factory */
@@ -37,6 +40,7 @@ namespace GDriveNURI
         private IBinaryWriterFactory _BinaryWriterFactory;
         private IFileWrap IFile;
         private IConfigurationManagerWrap ConfigurationManager;
+        private IDirectoryWrap Directory;
 
         private string dataCacheFolder;
         private IDatasetInfo info = null;
@@ -51,19 +55,21 @@ namespace GDriveNURI
             IFile = new FileWrap();
             _BinaryWriterFactory = new BinaryWriterFactory();
             ConfigurationManager = new ConfigurationManagerWrap();
-            ReadAppConfig();
+            Directory = new DirectoryWrap();
+            InitCacheFolder();
         }
 
         /* Constructs the object with custom filesystem wrappers for testing. */
-        public Storage(IUploadScheduler scheduler, IFileWrap file, 
-            IBinaryWriterFactory binaryWriterFactory,
+        public Storage(IUploadScheduler scheduler, IFileWrap file,
+            IDirectoryWrap dir, IBinaryWriterFactory binaryWriterFactory,
             IConfigurationManagerWrap configManager)
         {
             this.scheduler = scheduler;
             IFile = file;
             _BinaryWriterFactory = binaryWriterFactory;
             ConfigurationManager = configManager;
-            ReadAppConfig();
+            Directory = dir;
+            InitCacheFolder();
         }
 
         /* Stores the data from the sensor. */
@@ -84,11 +90,15 @@ namespace GDriveNURI
             Append(dataX, dataY, dataZ, precisionCounter, time);
         }
 
-        /* Initializes settings from the configuration file. */
-        private void ReadAppConfig()
+        /* Initializes the cache. */
+        private void InitCacheFolder()
         {
             var settings = ConfigurationManager.AppSettings;
             dataCacheFolder = settings["DataCacheFolder"];
+            if (!Directory.Exists(dataCacheFolder))
+            {
+                Directory.CreateDirectory(dataCacheFolder);
+            }
         }
 
         /* Appends the data into existing streams. */
@@ -148,6 +158,14 @@ namespace GDriveNURI
             t.Close();
 
             scheduler.UploadMagneticData(info);
+        }
+        
+        /* Closes the data files (eg. when the application exits).
+        Store() can be subsequently called, which may result in appending 
+        the data files, or creating new files. */
+        public void Close()
+        {
+            CloseAndUploadAll(DateTime.Now);
         }
     }
 
