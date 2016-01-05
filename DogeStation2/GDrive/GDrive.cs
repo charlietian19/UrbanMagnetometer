@@ -70,9 +70,7 @@ namespace GDriveNURI
             pathHelper = new GDrivePathHelper(this);
         }
 
-        public GDrive(string secretPath) : this(GoogleDriveInit(secretPath))
-        {
-        }
+        public GDrive(string secretPath) : this(GoogleDriveInit(secretPath)) { }
 
         /* Initializes Google DriveService object given the credential. */
         public static DriveServiceAdapter GoogleDriveInit(string secretPath)

@@ -22,19 +22,19 @@ namespace GDriveNURI
         IBinaryWriterWrap Create(IFileStreamWrap stream);
     }
 
-    /* Factory for IBinaryWriterWrap objects */
-    public class BinaryWriterFactory : IBinaryWriterFactory
-    {
-        public IBinaryWriterWrap Create(IFileStreamWrap stream)
-        {
-            return new BinaryWriterWrap(stream);
-        }
-    }
-
     // TODO: scan the data cache folder for files that haven't been uploaded
     // and upload them as well
     public class Storage : IStorage
     {
+        /* Factory for IBinaryWriterWrap objects */
+        public class BinaryWriterFactory : IBinaryWriterFactory
+        {
+            public IBinaryWriterWrap Create(IFileStreamWrap stream)
+            {
+                return new BinaryWriterWrap(stream);
+            }
+        }
+
         private IUploadScheduler scheduler;
         private IBinaryWriterWrap x, y, z, t;
         private IBinaryWriterFactory _BinaryWriterFactory;
