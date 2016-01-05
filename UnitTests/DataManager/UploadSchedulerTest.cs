@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SystemWrapper.Configuration;
 using SystemWrapper.IO;
+using System.Threading;
 using System.IO;
 using System.Collections.Specialized;
 using GDriveNURI;
@@ -28,17 +29,31 @@ namespace UnitTests.DataManager
         private IDatasetInfo info;
         private IPathWrap path;
 
+        private Semaphore finished;
+        int timeout;
+
         private int count;
 
         NameValueCollection settings;
+
+        /* Signals the main test thread that the worker is done. */
+        private void SignalFinished(IDatasetInfo info,
+            bool success, string msg)
+        {
+            finished.Release();
+        }
 
         [TestInitialize]
         public void SetupMocks()
         {
             settings = new NameValueCollection();
-            settings["MaxActiveUploads"] = "3";
+            settings["MaxActiveUploads"] = "5";
+            settings["MaxRetryCount"] = "3";
+            settings["WaitBetweenRetriesSeconds"] = "0";
             settings["RemoteFileNameFormat"] = @"\{0}\{1}\{2}\{3}\{4}";
             count = 0;
+            timeout = 10000;
+            finished = new Semaphore(0, 1);
 
             configMock = new Mock<IConfigurationManagerWrap>();
             uploaderMock = new Mock<IUploader>();
@@ -95,8 +110,10 @@ namespace UnitTests.DataManager
         {
             var scheduler = new UploadScheduler(uploader, config, file,
                 dir, zip, path);
+            scheduler.FinishedEvent += 
+                new UploadFinishedEventHandler(SignalFinished);
             scheduler.UploadMagneticData(info);
-            scheduler.UploadFinished.WaitOne();
+            finished.WaitOne(timeout);
 
             directoryMock.Verify(o => o.Exists("random0"), Times.Once());
             directoryMock.Verify(o => o.CreateDirectory("random0"),
@@ -121,11 +138,63 @@ namespace UnitTests.DataManager
         [TestMethod]
         public void UploadSingleFileCompressionFailed()
         {
+            zipMock.Setup(o => o.CreateFromDirectory(It.IsAny<string>(),
+                It.IsAny<string>())).Throws(new FileNotFoundException());
+            var scheduler = new UploadScheduler(uploader, config, file,
+                dir, zip, path);
+            scheduler.FinishedEvent +=
+                new UploadFinishedEventHandler(SignalFinished);
+            scheduler.UploadMagneticData(info);
+            finished.WaitOne(timeout);
+
+            directoryMock.Verify(o => o.Exists("random0"), Times.Once());
+            directoryMock.Verify(o => o.CreateDirectory("random0"),
+                Times.Once());
+            fileMock.Verify(o => o.Move("x0.bin", @"random0\x0.bin"),
+                Times.Once());
+            fileMock.Verify(o => o.Move("y0.bin", @"random0\y0.bin"),
+                Times.Once());
+            fileMock.Verify(o => o.Move("z0.bin", @"random0\z0.bin"),
+                Times.Once());
+            fileMock.Verify(o => o.Move("t0.bin", @"random0\t0.bin"),
+                Times.Once());
+            zipMock.Verify(o => o.CreateFromDirectory("random0", "data0.zip"),
+                Times.Once());
+            directoryMock.Verify(o => o.Delete("random0", true), Times.Never());
+            uploaderMock.Verify(o => o.Upload("data0.zip",
+                @"\2015\5\30\15\TestStation"), Times.Never());
+            fileMock.Verify(o => o.Delete("data0.zip"), Times.Never());
         }
 
         [TestMethod]
         public void UploadSingleFileUploadFailed()
         {
+            uploaderMock.Setup(o => o.Upload(It.IsAny<string>(),
+                It.IsAny<string>())).Throws(new FileUploadException());
+            var scheduler = new UploadScheduler(uploader, config, file,
+                dir, zip, path);
+            scheduler.FinishedEvent +=
+                new UploadFinishedEventHandler(SignalFinished);
+            scheduler.UploadMagneticData(info);
+            finished.WaitOne(timeout);
+
+            directoryMock.Verify(o => o.Exists("random0"), Times.Once());
+            directoryMock.Verify(o => o.CreateDirectory("random0"),
+                Times.Once());
+            fileMock.Verify(o => o.Move("x0.bin", @"random0\x0.bin"),
+                Times.Once());
+            fileMock.Verify(o => o.Move("y0.bin", @"random0\y0.bin"),
+                Times.Once());
+            fileMock.Verify(o => o.Move("z0.bin", @"random0\z0.bin"),
+                Times.Once());
+            fileMock.Verify(o => o.Move("t0.bin", @"random0\t0.bin"),
+                Times.Once());
+            zipMock.Verify(o => o.CreateFromDirectory("random0", "data0.zip"),
+                Times.Once());
+            directoryMock.Verify(o => o.Delete("random0", true), Times.Once());
+            uploaderMock.Verify(o => o.Upload("data0.zip",
+                @"\2015\5\30\15\TestStation"), Times.Exactly(3));
+            fileMock.Verify(o => o.Delete("data0.zip"), Times.Never());
         }
     }
 }

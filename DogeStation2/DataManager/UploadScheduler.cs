@@ -10,6 +10,7 @@ using System.IO.Compression;
 /* Example code taken from 
 
     https://msdn.microsoft.com/en-us/library/dd997371(v=vs.110).aspx
+    https://msdn.microsoft.com/en-us/library/aa645739(v=vs.71).aspx
 
 */
 
@@ -17,11 +18,16 @@ using System.IO.Compression;
 
 namespace GDriveNURI
 {
+    public delegate void UploadStartedEventHandler(IDatasetInfo info);
+    public delegate void UploadFinishedEventHandler(IDatasetInfo info, 
+        bool success, string message);
+
     public interface IUploadScheduler
     {
         void UploadMagneticData(IDatasetInfo info);
-        EventWaitHandle UploadStarted { get; }
-        EventWaitHandle UploadFinished { get; }
+        int ActiveUploads { get; }
+        event UploadFinishedEventHandler FinishedEvent;
+        event UploadStartedEventHandler StartedEvent;
     }
 
     public interface IZipFile
@@ -40,13 +46,9 @@ namespace GDriveNURI
 
     public class UploadScheduler : IUploadScheduler
     {
-        private int maxActiveUploads;
+        private int maxActiveUploads, maxRetryCount, waitBetweenRetriesSeconds;
         private string remoteFileName;
-        private int ActiveUploads = 0;
-        private readonly EventWaitHandle UploadStartedEventHandle
-            = new EventWaitHandle(false, EventResetMode.AutoReset);
-        private readonly EventWaitHandle UploadFinishedEventHandle
-            = new EventWaitHandle(false, EventResetMode.AutoReset);
+        private int ActiveUploadCount = 0;
         private BlockingCollection<IDatasetInfo> queue;
         private IUploader uploader;
         private IConfigurationManagerWrap ConfigurationManager;
@@ -54,13 +56,11 @@ namespace GDriveNURI
         private IDirectoryWrap Directory;
         private IZipFile zip;
         private IPathWrap Path;
-        public EventWaitHandle UploadStarted
+        public event UploadFinishedEventHandler FinishedEvent;
+        public event UploadStartedEventHandler StartedEvent;
+        public int ActiveUploads
         {
-            get { return UploadStartedEventHandle; }
-        }
-        public EventWaitHandle UploadFinished
-        {
-            get { return UploadFinishedEventHandle; }
+            get { return ActiveUploadCount; }
         }
 
         /* Creates an uploader with no queue bound. */
@@ -138,6 +138,9 @@ namespace GDriveNURI
         {
             var settings = ConfigurationManager.AppSettings;
             maxActiveUploads = Convert.ToInt32(settings["MaxActiveUploads"]);
+            maxRetryCount = Convert.ToInt32(settings["MaxRetryCount"]);
+            waitBetweenRetriesSeconds = Convert.ToInt32(
+                settings["WaitBetweenRetriesSeconds"]);
             remoteFileName = settings["RemoteFileNameFormat"];
         }
 
@@ -181,28 +184,67 @@ namespace GDriveNURI
 
         /* Adds the magnetic field dataset to an archive and returns full path
         to the archive. */
-        private string Archive(IDatasetInfo info)
+        private string MoveDataToTmpDir(IDatasetInfo info)
         {
             string tmpDirFullPath, newXFileName, newYFileName, newZFileName,
-                newTFileName, archiveName;
+                newTFileName;
 
             tmpDirFullPath = CreateTemporaryDirectory(info);
             newXFileName = Path.Combine(tmpDirFullPath, info.XFileName);
             newYFileName = Path.Combine(tmpDirFullPath, info.YFileName);
             newZFileName = Path.Combine(tmpDirFullPath, info.ZFileName);
             newTFileName = Path.Combine(tmpDirFullPath, info.TFileName);
-            archiveName = Path.Combine(info.FolderPath, info.ZipFileName);
 
             File.Move(info.FullPath(info.XFileName), newXFileName);
             File.Move(info.FullPath(info.YFileName), newYFileName);
             File.Move(info.FullPath(info.ZFileName), newZFileName);
             File.Move(info.FullPath(info.TFileName), newTFileName);
 
-            zip.CreateFromDirectory(tmpDirFullPath, archiveName);
-            DeleteTemporaryDirectory(tmpDirFullPath);
-            return archiveName;
+            return tmpDirFullPath;
         }
 
+        /* Uploads the files given DatasetInfo. */
+        private void UploadDo(IDatasetInfo info)
+        {
+            bool firstRun = true;
+            string archivePath = "", tmpDirFullPath = "", parent = "";
+            OnStarted(info);
+            for (int i = 0; i < maxRetryCount; i++)
+            {
+                try
+                {
+                    if (firstRun)
+                    {
+                        archivePath = Path.Combine(info.FolderPath, 
+                            info.ZipFileName);
+                        tmpDirFullPath = MoveDataToTmpDir(info);
+                        parent = string.Format(remoteFileName, info.Year,
+                            info.Month, info.Day, info.Hour, info.StationName);
+                        zip.CreateFromDirectory(tmpDirFullPath, archivePath);
+                        DeleteTemporaryDirectory(tmpDirFullPath);
+                        firstRun = false;
+                    }
+                    uploader.Upload(archivePath, parent);
+                    File.Delete(archivePath);
+                    OnFinished(info, true, "Upload successful");
+                    break;
+                }
+                catch (FileUploadException e)
+                {
+                    if (i + 1 == maxRetryCount)
+                    {
+                        OnFinished(info, false, e.Message);
+                        break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    OnFinished(info, false, e.Message);
+                    break;
+                    // don't clean up the data so we can retry later
+                }
+            }
+        }
 
         /* Retrieves the arriving data in background. */
         private void Worker()
@@ -218,15 +260,9 @@ namespace GDriveNURI
 
                 if (info != null)
                 {
-                    Interlocked.Increment(ref ActiveUploads);
-                    UploadStartedEventHandle.Set();
-                    string filePath = Archive(info);
-                    string parent = string.Format(remoteFileName, info.Year,
-                        info.Month, info.Day, info.Hour, info.StationName);
-                    uploader.Upload(filePath, parent);
-                    File.Delete(filePath);
-                    Interlocked.Decrement(ref ActiveUploads);
-                    UploadFinishedEventHandle.Set();
+                    Interlocked.Increment(ref ActiveUploadCount);
+                    UploadDo(info);
+                    Interlocked.Decrement(ref ActiveUploadCount);
                 }
             }
         }
@@ -235,6 +271,23 @@ namespace GDriveNURI
         public void UploadMagneticData(IDatasetInfo info)
         {
             queue.Add(info);
+        }
+
+        /* Invoke the event when an upload starts. */
+        protected virtual void OnStarted(IDatasetInfo info)
+        {
+            if (StartedEvent == null)
+                return;
+            StartedEvent(info);
+        }
+
+        /* Invoke the event when an upload finishes. */
+        protected virtual void OnFinished(IDatasetInfo info, bool success, 
+            string msg)
+        {
+            if (FinishedEvent == null)
+                return;
+            FinishedEvent(info, success, msg);
         }
     }
 

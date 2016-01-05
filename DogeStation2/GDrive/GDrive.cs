@@ -153,7 +153,7 @@ namespace GDriveNURI
                 {
                     string msg = string.Format("Can't upload {0} into {1}", 
                         path, remotePath);
-                    throw new IOException(msg);
+                    throw new FileUploadException(msg);
                 }
             }
         }
