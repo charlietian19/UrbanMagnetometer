@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DogeStation2", "DogeStation
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{DC96D414-7682-40A6-A186-4EB5A0C0B0DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegacyDataUploader", "LegacyDataUploader\LegacyDataUploader.csproj", "{6A16E2CA-BA77-46CD-A48D-CAA4AC7896B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{DC96D414-7682-40A6-A186-4EB5A0C0B0DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC96D414-7682-40A6-A186-4EB5A0C0B0DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC96D414-7682-40A6-A186-4EB5A0C0B0DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A16E2CA-BA77-46CD-A48D-CAA4AC7896B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A16E2CA-BA77-46CD-A48D-CAA4AC7896B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A16E2CA-BA77-46CD-A48D-CAA4AC7896B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A16E2CA-BA77-46CD-A48D-CAA4AC7896B2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
