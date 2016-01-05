@@ -2,7 +2,7 @@
 using System.Collections.Specialized;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SystemWrapper.Configuration;
-using GDriveNURI;
+using Utils.DataManager;
 using Moq;
 
 namespace UnitTests.DataManager

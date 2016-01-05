@@ -2,7 +2,7 @@
 using System.IO;
 using SystemWrapper.Configuration;
 
-namespace GDriveNURI
+namespace Utils.DataManager
 {
     public interface IDatasetInfo
     {

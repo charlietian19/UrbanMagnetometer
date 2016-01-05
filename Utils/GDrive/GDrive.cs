@@ -15,7 +15,7 @@ using System.Threading;
 
 */
 
-namespace GDriveNURI
+namespace Utils.GDrive
 {
     /* Provide the interface to enable service mocking. */
     public interface IService

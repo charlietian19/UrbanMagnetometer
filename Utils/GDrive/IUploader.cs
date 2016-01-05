@@ -1,4 +1,4 @@
-﻿namespace GDriveNURI
+﻿namespace Utils.GDrive
 {
     public interface IUploader
     {

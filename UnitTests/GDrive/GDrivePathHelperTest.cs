@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Google.Apis.Drive.v2.Data;
-using GDriveNURI;
+using Utils.GDrive;
 using Moq;
 
 namespace UnitTests.GDriveTests

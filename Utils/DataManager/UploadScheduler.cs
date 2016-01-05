@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 using SystemWrapper.Configuration;
 using SystemWrapper.IO;
 using System.IO.Compression;
-
+using Utils.GDrive;
 
 /* Example code taken from 
 
@@ -16,7 +16,7 @@ using System.IO.Compression;
 
 // TODO: proper exception handling
 
-namespace GDriveNURI
+namespace Utils.DataManager
 {
     public delegate void UploadStartedEventHandler(IDatasetInfo info);
     public delegate void UploadFinishedEventHandler(IDatasetInfo info, 

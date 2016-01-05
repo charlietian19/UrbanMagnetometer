@@ -7,7 +7,7 @@ using SystemWrapper.IO;
 using SystemWrapper.Configuration;
 using System.IO;
 
-namespace LegacyDataUploader
+namespace Utils.DataManager
 {
     /* Interface for IBinaryReaderWrap object factory */
     public interface IBinaryReaderFactory
@@ -21,7 +21,7 @@ namespace LegacyDataUploader
         IFileInfoWrap Create(string path);
     }
 
-    class LegacyReader
+    public class LegacyReader
     {
         /* Factory for IBinaryReaderWrap objects */
         public class BinaryReaderFactory : IBinaryReaderFactory

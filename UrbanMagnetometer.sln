@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\Unit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegacyDataUploader", "LegacyDataUploader\LegacyDataUploader.csproj", "{6A16E2CA-BA77-46CD-A48D-CAA4AC7896B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "Utils\Utils.csproj", "{6D794F57-90E8-477E-AF63-7D22FBA88A37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{6A16E2CA-BA77-46CD-A48D-CAA4AC7896B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A16E2CA-BA77-46CD-A48D-CAA4AC7896B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A16E2CA-BA77-46CD-A48D-CAA4AC7896B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D794F57-90E8-477E-AF63-7D22FBA88A37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D794F57-90E8-477E-AF63-7D22FBA88A37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D794F57-90E8-477E-AF63-7D22FBA88A37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D794F57-90E8-477E-AF63-7D22FBA88A37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

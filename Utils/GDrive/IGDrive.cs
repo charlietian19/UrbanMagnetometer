@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Google.Apis.Drive.v2.Data;
 
-namespace GDriveNURI
+namespace Utils.GDrive
 {
     public interface IGDrive
     {

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace GDriveNURI
+namespace Utils.GDrive
 {
     public class FileUploadException : IOException
     {

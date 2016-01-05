@@ -7,7 +7,7 @@ using SystemWrapper.Configuration;
 // Throws IOException, FileNotFound, etc...
 // Handle DirectoryNotFound?
 
-namespace GDriveNURI
+namespace Utils.DataManager
 {
     public interface IStorage
     {

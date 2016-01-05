@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
-using GDriveNURI;
+using Utils.GDrive;
+using Utils.DataManager;
+
 
 namespace DogeStation2
 {

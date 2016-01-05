@@ -5,7 +5,8 @@ using SystemWrapper.IO;
 using System.Threading;
 using System.IO;
 using System.Collections.Specialized;
-using GDriveNURI;
+using Utils.DataManager;
+using Utils.GDrive;
 using Moq;
 
 namespace UnitTests.DataManager
