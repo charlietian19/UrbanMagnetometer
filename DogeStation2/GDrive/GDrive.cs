@@ -4,7 +4,6 @@ using Google.Apis.Drive.v2.Data;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -173,6 +172,4 @@ namespace GDriveNURI
             insertRequest.Execute();
         }
     }
-
-
 }
