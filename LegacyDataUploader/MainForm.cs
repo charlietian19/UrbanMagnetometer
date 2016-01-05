@@ -14,7 +14,7 @@ namespace LegacyDataUploader
 {
     public partial class MainForm : Form
     {
-        private LegacyReader reader;
+        private DatasetReader reader;
         public MainForm()
         {
             InitializeComponent();
