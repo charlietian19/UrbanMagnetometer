@@ -3,5 +3,6 @@
     public interface IUploader
     {
         void Upload(string fileNameToUpload, string parent);
+        event UploadProgressDelegate ProgressEvent;
     }
 }

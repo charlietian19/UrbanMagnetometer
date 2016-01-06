@@ -61,6 +61,9 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.uploadProgressBar = new System.Windows.Forms.ToolStripProgressBar();
+            this.cancelButton = new System.Windows.Forms.Button();
+            this.worker = new System.ComponentModel.BackgroundWorker();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.xSlope)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ySlope)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.zSlope)).BeginInit();
@@ -237,6 +240,7 @@
             this.uploadButton.TabIndex = 13;
             this.uploadButton.Text = "Upload";
             this.uploadButton.UseVisualStyleBackColor = true;
+            this.uploadButton.Click += new System.EventHandler(this.uploadButton_Click);
             // 
             // groupBox2
             // 
@@ -385,12 +389,34 @@
             this.uploadProgressBar.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.uploadProgressBar.Size = new System.Drawing.Size(200, 42);
             // 
+            // cancelButton
+            // 
+            this.cancelButton.Location = new System.Drawing.Point(386, 279);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(165, 63);
+            this.cancelButton.TabIndex = 16;
+            this.cancelButton.Text = "Cancel";
+            this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
+            // 
+            // worker
+            // 
+            this.worker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.worker_DoWork);
+            this.worker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.Worker_ProgressChanged);
+            this.worker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.Worker_RunWorkerCompleted);
+            // 
+            // openFileDialog
+            // 
+            this.openFileDialog.FileName = "time.bin";
+            this.openFileDialog.Filter = "Magnetic field data (*.bin)|*.bin";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(867, 780);
+            this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.uploadButton);
@@ -452,6 +478,9 @@
         private System.Windows.Forms.Label chunksTotal;
         private System.Windows.Forms.Label startTime;
         private System.Windows.Forms.Label fileName;
+        private System.Windows.Forms.Button cancelButton;
+        private System.ComponentModel.BackgroundWorker worker;
+        private System.Windows.Forms.OpenFileDialog openFileDialog;
     }
 }
 

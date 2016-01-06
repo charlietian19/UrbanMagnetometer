@@ -153,5 +153,14 @@ namespace Utils.DataReader
         {
             return t.BaseStream.Position < t.BaseStream.Length;
         }
+
+        /* Closes the dataset files. */
+        public void Close()
+        {
+            t.Close();
+            x.Close();
+            y.Close();
+            z.Close();
+        }
     }
 }
