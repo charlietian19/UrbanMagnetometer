@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace LegacyDataUploader
 {
@@ -14,6 +12,8 @@ namespace LegacyDataUploader
         [STAThread]
         static void Main()
         {
+            Process process = Process.GetCurrentProcess();
+            process.PriorityClass = ProcessPriorityClass.BelowNormal;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
