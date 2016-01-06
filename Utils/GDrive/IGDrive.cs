@@ -9,5 +9,6 @@ namespace Utils.GDrive
         File GetFileInfo(string id);
         IList<ChildReference> ChildList(File file);
         void NewFolder(string name, File parent);
+        event UploadProgressDelegate ProgressEvent;
     }
 }

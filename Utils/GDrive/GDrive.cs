@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v2;
 using Google.Apis.Drive.v2.Data;
+using Google.Apis.Upload;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using System;
@@ -40,6 +41,9 @@ namespace Utils.GDrive
         public ChildrenResource Children { get { return service.Children; } }
     }
 
+    public delegate void UploadProgressDelegate(string name, long bytesSent, 
+        long bytesTotal);
+
     public class GDrive : IUploader, IGDrive
     {
         //private DriveService service;
@@ -50,6 +54,7 @@ namespace Utils.GDrive
             googleAuthUser;
         public static string filesMimeType, folderMimeType;
         private static int maxListResults;
+        public event UploadProgressDelegate ProgressEvent;
 
         /* Initializes settings from the configuration file. */
         private static void ReadAppConfig()
@@ -144,15 +149,26 @@ namespace Utils.GDrive
                     uploadStream,
                     filesMimeType);
 
-                Google.Apis.Upload.IUploadProgress progress = 
-                    await insertRequest.UploadAsync();
-                if (progress.Status == Google.Apis.Upload.UploadStatus.Failed)
+                insertRequest.ProgressChanged += 
+                    (p) => { UploadProgressChanged(p, uploadStream); };
+
+                IUploadProgress progress = await insertRequest.UploadAsync();
+                if (progress.Status == UploadStatus.Failed)
                 {
                     string msg = string.Format("Can't upload {0} into {1}", 
                         path, remotePath);
                     throw new FileUploadException(msg);
                 }
             }
+        }
+
+        /* Called whenever the upload progress changes. */
+        private void UploadProgressChanged(IUploadProgress progress, 
+            FileStream stream)
+        {
+            if (ProgressEvent == null)
+                return;
+            ProgressEvent(stream.Name, progress.BytesSent, stream.Length);            
         }
 
         /* Creates a new folder. */
