@@ -40,10 +40,16 @@ namespace Utils.DataReader
         private IFileInfoFactory infoFactory;
         private IBinaryReaderWrap x, y, z, t;
         private IBinaryReaderFactory readerFactory;
+        private long _chunkIndex;
         
         private long xFileLength, tFileLength;
         private DateTime _datasetStartTime;
         public DatasetChunk Chunk;
+
+        public long ChunkIndex
+        {
+            get { return _chunkIndex; }
+        }
 
         /* Creates a new DatasetReader with system wrapper. */
         public DatasetReader()
@@ -76,7 +82,7 @@ namespace Utils.DataReader
         }
 
         /* Returns the number of chunks in the dataset. */
-        public long Chunks
+        public long ChunksTotal
         {            
             get
             {
@@ -112,6 +118,7 @@ namespace Utils.DataReader
         {
             xFileLength = infoFactory.Create(xPath).Length;
             tFileLength = infoFactory.Create(tPath).Length;
+            _chunkIndex = 0;
 
             using (var file = readerFactory.Create(File.Open(tPath, FileMode.Open,
                 FileAccess.Read)))

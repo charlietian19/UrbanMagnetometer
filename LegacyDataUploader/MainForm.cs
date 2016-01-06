@@ -91,7 +91,7 @@ namespace LegacyDataUploader
                     reader.OpenDataFiles(openFileDialog.FileName);
                     fileName.Text = openFileDialog.FileName;
                     startTime.Text = reader.DatasetStartTime.ToString();
-                    chunksTotal.Text = reader.Chunks.ToString();
+                    chunksTotal.Text = reader.ChunksTotal.ToString();
                     pointsTotal.Text = reader.Points.ToString();
                     double size = reader.Size / 1073741824;
                     sizeTotalGB.Text = size.ToString();
@@ -108,6 +108,8 @@ namespace LegacyDataUploader
         private void Worker_ProgressChanged(object sender, 
             ProgressChangedEventArgs e)
         {
+            var progress = Math.Min(100, e.ProgressPercentage);
+            progress = Math.Max(0, progress);
             totalProgress.Value = e.ProgressPercentage;
         }
 
@@ -120,6 +122,7 @@ namespace LegacyDataUploader
             double bx = Convert.ToDouble(xOffset.Value);
             double by = Convert.ToDouble(yOffset.Value);
             double bz = Convert.ToDouble(zOffset.Value);
+            double progress = 0, newprogress = 0;
 
             while (reader.HasNextChunk() && (!worker.CancellationPending))
             {
@@ -137,8 +140,12 @@ namespace LegacyDataUploader
                 }
 
                 storage.Store(x, y, z, chunk.PerformanceCounter, chunk.Time);
-                var progress = Math.Min(100 * chunk.Index / reader.Chunks, 100.0);
-                worker.ReportProgress(Convert.ToInt32(progress));
+                newprogress = 100 * reader.ChunkIndex / reader.ChunksTotal;
+                if (newprogress != progress)
+                {
+                    worker.ReportProgress(Convert.ToInt32(progress));
+                    progress = newprogress;
+                }                
             }
             reader.Close();
             storage.Close();
