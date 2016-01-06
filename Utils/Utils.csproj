@@ -111,8 +111,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataManager\DatasetInfo.cs" />
-    <Compile Include="DataManager\DatasetReader.cs" />
-    <Compile Include="DataManager\LegacyReader.cs" />
+    <Compile Include="DataReader\DatasetChunk.cs" />
+    <Compile Include="DataReader\DatasetReader.cs" />
+    <Compile Include="DataReader\LegacyReader.cs" />
     <Compile Include="DataManager\Storage.cs" />
     <Compile Include="DataManager\UploadScheduler.cs" />
     <Compile Include="GDrive\FileUploadException.cs" />

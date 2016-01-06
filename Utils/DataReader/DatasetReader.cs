@@ -2,7 +2,7 @@
 using SystemWrapper.IO;
 using System.IO;
 
-namespace Utils.DataManager
+namespace Utils.DataReader
 {
     /* Interface for IBinaryReaderWrap object factory */
     public interface IBinaryReaderFactory
@@ -33,51 +33,6 @@ namespace Utils.DataManager
             public IFileInfoWrap Create(string path)
             {
                 return new FileInfoWrap(path);
-            }
-        }
-
-        /* Describes the latest retrieved chunk of data. */
-        public class DatasetChunk
-        {
-            internal DateTime _time;
-            internal long _index = 0;
-            internal double _performanceCounter;
-            internal double[] _xdata, _ydata, _zdata;
-
-            /* Returns the index of the current chunk. */
-            public long Index
-            {
-                get { return _index; }
-            }
-
-            /* Returns the timestamp of the current chunk. */
-            public DateTime Time
-            {
-                get { return _time; }
-            }
-
-            /* Returns the performance counter value of the current chunk. */
-            public double PerformanceCounter
-            {
-                get { return _performanceCounter; }
-            }
-
-            /* Returns the X channel data of the current chunk. */
-            public double[] XData
-            {
-                get { return _xdata; }
-            }
-
-            /* Returns the Y channel data of the current chunk. */
-            public double[] YData
-            {
-                get { return _ydata; }
-            }
-
-            /* Returns the Z channel data of the current chunk. */
-            public double[] ZData
-            {
-                get { return _zdata; }
             }
         }
 
@@ -140,8 +95,7 @@ namespace Utils.DataManager
         /* Opens the dataset files. */
         public void OpenDataFiles(string xPath, string yPath, string zPath,
             string tPath)
-        {
-            Chunk = new DatasetChunk();
+        {            
             ReadStats(xPath, tPath);
             x = readerFactory.Create(File.Open(xPath, FileMode.Open,
                 FileAccess.Read));
@@ -171,24 +125,27 @@ namespace Utils.DataManager
         }
 
         /* Reads the next chunk from the dataset. */
-        public void GetNextChunk()
+        public DatasetChunk GetNextChunk()
         {
-            Chunk._index = t.ReadInt64();
+            var index = t.ReadInt64();
             var length = t.ReadInt32();
             var timeUtc = t.ReadInt64();
-            Chunk._performanceCounter = t.ReadDouble();
+            var performanceCounter = t.ReadDouble();
 
-            Chunk._time = new DateTime(timeUtc, DateTimeKind.Utc);
-            Chunk._xdata = new double[length];
-            Chunk._ydata = new double[length];
-            Chunk._zdata = new double[length];
+            var time = new DateTime(timeUtc, DateTimeKind.Utc);
+            var xdata = new double[length];
+            var ydata = new double[length];
+            var zdata = new double[length];
 
             for (int i = 0; i < length; i++)
             {
-                Chunk._xdata[i] = x.ReadDouble();
-                Chunk._ydata[i] = y.ReadDouble();
-                Chunk._zdata[i] = z.ReadDouble();
+                xdata[i] = x.ReadDouble();
+                ydata[i] = y.ReadDouble();
+                zdata[i] = z.ReadDouble();
             }
+
+            return new DatasetChunk(time, index, performanceCounter, xdata,
+                ydata, zdata);
         }
 
     }

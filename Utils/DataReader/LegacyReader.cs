@@ -2,7 +2,7 @@
 using SystemWrapper.Configuration;
 using SystemWrapper.IO;
 
-namespace Utils.DataManager
+namespace Utils.DataReader
 {
     class LegacyReader : DatasetReader
     {
