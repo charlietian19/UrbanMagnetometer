@@ -60,10 +60,10 @@
             this.fileNameLabel = new System.Windows.Forms.Label();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.cancelButton = new System.Windows.Forms.Button();
             this.worker = new System.ComponentModel.BackgroundWorker();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.xSlope)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ySlope)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.zSlope)).BeginInit();
@@ -413,20 +413,25 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 749);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 747);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(870, 46);
+            this.statusStrip1.Size = new System.Drawing.Size(870, 48);
             this.statusStrip1.TabIndex = 15;
             this.statusStrip1.Text = "statusStrip";
             // 
             // toolStripStatusLabel
             // 
             this.toolStripStatusLabel.Name = "toolStripStatusLabel";
-            this.toolStripStatusLabel.Size = new System.Drawing.Size(774, 43);
+            this.toolStripStatusLabel.Size = new System.Drawing.Size(752, 43);
             this.toolStripStatusLabel.Spring = true;
             this.toolStripStatusLabel.Text = "Ready";
             this.toolStripStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.toolStripStatusLabel.Click += new System.EventHandler(this.toolStripStatusLabel_Click);
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(25, 43);
+            this.toolStripStatusLabel1.Text = ".";
             // 
             // cancelButton
             // 
@@ -450,12 +455,6 @@
             // 
             this.openFileDialog.FileName = "time.bin";
             this.openFileDialog.Filter = "Magnetic field data (*.bin)|*.bin";
-            // 
-            // toolStripStatusLabel1
-            // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(25, 43);
-            this.toolStripStatusLabel1.Text = ".";
             // 
             // MainForm
             // 

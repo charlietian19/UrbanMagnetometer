@@ -22,9 +22,18 @@ namespace LegacyDataUploader
         private IStorage storage;
         private LegacyReader reader;
 
+        enum UI_State
+        {
+            Start,
+            FileOpened,
+            Uploading,
+            Done
+        }
+
         public MainForm()
         {
             InitializeComponent();
+            SetUI(UI_State.Start);
             var settings = ConfigurationManager.AppSettings;
             stationName.Text = settings["StationName"];
             int queueBound = Convert.ToInt32(settings["MaxActiveUploads"]);         
@@ -67,7 +76,8 @@ namespace LegacyDataUploader
 
         private void Scheduler_StartedEvent(IDatasetInfo info)
         {
-            SetTextThreadSafe("Uploading...");
+            var msg = string.Format("Uploading dataset from {0}", info.StartDate);
+            SetTextThreadSafe(msg);
         }
 
         private void stationName_TextChanged(object sender, EventArgs e)
@@ -96,6 +106,7 @@ namespace LegacyDataUploader
                     double size = reader.Size / 1073741824;
                     sizeTotalGB.Text = size.ToString();
                     toolStripStatusLabel.Text = "File opened successfully.";
+                    SetUI(UI_State.FileOpened);
                 }
                 catch (Exception exception)
                 {
@@ -147,33 +158,29 @@ namespace LegacyDataUploader
                     progress = newprogress;
                 }                
             }
-            reader.Close();
             storage.Close();
         }
 
         private void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            reader = null;
+            reader.Rewind();
+            SetUI(UI_State.Done);
             if (e.Cancelled)
             {
                 toolStripStatusLabel.Text = "Cancelled.";
             }
-            else if (e.Error == null)
-            {
-                totalProgress.Value = 100;
-            }
-            else
+            else if (e.Error != null)
             {
                 toolStripStatusLabel.Text = e.Error.Message;
                 Console.WriteLine(e.Error.Message);
-            }
+            }      
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
             if (worker.IsBusy)
             {
-                worker.CancelAsync();
+                worker.CancelAsync();                
             }                       
         }
 
@@ -181,13 +188,54 @@ namespace LegacyDataUploader
         {
             if (!worker.IsBusy && (reader != null))
             {
+                SetUI(UI_State.Uploading);
                 worker.RunWorkerAsync(reader);
             }
         }
 
-        private void toolStripStatusLabel_Click(object sender, EventArgs e)
-        {
 
+        void SetUI(UI_State state)
+        {
+            switch (state)
+            {
+                case UI_State.Start:
+                    stationName.Enabled = true;
+                    xOffset.Enabled = true;
+                    yOffset.Enabled = true;
+                    zOffset.Enabled = true;
+                    xSlope.Enabled = true;
+                    ySlope.Enabled = true;
+                    zSlope.Enabled = true;
+                    browseButton.Enabled = true;
+                    uploadButton.Enabled = false;
+                    cancelButton.Enabled = false;
+                    return;
+                case UI_State.FileOpened:
+                case UI_State.Done:
+                    stationName.Enabled = true;
+                    xOffset.Enabled = true;
+                    yOffset.Enabled = true;
+                    zOffset.Enabled = true;
+                    xSlope.Enabled = true;
+                    ySlope.Enabled = true;
+                    zSlope.Enabled = true;
+                    browseButton.Enabled = true;
+                    uploadButton.Enabled = true;
+                    cancelButton.Enabled = false;
+                    return;
+                case UI_State.Uploading:
+                    stationName.Enabled = false;
+                    xOffset.Enabled = false;
+                    yOffset.Enabled = false;
+                    zOffset.Enabled = false;
+                    xSlope.Enabled = false;
+                    ySlope.Enabled = false;
+                    zSlope.Enabled = false;
+                    browseButton.Enabled = false;
+                    uploadButton.Enabled = false;
+                    cancelButton.Enabled = true;
+                    return;
+            }
         }
     }
 }

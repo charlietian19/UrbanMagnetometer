@@ -151,6 +151,7 @@ namespace Utils.DataReader
                 zdata[i] = z.ReadDouble();
             }
 
+            _chunkIndex++;
             return new DatasetChunk(time, index, performanceCounter, xdata,
                 ydata, zdata);
         }
@@ -168,6 +169,15 @@ namespace Utils.DataReader
             x.Close();
             y.Close();
             z.Close();
+        }
+
+        /* Rewinds the dataset files. */
+        public void Rewind()
+        {
+            x.BaseStream.Position = 0;
+            y.BaseStream.Position = 0;
+            z.BaseStream.Position = 0;
+            t.BaseStream.Position = 0;
         }
     }
 }
