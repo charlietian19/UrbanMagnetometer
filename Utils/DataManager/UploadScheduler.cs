@@ -249,6 +249,8 @@ namespace Utils.DataManager
         /* Retrieves the arriving data in background. */
         private void Worker()
         {
+            Thread thread = Thread.CurrentThread;
+            thread.Priority = ThreadPriority.Lowest;
             while (!queue.IsCompleted)
             {
                 IDatasetInfo info = null;
