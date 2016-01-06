@@ -158,6 +158,7 @@ namespace LegacyDataUploader
                     progress = newprogress;
                 }                
             }
+            worker.ReportProgress(100);
             storage.Close();
         }
 
