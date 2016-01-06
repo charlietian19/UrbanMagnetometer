@@ -11,6 +11,7 @@ using System.Configuration;
 using Utils.DataReader;
 using Utils.GDrive;
 using Utils.DataManager;
+using System.IO;
 
 namespace LegacyDataUploader
 {
@@ -25,32 +26,48 @@ namespace LegacyDataUploader
         {
             InitializeComponent();
             var settings = ConfigurationManager.AppSettings;
-            stationName.Text = settings["StationName"];            
+            stationName.Text = settings["StationName"];
+            int queueBound = Convert.ToInt32(settings["MaxActiveUploads"]);         
             google = new GDrive("nuri-station.json");
             google.ProgressEvent += Google_ProgressEvent;
-            scheduler = new UploadScheduler(google);
+            scheduler = new UploadScheduler(google, queueBound);
             scheduler.StartedEvent += Scheduler_StartedEvent;
             scheduler.FinishedEvent += Scheduler_FinishedEvent;
             storage = new Storage(scheduler);
         }
 
-        private void Google_ProgressEvent(string name, long bytesSent, 
+        private void Google_ProgressEvent(string fullPath, long bytesSent, 
             long bytesTotal)
         {
             double progress = 100 * bytesSent / bytesTotal;
-            uploadProgressBar.Value = Convert.ToInt32(progress);
-            toolStripStatusLabel.Text = "Uploading " + name;
+            var name = Path.GetFileName(fullPath);
+            var msg = string.Format("Uploading {0}, {1}% done", name, progress);
+            SetTextThreadSafe(msg);
+        }
+
+        delegate void SetTextCallback(string text);
+        private void SetTextThreadSafe(string text)
+        {
+            if (InvokeRequired)
+            {
+                SetTextCallback f = new SetTextCallback(SetTextThreadSafe);
+                Invoke(f, new object[] { text });
+            }
+            else
+            {
+                toolStripStatusLabel.Text = text;
+            }
         }
 
         private void Scheduler_FinishedEvent(IDatasetInfo info, bool success, 
             string message)
         {
-            toolStripStatusLabel.Text = message;
+            SetTextThreadSafe(message);
         }
 
         private void Scheduler_StartedEvent(IDatasetInfo info)
         {
-            toolStripStatusLabel.Text = "Uploading...";
+            SetTextThreadSafe("Uploading...");
         }
 
         private void stationName_TextChanged(object sender, EventArgs e)
@@ -76,6 +93,8 @@ namespace LegacyDataUploader
                     startTime.Text = reader.DatasetStartTime.ToString();
                     chunksTotal.Text = reader.Chunks.ToString();
                     pointsTotal.Text = reader.Points.ToString();
+                    double size = reader.Size / 1073741824;
+                    sizeTotalGB.Text = size.ToString();
                     toolStripStatusLabel.Text = "File opened successfully.";
                 }
                 catch (Exception exception)
@@ -94,37 +113,61 @@ namespace LegacyDataUploader
 
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            LegacyReader reader = (LegacyReader)e.Argument;           
+            LegacyReader reader = (LegacyReader)e.Argument;
+            double kx = Convert.ToDouble(xSlope.Value);
+            double ky = Convert.ToDouble(ySlope.Value);
+            double kz = Convert.ToDouble(zSlope.Value);
+            double bx = Convert.ToDouble(xOffset.Value);
+            double by = Convert.ToDouble(yOffset.Value);
+            double bz = Convert.ToDouble(zOffset.Value);
+
             while (reader.HasNextChunk() && (!worker.CancellationPending))
             {
                 var chunk = reader.GetNextChunk();
-                storage.Store(chunk.XData, chunk.XData, chunk.ZData, 
-                    chunk.PerformanceCounter, chunk.Time);
-                var progress = 100 * chunk.Index / reader.Chunks;
+                double[] x, y, z;
+                x = chunk.XData;
+                y = chunk.YData;
+                z = chunk.ZData;
+
+                for (int i = 0; i < x.Length; i++)
+                {
+                    x[i] = kx * x[i] + bx;
+                    y[i] = ky * y[i] + by;
+                    z[i] = kz * z[i] + bz;
+                }
+
+                storage.Store(x, y, z, chunk.PerformanceCounter, chunk.Time);
+                var progress = Math.Min(100 * chunk.Index / reader.Chunks, 100.0);
                 worker.ReportProgress(Convert.ToInt32(progress));
             }
             reader.Close();
+            storage.Close();
         }
 
         private void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            reader = null;
             if (e.Cancelled)
             {
                 toolStripStatusLabel.Text = "Cancelled.";
             }
             else if (e.Error == null)
             {
-                uploadProgressBar.Value = 100;
+                totalProgress.Value = 100;
             }
             else
             {
                 toolStripStatusLabel.Text = e.Error.Message;
+                Console.WriteLine(e.Error.Message);
             }
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
-            worker.CancelAsync();            
+            if (worker.IsBusy)
+            {
+                worker.CancelAsync();
+            }                       
         }
 
         private void uploadButton_Click(object sender, EventArgs e)
@@ -133,6 +176,11 @@ namespace LegacyDataUploader
             {
                 worker.RunWorkerAsync(reader);
             }
+        }
+
+        private void toolStripStatusLabel_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

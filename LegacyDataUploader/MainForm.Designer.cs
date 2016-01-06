@@ -60,10 +60,10 @@
             this.fileNameLabel = new System.Windows.Forms.Label();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.uploadProgressBar = new System.Windows.Forms.ToolStripProgressBar();
             this.cancelButton = new System.Windows.Forms.Button();
             this.worker = new System.ComponentModel.BackgroundWorker();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.xSlope)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ySlope)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.zSlope)).BeginInit();
@@ -116,25 +116,55 @@
             // 
             this.xSlope.DecimalPlaces = 3;
             this.xSlope.Location = new System.Drawing.Point(147, 43);
+            this.xSlope.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
             this.xSlope.Name = "xSlope";
             this.xSlope.Size = new System.Drawing.Size(150, 38);
             this.xSlope.TabIndex = 6;
+            this.xSlope.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // ySlope
             // 
             this.ySlope.DecimalPlaces = 3;
             this.ySlope.Location = new System.Drawing.Point(147, 88);
+            this.ySlope.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
             this.ySlope.Name = "ySlope";
             this.ySlope.Size = new System.Drawing.Size(150, 38);
             this.ySlope.TabIndex = 7;
+            this.ySlope.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // zSlope
             // 
             this.zSlope.DecimalPlaces = 3;
             this.zSlope.Location = new System.Drawing.Point(147, 133);
+            this.zSlope.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
             this.zSlope.Name = "zSlope";
             this.zSlope.Size = new System.Drawing.Size(150, 38);
             this.zSlope.TabIndex = 8;
+            this.zSlope.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // groupBox1
             // 
@@ -170,6 +200,11 @@
             // 
             this.zOffset.DecimalPlaces = 3;
             this.zOffset.Location = new System.Drawing.Point(489, 133);
+            this.zOffset.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
             this.zOffset.Name = "zOffset";
             this.zOffset.Size = new System.Drawing.Size(150, 38);
             this.zOffset.TabIndex = 14;
@@ -187,6 +222,11 @@
             // 
             this.yOffset.DecimalPlaces = 3;
             this.yOffset.Location = new System.Drawing.Point(489, 88);
+            this.yOffset.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
             this.yOffset.Name = "yOffset";
             this.yOffset.Size = new System.Drawing.Size(150, 38);
             this.yOffset.TabIndex = 13;
@@ -204,6 +244,11 @@
             // 
             this.xOffset.DecimalPlaces = 3;
             this.xOffset.Location = new System.Drawing.Point(489, 43);
+            this.xOffset.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
             this.xOffset.Name = "xOffset";
             this.xOffset.Size = new System.Drawing.Size(150, 38);
             this.xOffset.TabIndex = 12;
@@ -367,27 +412,21 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel,
-            this.uploadProgressBar});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 732);
+            this.toolStripStatusLabel1});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 749);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(867, 48);
+            this.statusStrip1.Size = new System.Drawing.Size(870, 46);
             this.statusStrip1.TabIndex = 15;
             this.statusStrip1.Text = "statusStrip";
             // 
             // toolStripStatusLabel
             // 
             this.toolStripStatusLabel.Name = "toolStripStatusLabel";
-            this.toolStripStatusLabel.Size = new System.Drawing.Size(650, 43);
+            this.toolStripStatusLabel.Size = new System.Drawing.Size(774, 43);
             this.toolStripStatusLabel.Spring = true;
             this.toolStripStatusLabel.Text = "Ready";
             this.toolStripStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // uploadProgressBar
-            // 
-            this.uploadProgressBar.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.uploadProgressBar.Name = "uploadProgressBar";
-            this.uploadProgressBar.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.uploadProgressBar.Size = new System.Drawing.Size(200, 42);
+            this.toolStripStatusLabel.Click += new System.EventHandler(this.toolStripStatusLabel_Click);
             // 
             // cancelButton
             // 
@@ -401,6 +440,8 @@
             // 
             // worker
             // 
+            this.worker.WorkerReportsProgress = true;
+            this.worker.WorkerSupportsCancellation = true;
             this.worker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.worker_DoWork);
             this.worker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.Worker_ProgressChanged);
             this.worker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.Worker_RunWorkerCompleted);
@@ -410,12 +451,18 @@
             this.openFileDialog.FileName = "time.bin";
             this.openFileDialog.Filter = "Magnetic field data (*.bin)|*.bin";
             // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(25, 43);
+            this.toolStripStatusLabel1.Text = ".";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(867, 780);
+            this.ClientSize = new System.Drawing.Size(870, 795);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox2);
@@ -472,7 +519,6 @@
         private System.Windows.Forms.Label fileNameLabel;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
-        private System.Windows.Forms.ToolStripProgressBar uploadProgressBar;
         private System.Windows.Forms.Label sizeTotalGB;
         private System.Windows.Forms.Label pointsTotal;
         private System.Windows.Forms.Label chunksTotal;
@@ -481,6 +527,7 @@
         private System.Windows.Forms.Button cancelButton;
         private System.ComponentModel.BackgroundWorker worker;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
     }
 }
 

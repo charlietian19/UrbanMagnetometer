@@ -130,10 +130,9 @@ namespace Utils.GDrive
         /* Synchronously uploads a file given by path to Google Drive. 
         parent is in the form of \foo\bar\file.bin, rather than Google IDs.
         Recursively creates the parent folder if it doesn't exist. */
-        public async void Upload(string path, string remotePath)
+        public void Upload(string path, string parent)
         {
             string fileName = Path.GetFileName(path);
-            string parent = Path.GetDirectoryName(path);
 
             using (var uploadStream = new FileStream(path, FileMode.Open,
                 FileAccess.Read))
@@ -152,11 +151,11 @@ namespace Utils.GDrive
                 insertRequest.ProgressChanged += 
                     (p) => { UploadProgressChanged(p, uploadStream); };
 
-                IUploadProgress progress = await insertRequest.UploadAsync();
+                IUploadProgress progress = insertRequest.Upload();
                 if (progress.Status == UploadStatus.Failed)
                 {
                     string msg = string.Format("Can't upload {0} into {1}", 
-                        path, remotePath);
+                        path, parent);
                     throw new FileUploadException(msg);
                 }
             }

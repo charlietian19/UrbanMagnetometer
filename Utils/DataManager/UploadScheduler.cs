@@ -220,7 +220,7 @@ namespace Utils.DataManager
                         tmpDirFullPath = MoveDataToTmpDir(info);
                         parent = string.Format(remoteFileName, info.Year,
                             info.Month, info.Day, info.Hour, info.StationName);
-                        zip.CreateFromDirectory(tmpDirFullPath, archivePath);
+                        zip.CreateFromDirectory(tmpDirFullPath, archivePath);                        
                         DeleteTemporaryDirectory(tmpDirFullPath);
                         firstRun = false;
                     }
