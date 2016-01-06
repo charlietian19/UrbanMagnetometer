@@ -128,7 +128,7 @@ namespace Utils.DataManager
         {
             writer.Write(index);
             writer.Write(length);
-            writer.Write(time.ToFileTimeUtc());
+            writer.Write(time.ToBinary());
             writer.Write(precisionCounter);
         }
 
