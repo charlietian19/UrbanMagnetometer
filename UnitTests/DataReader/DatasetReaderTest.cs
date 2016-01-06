@@ -169,9 +169,9 @@ namespace UnitTests.DataReader
         {
             var settings = new NameValueCollection();
             settings["LegacyChannelNameX"] = "raw_x.bin";
-            settings["ChannelNameY"] = "raw_y.bin";
-            settings["ChannelNameZ"] = "raw_z.bin";
-            settings["ChannelNameTime"] = "time.bin";
+            settings["LegacyChannelNameY"] = "raw_y.bin";
+            settings["LegacyChannelNameZ"] = "raw_z.bin";
+            settings["LegacyChannelNameTime"] = "time.bin";
 
             readerFactory = new BinaryReaderMockFactory();
             fileInfoFactory = new FileInfoMockFactory();
@@ -209,6 +209,37 @@ namespace UnitTests.DataReader
             CollectionAssert.AreEqual(z, chunk.ZData);
             Assert.AreEqual(23, chunk.Index);
             Assert.AreEqual(12.4, chunk.PerformanceCounter);
+            Assert.AreEqual(time, chunk.Time);
+        }
+
+        [TestMethod]
+        public void ReadSingleLegacyChunk()
+        {
+            double[] x = new double[] { 0.0, 1.0, 2.0, 3.0 };
+            double[] y = new double[] { 4.2, 2.7, 1.2, 1.5 };
+            double[] z = new double[] { 6.4, 5.3, 5.7, 1.8 };
+            var time = new DateTime(2015, 12, 25, 13, 30, 0);
+
+            BinaryReaderMockFactory.DatasetTimeMock.index = 52;
+            BinaryReaderMockFactory.DatasetTimeMock.performanceCounter = 7.222;
+            // the time is wrong due to a bug in the legacy code
+            BinaryReaderMockFactory.DatasetTimeMock.timeUtc = time.ToFileTimeUtc();
+            BinaryReaderMockFactory.xData = x;
+            BinaryReaderMockFactory.yData = y;
+            BinaryReaderMockFactory.zData = z;
+
+            var test = time.ToBinary() - time.ToFileTimeUtc();
+
+            var reader = new LegacyReader(file, fileInfoFactory, readerFactory, 
+                config);
+            reader.OpenDataFiles("time.bin");
+            var chunk = reader.GetNextChunk();
+
+            CollectionAssert.AreEqual(x, chunk.XData);
+            CollectionAssert.AreEqual(y, chunk.YData);
+            CollectionAssert.AreEqual(z, chunk.ZData);
+            Assert.AreEqual(52, chunk.Index);
+            Assert.AreEqual(7.222, chunk.PerformanceCounter);
             Assert.AreEqual(time, chunk.Time);
         }
     }

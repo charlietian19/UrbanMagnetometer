@@ -1,11 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using SystemWrapper.Configuration;
 using SystemWrapper.IO;
 
 namespace Utils.DataReader
 {
-    class LegacyReader : DatasetReader
+    public class LegacyReader : DatasetReader
     {
+        private const int magic = 1600;
         private IConfigurationManagerWrap ConfigurationManager;
         private string xFileName, yFileName, zFileName, tFileName;
 
@@ -48,5 +50,15 @@ namespace Utils.DataReader
             tFileName = settings["LegacyChannelNameTime"];
         }
 
+        /* Fixes the bug in the old data files that causes the 
+        timestamp year to be wrong. */
+        new public DatasetChunk GetNextChunk()
+        {
+            var chunk = base.GetNextChunk();
+            var fixedTime = chunk.Time.AddYears(magic);
+            return new DatasetChunk(fixedTime, chunk.Index,
+                chunk.PerformanceCounter, chunk.XData, chunk.YData, 
+                chunk.ZData);
+        }
     }
 }
