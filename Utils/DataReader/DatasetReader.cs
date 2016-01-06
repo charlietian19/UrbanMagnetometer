@@ -148,5 +148,10 @@ namespace Utils.DataReader
                 ydata, zdata);
         }
 
+        /* Returns true if there are more chunks and false otherwise. */
+        public bool HasNextChunk()
+        {
+            return t.BaseStream.Position < t.BaseStream.Length;
+        }
     }
 }
