@@ -34,15 +34,23 @@ namespace LegacyDataUploader
         {
             InitializeComponent();
             SetUI(UI_State.Start);
-            var settings = ConfigurationManager.AppSettings;
-            stationName.Text = settings["StationName"];
-            int queueBound = Convert.ToInt32(settings["MaxActiveUploads"]);         
-            google = new GDrive("nuri-station.json");
-            google.ProgressEvent += Google_ProgressEvent;
-            scheduler = new UploadScheduler(google, queueBound);
-            scheduler.StartedEvent += Scheduler_StartedEvent;
-            scheduler.FinishedEvent += Scheduler_FinishedEvent;
-            storage = new Storage(scheduler);
+            try
+            {
+                var settings = ConfigurationManager.AppSettings;
+                stationName.Text = settings["StationName"];
+                int queueBound = Convert.ToInt32(settings["MaxActiveUploads"]);
+                google = new GDrive("nuri-station.json");
+                google.ProgressEvent += Google_ProgressEvent;
+                scheduler = new UploadScheduler(google, queueBound);
+                scheduler.StartedEvent += Scheduler_StartedEvent;
+                scheduler.FinishedEvent += Scheduler_FinishedEvent;
+                storage = new Storage(scheduler);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show("Can't initialize: " + exception.Message);
+                Application.Exit();
+            }
         }
 
         private void Google_ProgressEvent(string fullPath, long bytesSent, 
