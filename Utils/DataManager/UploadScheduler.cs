@@ -233,17 +233,31 @@ namespace Utils.DataManager
                 {
                     if (i + 1 == maxRetryCount)
                     {
-                        OnFinished(info, false, e.Message);
+                        MoveToFailedFolder(archivePath);
+                        OnFinished(info, false, e.Message);                        
                         break;
                     }
                 }
                 catch (Exception e)
                 {
-                    OnFinished(info, false, e.Message);
-                    break;
-                    // don't clean up the data so we can retry later
+                    OnFinished(info, false, e.Message);                    
+                    break;                    
                 }
             }
+        }
+
+        /* Moves the files into the failed uploads folder. */
+        private void MoveToFailedFolder(string archivePath)
+        {
+            var dir = Path.GetDirectoryName(archivePath);
+            var file = Path.GetFileName(archivePath);
+            var dstDir = Path.Combine(dir, "failed");            
+            if (!Directory.Exists(dstDir))
+            {
+                Directory.CreateDirectory(dstDir);
+            }
+            var dst = Path.Combine(dstDir, file);
+            File.Move(archivePath, dst);
         }
 
         /* Retrieves the arriving data in background. */

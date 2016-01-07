@@ -96,6 +96,10 @@ namespace UnitTests.DataManager
                 .Returns<string, string>((s1, s2) => Path.Combine(s1, s2));
             pathMock.Setup(o => o.GetRandomFileName())
                 .Returns(string.Format("random{0}", count));
+            pathMock.Setup(o => o.GetDirectoryName(It.IsAny<string>()))
+                .Returns("");
+            pathMock.Setup(o => o.GetFileName(It.IsAny<string>()))
+                .Returns<string>(x => x);
 
             config = configMock.Object;
             uploader = uploaderMock.Object;
@@ -170,6 +174,7 @@ namespace UnitTests.DataManager
         [TestMethod]
         public void UploadSingleFileUploadFailed()
         {
+            var retries = Convert.ToInt32(settings["MaxRetryCount"]);
             uploaderMock.Setup(o => o.Upload(It.IsAny<string>(),
                 It.IsAny<string>())).Throws(new FileUploadException());
             var scheduler = new UploadScheduler(uploader, config, file,
@@ -194,8 +199,12 @@ namespace UnitTests.DataManager
                 Times.Once());
             directoryMock.Verify(o => o.Delete("random0", true), Times.Once());
             uploaderMock.Verify(o => o.Upload("data0.zip",
-                @"\2015\5\30\15\TestStation"), Times.Exactly(3));
+                @"\2015\5\30\15\TestStation"), Times.Exactly(retries));
             fileMock.Verify(o => o.Delete("data0.zip"), Times.Never());
+            directoryMock.Verify(o => o.Exists("failed"), Times.Once());
+            directoryMock.Verify(o => o.CreateDirectory("failed"), Times.Once());
+            fileMock.Verify(o => o.Move("data0.zip", @"failed\data0.zip"),
+                Times.Once());
         }
     }
 }
