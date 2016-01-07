@@ -104,7 +104,11 @@ namespace UnitTests.DataReader
             public IBinaryReaderWrap Create(IFileStreamWrap stream)
             {
                 var mock = new Mock<IBinaryReaderWrap>();
-                mock.Setup(o => o.Close());
+                mock.Setup(o => o.Close()).Callback(() =>
+                {
+                    mock.Setup(o => o.Read())
+                        .Throws(new IOException());
+                });
 
                 if (readStats)
                 {
