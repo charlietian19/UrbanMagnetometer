@@ -2,15 +2,17 @@
 using System.Windows.Forms;
 using Utils.GDrive;
 using Utils.DataManager;
+using Biomed_eMains_eFMx;
 
 
 namespace DogeStation2
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private IStorage storage;
+        private eMains sensor;
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             TryAuthenticate();
