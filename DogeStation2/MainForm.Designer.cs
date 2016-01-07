@@ -44,7 +44,7 @@
             this.stationName = new System.Windows.Forms.TextBox();
             this.dataGraph = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.dataGraph)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -66,6 +66,7 @@
             this.sensorList.Name = "sensorList";
             this.sensorList.Size = new System.Drawing.Size(121, 39);
             this.sensorList.TabIndex = 1;
+            this.sensorList.SelectedIndexChanged += new System.EventHandler(this.sensorList_SelectedIndexChanged);
             // 
             // recordButton
             // 
@@ -103,6 +104,7 @@
             this.refreshButton.TabIndex = 5;
             this.refreshButton.Text = "Refresh";
             this.refreshButton.UseVisualStyleBackColor = true;
+            this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
             // 
             // stationName
             // 
@@ -110,6 +112,7 @@
             this.stationName.Name = "stationName";
             this.stationName.Size = new System.Drawing.Size(418, 38);
             this.stationName.TabIndex = 6;
+            this.stationName.TextChanged += new System.EventHandler(this.stationName_TextChanged);
             // 
             // dataGraph
             // 
@@ -149,18 +152,18 @@
             // 
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatus});
+            this.toolStripStatusLabel});
             this.statusStrip.Location = new System.Drawing.Point(0, 1333);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1535, 46);
             this.statusStrip.TabIndex = 8;
             this.statusStrip.Text = "statusStrip1";
             // 
-            // toolStripStatus
+            // toolStripStatusLabel
             // 
-            this.toolStripStatus.Name = "toolStripStatus";
-            this.toolStripStatus.Size = new System.Drawing.Size(100, 41);
-            this.toolStripStatus.Text = "Ready";
+            this.toolStripStatusLabel.Name = "toolStripStatusLabel";
+            this.toolStripStatusLabel.Size = new System.Drawing.Size(100, 41);
+            this.toolStripStatusLabel.Text = "Ready";
             // 
             // MainForm
             // 
@@ -197,7 +200,7 @@
         private System.Windows.Forms.TextBox stationName;
         private System.Windows.Forms.DataVisualization.Charting.Chart dataGraph;
         private System.Windows.Forms.StatusStrip statusStrip;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatus;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
     }
 }
 
