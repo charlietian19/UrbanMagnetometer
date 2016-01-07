@@ -25,7 +25,16 @@ namespace UnitTests.DataManager
                 mock.Setup(o => o.Write(It.IsAny<long>()));
                 mock.Setup(o => o.Write(It.IsAny<double>()));
                 mock.Setup(o => o.Write(It.IsAny<int>()));
-                mock.Setup(o => o.Close());
+                mock.Setup(o => o.Close())
+                    .Callback(() =>
+                    {
+                        mock.Setup(o => o.Write(It.IsAny<long>()))
+                            .Throws(new IOException());
+                        mock.Setup(o => o.Write(It.IsAny<double>()))
+                            .Throws(new IOException());
+                        mock.Setup(o => o.Write(It.IsAny<int>()))
+                            .Throws(new IOException());
+                    });
 
                 switch (count % 4)
                 {
@@ -108,7 +117,7 @@ namespace UnitTests.DataManager
             factory.z.Verify(o => o.Write(3.0), Times.Once());
             factory.t.Verify(o => o.Write((long)0), Times.Once());
             factory.t.Verify(o => o.Write(1), Times.Once());
-            factory.t.Verify(o => o.Write(time.ToFileTimeUtc()), Times.Once());
+            factory.t.Verify(o => o.Write(time.ToBinary()), Times.Once());
             factory.t.Verify(o => o.Write(seconds), Times.Once());
         }
 
@@ -135,7 +144,7 @@ namespace UnitTests.DataManager
 
             factory.t.Verify(o => o.Write((long)0), Times.Once());
             factory.t.Verify(o => o.Write((int)x.Length), Times.Once());
-            factory.t.Verify(o => o.Write(time.ToFileTimeUtc()), Times.Once());
+            factory.t.Verify(o => o.Write(time.ToBinary()), Times.Once());
             factory.t.Verify(o => o.Write(seconds), Times.Once());
         }
 
@@ -214,7 +223,29 @@ namespace UnitTests.DataManager
             factory.z.Verify(o => o.Write(2.0), Times.Once());
             factory.t.Verify(o => o.Write((long)0), Times.Once());
             factory.t.Verify(o => o.Write(1), Times.Once());
-            factory.t.Verify(o => o.Write(time2.ToFileTimeUtc()), Times.Once());
+            factory.t.Verify(o => o.Write(time2.ToBinary()), Times.Once());
+            factory.t.Verify(o => o.Write(seconds), Times.Once());
+        }
+
+        [TestMethod]
+        public void ReopenFileAfterCloseCalled()
+        {
+            var storage = new Storage(scheduler, file, dir, factory, config);
+            double[] x1 = { 123.532 }, y1 = { 21.2 }, z1 = { 2.0 };
+            double[] x2 = { 52.2 }, y2 = { 54.2 }, z2 = { 213.6 };
+            DateTime time = new DateTime(2016, 1, 1, 0, 0, 0);
+            double seconds = 125.54323;
+
+            storage.Store(x1, y1, z1, seconds, time);
+            storage.Close();
+            storage.Store(x2, y2, z2, seconds, time);
+
+            factory.x.Verify(o => o.Write(52.2), Times.Once());
+            factory.y.Verify(o => o.Write(54.2), Times.Once());
+            factory.z.Verify(o => o.Write(213.6), Times.Once());
+            factory.t.Verify(o => o.Write((long)0), Times.Once());
+            factory.t.Verify(o => o.Write(1), Times.Once());
+            factory.t.Verify(o => o.Write(time.ToBinary()), Times.Once());
             factory.t.Verify(o => o.Write(seconds), Times.Once());
         }
     }

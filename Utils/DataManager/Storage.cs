@@ -156,6 +156,7 @@ namespace Utils.DataManager
             y.Close();
             z.Close();
             t.Close();
+            isWriting = false;
 
             scheduler.UploadMagneticData(info);
         }
