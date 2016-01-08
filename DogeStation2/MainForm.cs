@@ -10,12 +10,13 @@ namespace DogeStation2
 {
     public partial class MainForm : Form
     {
-        private IStorage storage;
+        private Storage storage;
         private eMains sensor;
         private double samplingRate;
         private Range range = Range.NEG_10_TO_PLUS_10V;
         private bool convertToMicroTesla;
         private DateTime lastUpdated = DateTime.Now;
+        private bool doneUploading = true;
 
         enum UI_State
         {
@@ -84,6 +85,7 @@ namespace DogeStation2
             string message)
         {
             SetTextThreadSafe(message);
+            doneUploading = true;
         }
 
         private void Scheduler_StartedEvent(IDatasetInfo info)
@@ -91,6 +93,7 @@ namespace DogeStation2
             var msg = string.Format("Uploading dataset from {0}", 
                 info.StartDate);
             SetTextThreadSafe(msg);
+            doneUploading = false;
         }
 
         private void stationName_TextChanged(object sender, EventArgs e)
@@ -104,11 +107,12 @@ namespace DogeStation2
             switch (state)
             {
                 case UI_State.Ready:
-                    stationName.Enabled = true;
+                    stationName.Enabled = false;
                     sensorList.Enabled = true;
                     refreshButton.Enabled = true;
                     recordButton.Enabled = true;
                     cancelButton.Enabled = false;
+                    uploadButton.Enabled = true;
                     return;
                 case UI_State.Recording:
                     stationName.Enabled = false;
@@ -116,13 +120,15 @@ namespace DogeStation2
                     refreshButton.Enabled = false;
                     recordButton.Enabled = false;
                     cancelButton.Enabled = true;
+                    uploadButton.Enabled = false;
                     return;
                 case UI_State.NoSensorFound:
-                    stationName.Enabled = true;
+                    stationName.Enabled = false;
                     sensorList.Enabled = true;
                     refreshButton.Enabled = true;
                     recordButton.Enabled = false;
                     cancelButton.Enabled = false;
+                    uploadButton.Enabled = true;
                     return;
             }
         }
@@ -138,7 +144,12 @@ namespace DogeStation2
             {
                 sensorList.Items.Clear();
                 var sensors = eMains.GetAvailableSerials();
-                sensorList.Items.Add(sensors);
+                sensorList.Items.Clear();
+                foreach (var item in sensors)
+                {
+                    sensorList.Items.Add(item);
+                }
+                
                 if (sensors.Count > 0)
                 {
                     sensorList.Text = sensors[0].ToString();
@@ -188,6 +199,7 @@ namespace DogeStation2
                 sensor.NewDataHandler -= Sensor_NewDataHandler;
                 sensor.NewDataHandler += Sensor_NewDataHandler;
                 sensor.DAQStart(convertToMicroTesla);
+                doneUploading = false;
                 SetUI(UI_State.Recording);
             }
             catch (Exception exception)
@@ -206,7 +218,6 @@ namespace DogeStation2
                 UpdateGraphThreadSafe(dataX, dataY, dataZ);
                 lastUpdated = time;
             }
-            throw new NotImplementedException();
         }
 
         private void UpdateGraphThreadSafe(double[] dataX, double[] dataY, 
@@ -229,7 +240,10 @@ namespace DogeStation2
             {
                 var Points = dataGraph.Series.FindByName(series).Points;
                 Points.Clear();
-                Points.Add(data);
+                foreach (var point in data)
+                {
+                    Points.Add(point);
+                }
             }
         }
 
@@ -252,6 +266,34 @@ namespace DogeStation2
             {
                 toolStripStatusLabel.Text = exception.Message;
                 SetUI(UI_State.Ready);
+            }
+        }
+
+        private void uploadButton_Click(object sender, EventArgs e)
+        {
+            storage.Close();
+            doneUploading = false;
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (sensor != null)
+            {
+                sensor.DAQStop();
+                SetUI(UI_State.Ready);
+            }
+
+            if (storage.HasCachedData)
+            {
+                storage.Close();
+                doneUploading = false;
+            }
+
+            if (!doneUploading)
+            {
+                e.Cancel = true;
+                toolStripStatusLabel.Text
+                    = "Please wait until the files are uploaded.";
             }
         }
     }

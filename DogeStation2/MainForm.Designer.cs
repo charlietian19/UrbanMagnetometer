@@ -45,6 +45,7 @@
             this.dataGraph = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.uploadButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGraph)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -60,9 +61,10 @@
             // 
             // sensorList
             // 
+            this.sensorList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.sensorList.FormattingEnabled = true;
             this.sensorList.ItemHeight = 31;
-            this.sensorList.Location = new System.Drawing.Point(821, 15);
+            this.sensorList.Location = new System.Drawing.Point(669, 15);
             this.sensorList.Name = "sensorList";
             this.sensorList.Size = new System.Drawing.Size(121, 39);
             this.sensorList.TabIndex = 1;
@@ -71,7 +73,7 @@
             // recordButton
             // 
             this.recordButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
-            this.recordButton.Location = new System.Drawing.Point(1198, 13);
+            this.recordButton.Location = new System.Drawing.Point(995, 13);
             this.recordButton.Name = "recordButton";
             this.recordButton.Size = new System.Drawing.Size(150, 53);
             this.recordButton.TabIndex = 2;
@@ -81,7 +83,7 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(1354, 13);
+            this.cancelButton.Location = new System.Drawing.Point(1151, 13);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(150, 53);
             this.cancelButton.TabIndex = 3;
@@ -92,7 +94,7 @@
             // sensorLabel
             // 
             this.sensorLabel.AutoSize = true;
-            this.sensorLabel.Location = new System.Drawing.Point(699, 23);
+            this.sensorLabel.Location = new System.Drawing.Point(547, 23);
             this.sensorLabel.Name = "sensorLabel";
             this.sensorLabel.Size = new System.Drawing.Size(105, 32);
             this.sensorLabel.TabIndex = 4;
@@ -100,7 +102,7 @@
             // 
             // refreshButton
             // 
-            this.refreshButton.Location = new System.Drawing.Point(948, 13);
+            this.refreshButton.Location = new System.Drawing.Point(796, 13);
             this.refreshButton.Name = "refreshButton";
             this.refreshButton.Size = new System.Drawing.Size(150, 53);
             this.refreshButton.TabIndex = 5;
@@ -110,9 +112,10 @@
             // 
             // stationName
             // 
+            this.stationName.Enabled = false;
             this.stationName.Location = new System.Drawing.Point(230, 20);
             this.stationName.Name = "stationName";
-            this.stationName.Size = new System.Drawing.Size(418, 38);
+            this.stationName.Size = new System.Drawing.Size(302, 38);
             this.stationName.TabIndex = 6;
             this.stationName.TextChanged += new System.EventHandler(this.stationName_TextChanged);
             // 
@@ -121,8 +124,11 @@
             this.dataGraph.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            chartArea7.AxisY.IsStartedFromZero = false;
             chartArea7.Name = "X";
+            chartArea8.AxisY.IsStartedFromZero = false;
             chartArea8.Name = "Y";
+            chartArea9.AxisY.IsStartedFromZero = false;
             chartArea9.Name = "Z";
             this.dataGraph.ChartAreas.Add(chartArea7);
             this.dataGraph.ChartAreas.Add(chartArea8);
@@ -167,11 +173,22 @@
             this.toolStripStatusLabel.Size = new System.Drawing.Size(100, 41);
             this.toolStripStatusLabel.Text = "Ready";
             // 
+            // uploadButton
+            // 
+            this.uploadButton.Location = new System.Drawing.Point(1353, 13);
+            this.uploadButton.Name = "uploadButton";
+            this.uploadButton.Size = new System.Drawing.Size(150, 53);
+            this.uploadButton.TabIndex = 9;
+            this.uploadButton.Text = "Upload";
+            this.uploadButton.UseVisualStyleBackColor = true;
+            this.uploadButton.Click += new System.EventHandler(this.uploadButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1535, 1379);
+            this.Controls.Add(this.uploadButton);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.dataGraph);
             this.Controls.Add(this.stationName);
@@ -183,6 +200,7 @@
             this.Controls.Add(this.stationNameLabel);
             this.Name = "MainForm";
             this.Text = "Magnetic Data Recorder";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.dataGraph)).EndInit();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
@@ -203,6 +221,7 @@
         private System.Windows.Forms.DataVisualization.Charting.Chart dataGraph;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
+        private System.Windows.Forms.Button uploadButton;
     }
 }
 

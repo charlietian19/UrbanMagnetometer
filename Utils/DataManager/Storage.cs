@@ -48,6 +48,11 @@ namespace Utils.DataManager
         private bool isWriting = false;
         private long index;
 
+        public bool HasCachedData
+        {
+            get { return isWriting; }
+        }
+
         /* Constructs the data writer given a Google Drive connection. */
         public Storage(IUploadScheduler scheduler)
         {
@@ -152,6 +157,11 @@ namespace Utils.DataManager
         time indicates when the latest chunk of data was received. */
         private void CloseAndUploadAll(DateTime time)
         {
+            if (!isWriting)
+            {
+                return;
+            }
+
             x.Close();
             y.Close();
             z.Close();
