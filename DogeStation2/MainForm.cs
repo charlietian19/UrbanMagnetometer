@@ -10,7 +10,7 @@ namespace DogeStation2
 {
     public partial class MainForm : Form
     {
-        private Storage storage;
+        private LegacyStorage storage;
         private eMains sensor;
         private double samplingRate;
         private Range range = Range.NEG_10_TO_PLUS_10V;
@@ -47,7 +47,7 @@ namespace DogeStation2
                 var scheduler = new UploadScheduler(google);
                 scheduler.StartedEvent += Scheduler_StartedEvent;
                 scheduler.FinishedEvent += Scheduler_FinishedEvent;
-                storage = new Storage(scheduler);
+                storage = new LegacyStorage(scheduler);
             }
             catch (Exception exception)
             {

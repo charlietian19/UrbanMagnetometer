@@ -9,7 +9,7 @@ using SystemWrapper.Configuration;
 
 namespace Utils.DataManager
 {
-    public interface IStorage
+    public interface ILegacyStorage
     {
         void Store(double[] dataX, double[] dataY, double[] dataZ, double systemSeconds, 
             DateTime time);
@@ -24,7 +24,7 @@ namespace Utils.DataManager
 
     // TODO: scan the data cache folder for files that haven't been uploaded
     // and upload them as well
-    public class Storage : IStorage
+    public class LegacyStorage : ILegacyStorage
     {
         /* Factory for IBinaryWriterWrap objects */
         public class BinaryWriterFactory : IBinaryWriterFactory
@@ -54,7 +54,7 @@ namespace Utils.DataManager
         }
 
         /* Constructs the data writer given a Google Drive connection. */
-        public Storage(IUploadScheduler scheduler)
+        public LegacyStorage(IUploadScheduler scheduler)
         {
             this.scheduler = scheduler;
             IFile = new FileWrap();
@@ -65,7 +65,7 @@ namespace Utils.DataManager
         }
 
         /* Constructs the object with custom filesystem wrappers for testing. */
-        public Storage(IUploadScheduler scheduler, IFileWrap file,
+        public LegacyStorage(IUploadScheduler scheduler, IFileWrap file,
             IDirectoryWrap dir, IBinaryWriterFactory binaryWriterFactory,
             IConfigurationManagerWrap configManager)
         {

@@ -19,7 +19,7 @@ namespace LegacyDataUploader
     {
         private IUploader google;
         private IUploadScheduler scheduler;
-        private IStorage storage;
+        private ILegacyStorage storage;
         private LegacyReader reader;
 
         enum UI_State
@@ -44,7 +44,7 @@ namespace LegacyDataUploader
                 scheduler = new UploadScheduler(google, queueBound);
                 scheduler.StartedEvent += Scheduler_StartedEvent;
                 scheduler.FinishedEvent += Scheduler_FinishedEvent;
-                storage = new Storage(scheduler);
+                storage = new LegacyStorage(scheduler);
             }
             catch (Exception exception)
             {
