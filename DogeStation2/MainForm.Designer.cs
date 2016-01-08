@@ -28,13 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea9 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series9 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.stationNameLabel = new System.Windows.Forms.Label();
             this.sensorList = new System.Windows.Forms.ComboBox();
             this.recordButton = new System.Windows.Forms.Button();
@@ -77,6 +77,7 @@
             this.recordButton.TabIndex = 2;
             this.recordButton.Text = "Record";
             this.recordButton.UseVisualStyleBackColor = true;
+            this.recordButton.Click += new System.EventHandler(this.recordButton_Click);
             // 
             // cancelButton
             // 
@@ -86,6 +87,7 @@
             this.cancelButton.TabIndex = 3;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
             // sensorLabel
             // 
@@ -119,31 +121,31 @@
             this.dataGraph.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea1.Name = "X";
-            chartArea2.Name = "Y";
-            chartArea3.Name = "Z";
-            this.dataGraph.ChartAreas.Add(chartArea1);
-            this.dataGraph.ChartAreas.Add(chartArea2);
-            this.dataGraph.ChartAreas.Add(chartArea3);
-            legend1.Name = "Legend1";
-            this.dataGraph.Legends.Add(legend1);
+            chartArea7.Name = "X";
+            chartArea8.Name = "Y";
+            chartArea9.Name = "Z";
+            this.dataGraph.ChartAreas.Add(chartArea7);
+            this.dataGraph.ChartAreas.Add(chartArea8);
+            this.dataGraph.ChartAreas.Add(chartArea9);
+            legend3.Name = "Legend1";
+            this.dataGraph.Legends.Add(legend3);
             this.dataGraph.Location = new System.Drawing.Point(37, 90);
             this.dataGraph.Name = "dataGraph";
-            series1.ChartArea = "X";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series1.Legend = "Legend1";
-            series1.Name = "X";
-            series2.ChartArea = "Y";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series2.Legend = "Legend1";
-            series2.Name = "Y";
-            series3.ChartArea = "Z";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series3.Legend = "Legend1";
-            series3.Name = "Z";
-            this.dataGraph.Series.Add(series1);
-            this.dataGraph.Series.Add(series2);
-            this.dataGraph.Series.Add(series3);
+            series7.ChartArea = "X";
+            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series7.Legend = "Legend1";
+            series7.Name = "X";
+            series8.ChartArea = "Y";
+            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series8.Legend = "Legend1";
+            series8.Name = "Y";
+            series9.ChartArea = "Z";
+            series9.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series9.Legend = "Legend1";
+            series9.Name = "Z";
+            this.dataGraph.Series.Add(series7);
+            this.dataGraph.Series.Add(series8);
+            this.dataGraph.Series.Add(series9);
             this.dataGraph.Size = new System.Drawing.Size(1466, 1213);
             this.dataGraph.TabIndex = 7;
             this.dataGraph.Text = "Magnetic Data Sample";
