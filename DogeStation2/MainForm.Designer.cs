@@ -28,13 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea9 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series9 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.stationNameLabel = new System.Windows.Forms.Label();
             this.sensorList = new System.Windows.Forms.ComboBox();
             this.recordButton = new System.Windows.Forms.Button();
@@ -55,16 +55,16 @@
             this.stationNameLabel.AutoSize = true;
             this.stationNameLabel.Location = new System.Drawing.Point(30, 23);
             this.stationNameLabel.Name = "stationNameLabel";
-            this.stationNameLabel.Size = new System.Drawing.Size(183, 32);
+            this.stationNameLabel.Size = new System.Drawing.Size(90, 32);
             this.stationNameLabel.TabIndex = 0;
-            this.stationNameLabel.Text = "Station name";
+            this.stationNameLabel.Text = "Name";
             // 
             // sensorList
             // 
             this.sensorList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.sensorList.FormattingEnabled = true;
             this.sensorList.ItemHeight = 31;
-            this.sensorList.Location = new System.Drawing.Point(669, 15);
+            this.sensorList.Location = new System.Drawing.Point(569, 15);
             this.sensorList.Name = "sensorList";
             this.sensorList.Size = new System.Drawing.Size(121, 39);
             this.sensorList.TabIndex = 1;
@@ -73,9 +73,9 @@
             // recordButton
             // 
             this.recordButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
-            this.recordButton.Location = new System.Drawing.Point(995, 13);
+            this.recordButton.Location = new System.Drawing.Point(843, 12);
             this.recordButton.Name = "recordButton";
-            this.recordButton.Size = new System.Drawing.Size(150, 53);
+            this.recordButton.Size = new System.Drawing.Size(140, 53);
             this.recordButton.TabIndex = 2;
             this.recordButton.Text = "Record";
             this.recordButton.UseVisualStyleBackColor = true;
@@ -83,9 +83,9 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(1151, 13);
+            this.cancelButton.Location = new System.Drawing.Point(990, 12);
             this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(150, 53);
+            this.cancelButton.Size = new System.Drawing.Size(140, 53);
             this.cancelButton.TabIndex = 3;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
@@ -94,7 +94,7 @@
             // sensorLabel
             // 
             this.sensorLabel.AutoSize = true;
-            this.sensorLabel.Location = new System.Drawing.Point(547, 23);
+            this.sensorLabel.Location = new System.Drawing.Point(447, 23);
             this.sensorLabel.Name = "sensorLabel";
             this.sensorLabel.Size = new System.Drawing.Size(105, 32);
             this.sensorLabel.TabIndex = 4;
@@ -102,9 +102,9 @@
             // 
             // refreshButton
             // 
-            this.refreshButton.Location = new System.Drawing.Point(796, 13);
+            this.refreshButton.Location = new System.Drawing.Point(696, 12);
             this.refreshButton.Name = "refreshButton";
-            this.refreshButton.Size = new System.Drawing.Size(150, 53);
+            this.refreshButton.Size = new System.Drawing.Size(140, 53);
             this.refreshButton.TabIndex = 5;
             this.refreshButton.Text = "Refresh";
             this.refreshButton.UseVisualStyleBackColor = true;
@@ -113,7 +113,7 @@
             // stationName
             // 
             this.stationName.Enabled = false;
-            this.stationName.Location = new System.Drawing.Point(230, 20);
+            this.stationName.Location = new System.Drawing.Point(130, 20);
             this.stationName.Name = "stationName";
             this.stationName.Size = new System.Drawing.Size(302, 38);
             this.stationName.TabIndex = 6;
@@ -124,35 +124,35 @@
             this.dataGraph.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea7.AxisY.IsStartedFromZero = false;
-            chartArea7.Name = "X";
-            chartArea8.AxisY.IsStartedFromZero = false;
-            chartArea8.Name = "Y";
-            chartArea9.AxisY.IsStartedFromZero = false;
-            chartArea9.Name = "Z";
-            this.dataGraph.ChartAreas.Add(chartArea7);
-            this.dataGraph.ChartAreas.Add(chartArea8);
-            this.dataGraph.ChartAreas.Add(chartArea9);
-            legend3.Name = "Legend1";
-            this.dataGraph.Legends.Add(legend3);
+            chartArea1.AxisY.IsStartedFromZero = false;
+            chartArea1.Name = "X";
+            chartArea2.AxisY.IsStartedFromZero = false;
+            chartArea2.Name = "Y";
+            chartArea3.AxisY.IsStartedFromZero = false;
+            chartArea3.Name = "Z";
+            this.dataGraph.ChartAreas.Add(chartArea1);
+            this.dataGraph.ChartAreas.Add(chartArea2);
+            this.dataGraph.ChartAreas.Add(chartArea3);
+            legend1.Name = "Legend1";
+            this.dataGraph.Legends.Add(legend1);
             this.dataGraph.Location = new System.Drawing.Point(37, 90);
             this.dataGraph.Name = "dataGraph";
-            series7.ChartArea = "X";
-            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series7.Legend = "Legend1";
-            series7.Name = "X";
-            series8.ChartArea = "Y";
-            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series8.Legend = "Legend1";
-            series8.Name = "Y";
-            series9.ChartArea = "Z";
-            series9.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series9.Legend = "Legend1";
-            series9.Name = "Z";
-            this.dataGraph.Series.Add(series7);
-            this.dataGraph.Series.Add(series8);
-            this.dataGraph.Series.Add(series9);
-            this.dataGraph.Size = new System.Drawing.Size(1466, 1213);
+            series1.ChartArea = "X";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series1.Legend = "Legend1";
+            series1.Name = "X";
+            series2.ChartArea = "Y";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series2.Legend = "Legend1";
+            series2.Name = "Y";
+            series3.ChartArea = "Z";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series3.Legend = "Legend1";
+            series3.Name = "Z";
+            this.dataGraph.Series.Add(series1);
+            this.dataGraph.Series.Add(series2);
+            this.dataGraph.Series.Add(series3);
+            this.dataGraph.Size = new System.Drawing.Size(1242, 474);
             this.dataGraph.TabIndex = 7;
             this.dataGraph.Text = "Magnetic Data Sample";
             // 
@@ -161,9 +161,10 @@
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel});
-            this.statusStrip.Location = new System.Drawing.Point(0, 1333);
+            this.statusStrip.Location = new System.Drawing.Point(0, 611);
+            this.statusStrip.MinimumSize = new System.Drawing.Size(0, 0);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1535, 46);
+            this.statusStrip.Size = new System.Drawing.Size(1309, 46);
             this.statusStrip.TabIndex = 8;
             this.statusStrip.Text = "statusStrip1";
             // 
@@ -175,9 +176,9 @@
             // 
             // uploadButton
             // 
-            this.uploadButton.Location = new System.Drawing.Point(1353, 13);
+            this.uploadButton.Location = new System.Drawing.Point(1137, 12);
             this.uploadButton.Name = "uploadButton";
-            this.uploadButton.Size = new System.Drawing.Size(150, 53);
+            this.uploadButton.Size = new System.Drawing.Size(140, 53);
             this.uploadButton.TabIndex = 9;
             this.uploadButton.Text = "Upload";
             this.uploadButton.UseVisualStyleBackColor = true;
@@ -187,7 +188,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1535, 1379);
+            this.ClientSize = new System.Drawing.Size(1309, 657);
             this.Controls.Add(this.uploadButton);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.dataGraph);

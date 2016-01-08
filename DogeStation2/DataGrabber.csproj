@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Biomed-eMains-eFM-x">
+      <HintPath>..\..\Biomed-eMains-eFM-x\Release\Biomed-eMains-eFM-x.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -100,10 +103,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Biomed-eMains-eFM-x\Biomed-eMains-eFM-x\Biomed-eMains-eFM-x.vcxproj">
-      <Project>{4be35e45-8c2f-4f40-af10-0c77881f703f}</Project>
-      <Name>Biomed-eMains-eFM-x</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Utils\Utils.csproj">
       <Project>{6d794f57-90e8-477e-af63-7d22fba88a37}</Project>
       <Name>Utils</Name>
