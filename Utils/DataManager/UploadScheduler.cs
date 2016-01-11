@@ -237,6 +237,10 @@ namespace Utils.DataManager
                         OnFinished(info, false, e.Message);                        
                         break;
                     }
+                    else
+                    {
+                        Thread.Sleep(waitBetweenRetriesSeconds * 1000);
+                    }
                 }
                 catch (Exception e)
                 {
