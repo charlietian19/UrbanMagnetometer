@@ -140,7 +140,7 @@ namespace Utils.DataReader
             var timeLocal = t.ReadInt64();
             var performanceCounter = t.ReadDouble();
 
-            var time = new DateTime(timeLocal, DateTimeKind.Local);
+            var time = DateTime.FromBinary(timeLocal);
             var xdata = new double[length];
             var ydata = new double[length];
             var zdata = new double[length];
