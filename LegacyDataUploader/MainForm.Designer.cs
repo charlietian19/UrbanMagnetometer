@@ -264,6 +264,8 @@
             // 
             // totalProgress
             // 
+            this.totalProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.totalProgress.Location = new System.Drawing.Point(176, 295);
             this.totalProgress.Name = "totalProgress";
             this.totalProgress.Size = new System.Drawing.Size(625, 33);
@@ -289,6 +291,8 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.sizeTotalGB);
             this.groupBox2.Controls.Add(this.pointsTotal);
             this.groupBox2.Controls.Add(this.chunksTotal);
@@ -413,16 +417,16 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 747);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 749);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(870, 48);
+            this.statusStrip1.Size = new System.Drawing.Size(870, 46);
             this.statusStrip1.TabIndex = 15;
             this.statusStrip1.Text = "statusStrip";
             // 
             // toolStripStatusLabel
             // 
             this.toolStripStatusLabel.Name = "toolStripStatusLabel";
-            this.toolStripStatusLabel.Size = new System.Drawing.Size(752, 43);
+            this.toolStripStatusLabel.Size = new System.Drawing.Size(830, 41);
             this.toolStripStatusLabel.Spring = true;
             this.toolStripStatusLabel.Text = "Ready";
             this.toolStripStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -430,7 +434,7 @@
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(25, 43);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(25, 41);
             this.toolStripStatusLabel1.Text = ".";
             // 
             // cancelButton

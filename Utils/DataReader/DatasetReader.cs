@@ -43,7 +43,7 @@ namespace Utils.DataReader
         private long _chunkIndex;
         
         private long xFileLength, tFileLength;
-        private DateTime _datasetStartTime;
+        protected DateTime datasetStartTime;
         public DatasetChunk Chunk;
 
         public long ChunkIndex
@@ -78,7 +78,7 @@ namespace Utils.DataReader
         /* Returns DateTime object when the data was taken. */
         public DateTime DatasetStartTime
         {
-            get { return _datasetStartTime; }
+            get { return datasetStartTime; }
         }
 
         /* Returns the number of chunks in the dataset. */
@@ -114,7 +114,7 @@ namespace Utils.DataReader
         }
 
         /* Fills out the dataset stats */
-        private void ReadStats(string xPath, string tPath)
+        protected virtual void ReadStats(string xPath, string tPath)
         {
             xFileLength = infoFactory.Create(xPath).Length;
             tFileLength = infoFactory.Create(tPath).Length;
@@ -125,9 +125,10 @@ namespace Utils.DataReader
             {
                 var index = file.ReadInt64();
                 var length = file.ReadInt32();
-                var timeUtc = file.ReadInt64();
+                var timeLocal = file.ReadInt64();
                 var counter = file.ReadDouble();
-                _datasetStartTime = new DateTime(timeUtc, DateTimeKind.Utc);
+                
+                datasetStartTime = DateTime.FromBinary(timeLocal);
             }
         }
 
@@ -136,10 +137,10 @@ namespace Utils.DataReader
         {
             var index = t.ReadInt64();
             var length = t.ReadInt32();
-            var timeUtc = t.ReadInt64();
+            var timeLocal = t.ReadInt64();
             var performanceCounter = t.ReadDouble();
 
-            var time = new DateTime(timeUtc, DateTimeKind.Utc);
+            var time = new DateTime(timeLocal, DateTimeKind.Local);
             var xdata = new double[length];
             var ydata = new double[length];
             var zdata = new double[length];

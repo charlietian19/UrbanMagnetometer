@@ -55,10 +55,16 @@ namespace Utils.DataReader
         new public DatasetChunk GetNextChunk()
         {
             var chunk = base.GetNextChunk();
-            var fixedTime = chunk.Time.AddYears(magic);
+            var fixedTime = chunk.Time.AddYears(magic).AddHours(-8);
             return new DatasetChunk(fixedTime, chunk.Index,
                 chunk.PerformanceCounter, chunk.XData, chunk.YData, 
                 chunk.ZData);
+        }
+        
+        override protected void ReadStats(string xPath, string tPath)
+        {
+            base.ReadStats(xPath, tPath);
+            datasetStartTime = datasetStartTime.AddYears(magic).AddHours(-8);
         }
     }
 }

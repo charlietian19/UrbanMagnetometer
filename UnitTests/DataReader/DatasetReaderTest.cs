@@ -222,7 +222,8 @@ namespace UnitTests.DataReader
             double[] x = new double[] { 0.0, 1.0, 2.0, 3.0 };
             double[] y = new double[] { 4.2, 2.7, 1.2, 1.5 };
             double[] z = new double[] { 6.4, 5.3, 5.7, 1.8 };
-            var time = new DateTime(2015, 12, 25, 13, 30, 0);
+            var time = new DateTime(2015, 12, 25, 13, 30, 0, 
+                DateTimeKind.Local);
 
             BinaryReaderMockFactory.DatasetTimeMock.index = 52;
             BinaryReaderMockFactory.DatasetTimeMock.performanceCounter = 7.222;
@@ -231,8 +232,6 @@ namespace UnitTests.DataReader
             BinaryReaderMockFactory.xData = x;
             BinaryReaderMockFactory.yData = y;
             BinaryReaderMockFactory.zData = z;
-
-            var test = time.ToBinary() - time.ToFileTimeUtc();
 
             var reader = new LegacyReader(file, fileInfoFactory, readerFactory, 
                 config);
