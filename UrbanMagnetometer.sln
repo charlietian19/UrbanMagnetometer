@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "Utils\Utils.csproj
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Biomed-eMains-eFM-x", "..\Biomed-eMains-eFM-x\Biomed-eMains-eFM-x\Biomed-eMains-eFM-x.vcxproj", "{4BE35E45-8C2F-4F40-AF10-0C77881F703F}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "NURI_Station_Installer", "NURI_Station_Installer\NURI_Station_Installer.vdproj", "{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,12 @@ Global
 		{4BE35E45-8C2F-4F40-AF10-0C77881F703F}.Release|x64.Build.0 = Release|x64
 		{4BE35E45-8C2F-4F40-AF10-0C77881F703F}.Release|x86.ActiveCfg = Release|Win32
 		{4BE35E45-8C2F-4F40-AF10-0C77881F703F}.Release|x86.Build.0 = Release|Win32
+		{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}.Debug|Any CPU.ActiveCfg = Debug
+		{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}.Debug|x64.ActiveCfg = Debug
+		{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}.Debug|x86.ActiveCfg = Debug
+		{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}.Release|Any CPU.ActiveCfg = Release
+		{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}.Release|x64.ActiveCfg = Release
+		{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -114,6 +114,7 @@ namespace LegacyDataUploader
                     double size = reader.Size / 1073741824;
                     sizeTotalGB.Text = size.ToString();
                     toolStripStatusLabel.Text = "File opened successfully.";
+                    totalProgress.Value = 0;
                     SetUI(UI_State.FileOpened);
                 }
                 catch (Exception exception)
