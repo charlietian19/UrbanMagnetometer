@@ -1,35 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Configuration;
 using Microsoft.Win32;
+
 
 namespace Utils.Configuration
 {
     public class Settings
     {
-        private static string path = @"Software\Budker labs\NURI Magnetometer";
-        private static string cache = "cache";
-        private static string stationName = "StationName";
-        private static string missing = "Configuration settings are missing, please reinstall the program.";
+        private static string path = @"HKEY_CURRENT_USER\Software\Budker labs\NURI Magnetometer";
+        private static string missing = "Registry key {0} is missing, please reinstall the program.";
+        private static string stationName = "StationName", cache = "cache";
 
         /* Returns a string registry value given its name */
         private static string GetStringValue(string name)
         {
             try
             {
-                var view32 = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine,
-                    RegistryView.Registry32);
-                var key = view32.OpenSubKey(path, false);
-                var val = key.GetValue(name);
-                key.Close();
+                var val = Registry.GetValue(path, name, "");
                 return val.ToString();
             }
             catch (Exception)
             {
-                throw new System.IO.IOException(missing);
+                throw new System.IO.IOException(string.Format(missing, name));
             }
         }
 
@@ -38,18 +30,15 @@ namespace Utils.Configuration
         {
             try
             {
-                var view32 = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine,
-                        RegistryView.Registry32);
-                var key = view32.OpenSubKey(path, true);
-                key.SetValue(name, value);
-                key.Close();
+                Registry.SetValue(path, name, value);
             }
             catch (Exception)
             {
-                throw new System.IO.IOException(missing);
+                throw new System.IO.IOException(string.Format(missing, name));
             }
         }
 
+        /* Path to the data cache folder */
         public static string CacheFolder
         {            
             get
@@ -64,6 +53,7 @@ namespace Utils.Configuration
             }
         }
 
+        /* Name of the data acquisition station. */
         public static string StationName
         {
             get
@@ -82,7 +72,23 @@ namespace Utils.Configuration
         {
             get
             {
-                return ConfigurationManager.AppSettings[stationName];
+                return ConfigurationManager.AppSettings["MaxActiveUploads"];
+            }
+        }
+
+        public static string SamplingRate
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["SamplingRate"];
+            }
+        }
+
+        public static string DataUnits
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["DataUnits"];
             }
         }
     }

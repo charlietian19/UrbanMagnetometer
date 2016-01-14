@@ -2,8 +2,8 @@
 using System.Windows.Forms;
 using Utils.GDrive;
 using Utils.DataManager;
+using Utils.Configuration;
 using Biomed_eMains_eFMx;
-using System.Configuration;
 using System.IO;
 
 namespace DogeStation2
@@ -37,10 +37,9 @@ namespace DogeStation2
             try
             {
                 eMains.LoadDLL();
-                var settings = ConfigurationManager.AppSettings;
-                stationName.Text = settings["StationName"];
-                samplingRate = Convert.ToInt32(settings["SamplingRate"]);
-                var units = settings["DataUnits"];
+                stationName.Text = Settings.StationName;
+                samplingRate = Convert.ToInt32(Settings.SamplingRate);
+                var units = Settings.DataUnits;
                 convertToMicroTesla = (units == "uT");
                 var google = new GDrive("nuri-station.json");
                 google.ProgressEvent += Google_ProgressEvent;
@@ -52,7 +51,7 @@ namespace DogeStation2
             catch (Exception exception)
             {
                 MessageBox.Show("Can't initialize: " + exception.Message);
-                Application.Exit();
+                Environment.Exit(-1);
             }
         }
 
@@ -98,8 +97,7 @@ namespace DogeStation2
 
         private void stationName_TextChanged(object sender, EventArgs e)
         {
-            var settings = ConfigurationManager.AppSettings;
-            settings["StationName"] = stationName.Text;
+            Settings.StationName = stationName.Text;
         }
 
         void SetUI(UI_State state)
@@ -107,7 +105,7 @@ namespace DogeStation2
             switch (state)
             {
                 case UI_State.Ready:
-                    stationName.Enabled = false;
+                    stationName.Enabled = true;
                     sensorList.Enabled = true;
                     refreshButton.Enabled = true;
                     recordButton.Enabled = true;
@@ -123,7 +121,7 @@ namespace DogeStation2
                     uploadButton.Enabled = false;
                     return;
                 case UI_State.NoSensorFound:
-                    stationName.Enabled = false;
+                    stationName.Enabled = true;
                     sensorList.Enabled = true;
                     refreshButton.Enabled = true;
                     recordButton.Enabled = false;

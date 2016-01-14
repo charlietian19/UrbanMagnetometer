@@ -112,7 +112,6 @@
             // 
             // stationName
             // 
-            this.stationName.Enabled = false;
             this.stationName.Location = new System.Drawing.Point(130, 20);
             this.stationName.Name = "stationName";
             this.stationName.Size = new System.Drawing.Size(302, 38);
@@ -162,7 +161,6 @@
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel});
             this.statusStrip.Location = new System.Drawing.Point(0, 611);
-            this.statusStrip.MinimumSize = new System.Drawing.Size(0, 0);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1309, 46);
             this.statusStrip.TabIndex = 8;
