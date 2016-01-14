@@ -4043,6 +4043,17 @@
             "Property" = "8:DATAFOLDER"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_060226E1D7F749A2A22EC7A371285F5D"
+                    {
+                    "Name" = "8:cache"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_578159C4F0D6451198A6472CAB40EAAF"
+                        "Folders"
+                        {
+                        }
+                    }
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_1A4DE1E1598842CDABB66262F24ACE69"
                     {
                     "Name" = "8:credentials"
@@ -4059,28 +4070,6 @@
                             "Condition" = "8:"
                             "Transitive" = "11:FALSE"
                             "Property" = "8:_781B7C95D9B643D499D1EA4F7DAE2FC0"
-                                "Folders"
-                                {
-                                }
-                            }
-                        }
-                    }
-                    "{9EF0B969-E518-4E46-987F-47570745A589}:_8A28A1422E1340E58BBA67DB0698F504"
-                    {
-                    "Name" = "8:cache"
-                    "AlwaysCreate" = "11:TRUE"
-                    "Condition" = "8:"
-                    "Transitive" = "11:FALSE"
-                    "Property" = "8:_FB198D96892C4939AD70B4650750D119"
-                        "Folders"
-                        {
-                            "{9EF0B969-E518-4E46-987F-47570745A589}:_1D09A356134D447E8C63950DC26182A7"
-                            {
-                            "Name" = "8:failed"
-                            "AlwaysCreate" = "11:TRUE"
-                            "Condition" = "8:"
-                            "Transitive" = "11:FALSE"
-                            "Property" = "8:_13F11AB927534E5E94CBC514DC14BCF0"
                                 "Folders"
                                 {
                                 }
@@ -4106,13 +4095,13 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:NURI Magnetometer"
         "ProductCode" = "8:{C93DA18A-ED04-42EB-8EDD-B18626C95699}"
-        "PackageCode" = "8:{1204AB41-0401-41CB-8DEA-BB9186E7B758}"
+        "PackageCode" = "8:{3ABA67D2-4914-4655-8325-4E4C05C393DE}"
         "UpgradeCode" = "8:{F5ED7C4D-F398-4143-9BB0-28A0F52451B4}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
-        "InstallAllUsers" = "11:TRUE"
+        "InstallAllUsers" = "11:FALSE"
         "ProductVersion" = "8:1.0.3"
         "Manufacturer" = "8:Budker labs"
         "ARPHELPTELEPHONE" = "8:"
@@ -4147,7 +4136,7 @@
                     "Transitive" = "11:FALSE"
                         "Keys"
                         {
-                            "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_F88A17F65D2647B4972101C978B8DEFC"
+                            "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_18FCE33BF1D54876BEBAF4C0D40075F9"
                             {
                             "Name" = "8:[Manufacturer]"
                             "Condition" = "8:"
@@ -4156,36 +4145,6 @@
                             "Transitive" = "11:FALSE"
                                 "Keys"
                                 {
-                                    "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_76300A66FF084320A3018B746B8E7337"
-                                    {
-                                    "Name" = "8:[ProductName]"
-                                    "Condition" = "8:"
-                                    "AlwaysCreate" = "11:TRUE"
-                                    "DeleteAtUninstall" = "11:FALSE"
-                                    "Transitive" = "11:FALSE"
-                                        "Keys"
-                                        {
-                                        }
-                                        "Values"
-                                        {
-                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_9D23ED49A3594F5CA11EAE745A2DF060"
-                                            {
-                                            "Name" = "8:StationName"
-                                            "Condition" = "8:"
-                                            "Transitive" = "11:FALSE"
-                                            "ValueTypes" = "3:1"
-                                            "Value" = "8:[STATIONNAME]"
-                                            }
-                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_C51798B34CBE4025999FBD086F14D840"
-                                            {
-                                            "Name" = "8:DataFolderPath"
-                                            "Condition" = "8:"
-                                            "Transitive" = "11:FALSE"
-                                            "ValueTypes" = "3:1"
-                                            "Value" = "8:[DATAFOLDER]"
-                                            }
-                                        }
-                                    }
                                 }
                                 "Values"
                                 {
@@ -4220,6 +4179,36 @@
                             "Transitive" = "11:FALSE"
                                 "Keys"
                                 {
+                                    "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_622B49BE1B32462395F5F85D4547EF62"
+                                    {
+                                    "Name" = "8:[ProductName]"
+                                    "Condition" = "8:"
+                                    "AlwaysCreate" = "11:TRUE"
+                                    "DeleteAtUninstall" = "11:FALSE"
+                                    "Transitive" = "11:FALSE"
+                                        "Keys"
+                                        {
+                                        }
+                                        "Values"
+                                        {
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_9D23ED49A3594F5CA11EAE745A2DF060"
+                                            {
+                                            "Name" = "8:StationName"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:[STATIONNAME]"
+                                            }
+                                            "{ADCFDA98-8FDD-45E4-90BC-E3D20B029870}:_C51798B34CBE4025999FBD086F14D840"
+                                            {
+                                            "Name" = "8:cache"
+                                            "Condition" = "8:"
+                                            "Transitive" = "11:FALSE"
+                                            "ValueTypes" = "3:1"
+                                            "Value" = "8:[DATAFOLDER]\\cache"
+                                            }
+                                        }
+                                    }
                                 }
                                 "Values"
                                 {
