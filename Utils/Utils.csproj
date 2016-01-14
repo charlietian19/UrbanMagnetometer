@@ -110,6 +110,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\Settings.cs" />
     <Compile Include="DataManager\DatasetInfo.cs" />
     <Compile Include="DataReader\DatasetChunk.cs" />
     <Compile Include="DataReader\DatasetReader.cs" />

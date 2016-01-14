@@ -7,11 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Configuration;
 using Utils.DataReader;
 using Utils.GDrive;
 using Utils.DataManager;
+using Utils.Configuration;
 using System.IO;
+
 
 namespace LegacyDataUploader
 {
@@ -35,10 +36,9 @@ namespace LegacyDataUploader
             InitializeComponent();
             SetUI(UI_State.Start);
             try
-            {
-                var settings = ConfigurationManager.AppSettings;
-                stationName.Text = settings["StationName"];
-                int queueBound = Convert.ToInt32(settings["MaxActiveUploads"]);
+            {                
+                stationName.Text = Settings.StationName;
+                int queueBound = Convert.ToInt32(Settings.MaxActiveUploads);
                 google = new GDrive("nuri-station.json");
                 google.ProgressEvent += Google_ProgressEvent;
                 scheduler = new UploadScheduler(google, queueBound);
@@ -49,7 +49,7 @@ namespace LegacyDataUploader
             catch (Exception exception)
             {
                 MessageBox.Show("Can't initialize: " + exception.Message);
-                Application.Exit();
+                Environment.Exit(-1);
             }
         }
 
@@ -90,8 +90,7 @@ namespace LegacyDataUploader
 
         private void stationName_TextChanged(object sender, EventArgs e)
         {
-            var settings = ConfigurationManager.AppSettings;
-            settings["StationName"] = stationName.Text;
+            Settings.StationName = stationName.Text;
         }
 
         private void browseButton_Click(object sender, EventArgs e)
