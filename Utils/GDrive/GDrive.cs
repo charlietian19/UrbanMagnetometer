@@ -137,26 +137,34 @@ namespace Utils.GDrive
             using (var uploadStream = new FileStream(path, FileMode.Open,
                 FileAccess.Read))
             {
-                string parentId = pathHelper.CreateDirectoryTree(parent).Id;
-                var insertRequest = service.Files.Insert(
-                    new Google.Apis.Drive.v2.Data.File
-                    {
-                        Title = fileName,
-                        Parents = new List<ParentReference>
-                            { new ParentReference() { Id = parentId } }
-                    },
-                    uploadStream,
-                    filesMimeType);
-
-                insertRequest.ProgressChanged += 
-                    (p) => { UploadProgressChanged(p, uploadStream); };
-
-                IUploadProgress progress = insertRequest.Upload();
-                if (progress.Status == UploadStatus.Failed)
+                try
                 {
-                    string msg = string.Format("Can't upload {0} into {1}", 
-                        path, parent);
-                    throw new FileUploadException(msg);
+                    string parentId = pathHelper.CreateDirectoryTree(parent).Id;
+                    var insertRequest = service.Files.Insert(
+                        new Google.Apis.Drive.v2.Data.File
+                        {
+                            Title = fileName,
+                            Parents = new List<ParentReference>
+                                { new ParentReference() { Id = parentId } }
+                        },
+                        uploadStream,
+                        filesMimeType);
+
+                    insertRequest.ProgressChanged +=
+                        (p) => { UploadProgressChanged(p, uploadStream); };
+
+                    IUploadProgress progress = insertRequest.Upload();
+
+                    if (progress.Status == UploadStatus.Failed)
+                    {
+                        string msg = string.Format("Can't upload {0} into {1}",
+                            path, parent);
+                        throw new FileUploadException(msg);
+                    }
+                }
+                catch (Google.GoogleApiException e)
+                {
+                    throw new FileUploadException(e.Message);
                 }
             }
         }

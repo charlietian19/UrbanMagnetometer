@@ -254,8 +254,7 @@ namespace Utils.DataManager
                     OnFinished(info, true, "Upload successful");
                     break;
                 }
-                catch (Exception e) when 
-                    (e is FileUploadException || e is Google.GoogleApiException)
+                catch (FileUploadException e)
                 {
                     if (i + 1 == maxRetryCount)
                     {
