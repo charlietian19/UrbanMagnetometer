@@ -208,33 +208,47 @@ namespace Utils.DataManager
             return tmpDirFullPath;
         }
 
-        /* Uploads the files given DatasetInfo. */
-        private void UploadDo(IDatasetInfo info)
+        /* Adds the files from the dataset into a zip archive. */
+        private string ArchiveFiles(IDatasetInfo info)
         {
-            bool firstRun = true;
-            string archivePath = "", tmpDirFullPath = "", parent = "";
+            string archivePath = "", tmpDirFullPath = "";
+            archivePath = Path.Combine(info.FolderPath, info.ZipFileName);
+            tmpDirFullPath = MoveDataToTmpDir(info);
+            zip.CreateFromDirectory(tmpDirFullPath, archivePath);
+            DeleteTemporaryDirectory(tmpDirFullPath);
+            return archivePath;
+        }
+
+        /* Uploads the files given DatasetInfo. */
+        private void UploadDo(IDatasetInfo info, bool archive)
+        {
+            string archivePath = "";
+            string parent = string.Format(remoteFileName, info.Year,
+                            info.Month, info.Day, info.Hour, info.StationName);
             OnStarted(info);
+            if (archive)
+            {
+                try
+                {
+                    archivePath = ArchiveFiles(info);
+                }
+                catch (Exception e)
+                {
+                    OnFinished(info, false, e.Message);
+                    return;
+                }
+            }
+
             for (int i = 0; i < maxRetryCount; i++)
             {
                 try
                 {
-                    if (firstRun)
-                    {
-                        archivePath = Path.Combine(info.FolderPath, 
-                            info.ZipFileName);
-                        tmpDirFullPath = MoveDataToTmpDir(info);
-                        parent = string.Format(remoteFileName, info.Year,
-                            info.Month, info.Day, info.Hour, info.StationName);
-                        zip.CreateFromDirectory(tmpDirFullPath, archivePath);                        
-                        DeleteTemporaryDirectory(tmpDirFullPath);
-                        firstRun = false;
-                    }
                     uploader.Upload(archivePath, parent);
                     File.Delete(archivePath);
                     OnFinished(info, true, "Upload successful");
                     break;
                 }
-                catch (FileUploadException e)
+                catch (Exception e) when (e is FileUploadException || e is Google.GoogleApiException)
                 {
                     if (i + 1 == maxRetryCount)
                     {
@@ -249,8 +263,8 @@ namespace Utils.DataManager
                 }
                 catch (Exception e)
                 {
-                    OnFinished(info, false, e.Message);                    
-                    break;                    
+                    OnFinished(info, false, e.Message);
+                    break;
                 }
             }
         }
@@ -286,7 +300,7 @@ namespace Utils.DataManager
                 if (info != null)
                 {
                     Interlocked.Increment(ref ActiveUploadCount);
-                    UploadDo(info);
+                    UploadDo(info, true);
                     Interlocked.Decrement(ref ActiveUploadCount);
                 }
             }
