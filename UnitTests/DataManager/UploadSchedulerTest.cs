@@ -55,6 +55,8 @@ namespace UnitTests.DataManager
             settings["MaxRetryCount"] = "3";
             settings["WaitBetweenRetriesSeconds"] = "234";
             settings["RemoteFileNameFormat"] = @"\{0}\{1}\{2}\{3}\{4}";
+            settings["MaxDelayBeforeUploadMs"] = "352";
+            settings["EnableDelayBeforeUpload"] = "false";
             count = 0;
             timeout = 10000;
             finished = new Semaphore(0, 1);
@@ -117,10 +119,23 @@ namespace UnitTests.DataManager
         }
 
         [TestMethod]
-        public void UploadSingleFileSuccess()
+        public void UploadSingleFileSuccessWithDelay()
         {
+            settings["EnableDelayBeforeUpload"] = "true";
             var scheduler = new UploadScheduler(uploader, config, file,
                 dir, zip, path, thread);
+            scheduler.FinishedEvent +=
+                new UploadFinishedEventHandler(SignalFinished);
+            scheduler.UploadMagneticData(info);
+            finished.WaitOne(timeout);
+            threadMock.Verify(o => o.Sleep(It.IsAny<int>()), Times.Once());
+        }
+
+        [TestMethod]
+        public void UploadSingleFileSuccessNoDelay()
+        {            
+            var scheduler = new UploadScheduler(uploader, config, file,
+                dir, zip, path, thread);            
             scheduler.FinishedEvent += 
                 new UploadFinishedEventHandler(SignalFinished);
             scheduler.UploadMagneticData(info);

@@ -47,7 +47,9 @@ namespace Utils.DataManager
 
     public class UploadScheduler : IUploadScheduler
     {
-        private int maxActiveUploads, maxRetryCount, waitBetweenRetriesSeconds;
+        private int maxActiveUploads, maxRetryCount, waitBetweenRetriesSeconds,
+            maxDelayBeforeUploadMs;
+        bool enableDelayBeforeUpload;
         private string remoteFileName;
         private int ActiveUploadCount = 0;
         private BlockingCollection<IDatasetInfo> queue;
@@ -147,6 +149,10 @@ namespace Utils.DataManager
             waitBetweenRetriesSeconds = Convert.ToInt32(
                 settings["WaitBetweenRetriesSeconds"]);
             remoteFileName = settings["RemoteFileNameFormat"];
+            enableDelayBeforeUpload = Convert.ToBoolean(
+                settings["EnableDelayBeforeUpload"]);
+            maxDelayBeforeUploadMs = Convert.ToInt32(
+                settings["MaxDelayBeforeUploadMs"]);
         }
 
         /* Starts the worker threads. */
@@ -248,7 +254,8 @@ namespace Utils.DataManager
                     OnFinished(info, true, "Upload successful");
                     break;
                 }
-                catch (Exception e) when (e is FileUploadException || e is Google.GoogleApiException)
+                catch (Exception e) when 
+                    (e is FileUploadException || e is Google.GoogleApiException)
                 {
                     if (i + 1 == maxRetryCount)
                     {
@@ -299,6 +306,11 @@ namespace Utils.DataManager
 
                 if (info != null)
                 {
+                    if (enableDelayBeforeUpload)
+                    {
+                        Random rnd = new Random();
+                        ThreadWrap.Sleep(rnd.Next(maxDelayBeforeUploadMs));
+                    }
                     Interlocked.Increment(ref ActiveUploadCount);
                     UploadDo(info, true);
                     Interlocked.Decrement(ref ActiveUploadCount);
