@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using SystemWrapper.Configuration;
 using SystemWrapper.IO;
+using SystemWrapper.Threading;
 using System.IO.Compression;
 using Utils.GDrive;
 
@@ -56,6 +57,7 @@ namespace Utils.DataManager
         private IDirectoryWrap Directory;
         private IZipFile zip;
         private IPathWrap Path;
+        private IThreadWrap ThreadWrap;
         public event UploadFinishedEventHandler FinishedEvent;
         public event UploadStartedEventHandler StartedEvent;
         public int ActiveUploads
@@ -80,18 +82,18 @@ namespace Utils.DataManager
         /* Creates an uploader that uses provided wrappers and no queue bound*/
         public UploadScheduler(IUploader uploader, 
             IConfigurationManagerWrap config, IFileWrap file, IDirectoryWrap dir,
-            IZipFile zip, IPathWrap path)
+            IZipFile zip, IPathWrap path, IThreadWrap thread)
         {
-            UseCustomWrapper(config, file, dir, zip, path);
+            UseCustomWrapper(config, file, dir, zip, path, thread);
             InitNoQueueBound(uploader);
         }
 
         /* Creates an uploader that uses provided wrappers and a queue bound*/
         public UploadScheduler(IUploader uploader, int maxQueueLength,
             IConfigurationManagerWrap config, IFileWrap file, IDirectoryWrap dir,
-            IZipFile zip, IPathWrap path)
+            IZipFile zip, IPathWrap path, IThreadWrap thread)
         {
-            UseCustomWrapper(config, file, dir, zip, path);
+            UseCustomWrapper(config, file, dir, zip, path, thread);
             InitWithQueueBound(uploader, maxQueueLength);
         }
 
@@ -103,17 +105,20 @@ namespace Utils.DataManager
             Directory = new DirectoryWrap();
             zip = new ZipFileWrapper();
             Path = new PathWrap();
+            ThreadWrap = new ThreadWrap();
         }
 
         /* Assigns the wrappers to use the provided objects. */
         private void UseCustomWrapper(IConfigurationManagerWrap config, 
-            IFileWrap file, IDirectoryWrap dir, IZipFile zip, IPathWrap path)
+            IFileWrap file, IDirectoryWrap dir, IZipFile zip, IPathWrap path,
+            IThreadWrap thread)
         {
             ConfigurationManager = config;
             File = file;
             Directory = dir;
             this.zip = zip;
             Path = path;
+            ThreadWrap = thread;
         }
 
         /* Initializes uploader with no queue bound. */
@@ -239,7 +244,7 @@ namespace Utils.DataManager
                     }
                     else
                     {
-                        Thread.Sleep(waitBetweenRetriesSeconds * 1000);
+                        ThreadWrap.Sleep(waitBetweenRetriesSeconds * 1000);
                     }
                 }
                 catch (Exception e)
