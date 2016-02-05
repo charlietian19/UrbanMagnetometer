@@ -48,11 +48,15 @@ namespace Utils.DataManager
     public class UploadScheduler : IUploadScheduler
     {
         private int maxActiveUploads, maxRetryCount, waitBetweenRetriesSeconds,
-            maxDelayBeforeUploadMs;
-        bool enableDelayBeforeUpload;
+            maxDelayBeforeUploadMilliseconds, 
+            minDelayBetweenFailedRetriesSeconds,
+            maxDelayBetweenFailedRetriesSeconds;
+        bool enableDelayBeforeUpload, enableFailedRetryWorker;
         private string remoteFileName;
         private int ActiveUploadCount = 0;
         private BlockingCollection<IDatasetInfo> queue;
+        private ConcurrentQueue<IDatasetInfo> queueFailed 
+            = new ConcurrentQueue<IDatasetInfo>();
         private IUploader uploader;
         private IConfigurationManagerWrap ConfigurationManager;
         private IFileWrap File;
@@ -60,6 +64,7 @@ namespace Utils.DataManager
         private IZipFile zip;
         private IPathWrap Path;
         private IThreadWrap ThreadWrap;
+        private AutoResetEvent retryEvent = new AutoResetEvent(false);
         public event UploadFinishedEventHandler FinishedEvent;
         public event UploadStartedEventHandler StartedEvent;
         public int ActiveUploads
@@ -149,10 +154,18 @@ namespace Utils.DataManager
             waitBetweenRetriesSeconds = Convert.ToInt32(
                 settings["WaitBetweenRetriesSeconds"]);
             remoteFileName = settings["RemoteFileNameFormat"];
+
             enableDelayBeforeUpload = Convert.ToBoolean(
                 settings["EnableDelayBeforeUpload"]);
-            maxDelayBeforeUploadMs = Convert.ToInt32(
-                settings["MaxDelayBeforeUploadMs"]);
+            maxDelayBeforeUploadMilliseconds = Convert.ToInt32(
+                settings["MaxDelayBeforeUploadMilliseconds"]);
+
+            enableFailedRetryWorker = Convert.ToBoolean(
+                settings["EnableFailedRetryWorker"]);
+            minDelayBetweenFailedRetriesSeconds = Convert.ToInt32(
+                settings["MinDelayBetweenFailedRetriesSeconds"]);
+            maxDelayBetweenFailedRetriesSeconds = Convert.ToInt32(
+                settings["MaxDelayBetweenFailedRetriesSeconds"]);
         }
 
         /* Starts the worker threads. */
@@ -161,6 +174,11 @@ namespace Utils.DataManager
             for (int i = 0; i < maxActiveUploads; i++)
             {
                 Task.Run(() => Worker());
+            }
+
+            if (enableFailedRetryWorker)
+            {
+                Task.Run(() => RetryWorker());
             }
         }
 
@@ -228,7 +246,6 @@ namespace Utils.DataManager
         /* Uploads the files given DatasetInfo. */
         private void UploadDo(IDatasetInfo info, bool archive)
         {
-            string archivePath = "";
             string parent = string.Format(remoteFileName, info.Year,
                             info.Month, info.Day, info.Hour, info.StationName);
             OnStarted(info);
@@ -236,7 +253,7 @@ namespace Utils.DataManager
             {
                 try
                 {
-                    archivePath = ArchiveFiles(info);
+                    info.ArchivePath = ArchiveFiles(info);
                 }
                 catch (Exception e)
                 {
@@ -249,8 +266,8 @@ namespace Utils.DataManager
             {
                 try
                 {
-                    uploader.Upload(archivePath, parent);
-                    File.Delete(archivePath);
+                    uploader.Upload(info.ArchivePath, parent);
+                    File.Delete(info.ArchivePath);
                     OnFinished(info, true, "Upload successful");
                     break;
                 }
@@ -258,7 +275,7 @@ namespace Utils.DataManager
                 {
                     if (i + 1 == maxRetryCount)
                     {
-                        MoveToFailedFolder(archivePath);
+                        ProcessFailedUpload(info);
                         OnFinished(info, false, e.Message);                        
                         break;
                     }
@@ -275,18 +292,21 @@ namespace Utils.DataManager
             }
         }
 
-        /* Moves the files into the failed uploads folder. */
-        private void MoveToFailedFolder(string archivePath)
+        /* Moves the files into the failed uploads folder and adds 
+        it to the failed files queue. */
+        private void ProcessFailedUpload(IDatasetInfo info)
         {
-            var dir = Path.GetDirectoryName(archivePath);
-            var file = Path.GetFileName(archivePath);
+            var dir = Path.GetDirectoryName(info.ArchivePath);
+            var file = Path.GetFileName(info.ArchivePath);
             var dstDir = Path.Combine(dir, "failed");            
             if (!Directory.Exists(dstDir))
             {
                 Directory.CreateDirectory(dstDir);
             }
             var dst = Path.Combine(dstDir, file);
-            File.Move(archivePath, dst);
+            File.Move(info.ArchivePath, dst);
+            info.ArchivePath = dst;
+            queueFailed.Enqueue(info);
         }
 
         /* Retrieves the arriving data in background. */
@@ -308,12 +328,45 @@ namespace Utils.DataManager
                     if (enableDelayBeforeUpload)
                     {
                         Random rnd = new Random();
-                        ThreadWrap.Sleep(rnd.Next(maxDelayBeforeUploadMs));
+                        ThreadWrap.Sleep(rnd.Next(maxDelayBeforeUploadMilliseconds));
                     }
                     Interlocked.Increment(ref ActiveUploadCount);
                     UploadDo(info, true);
                     Interlocked.Decrement(ref ActiveUploadCount);
                 }
+            }
+        }
+
+        /* Triggers the upload of failed files. */
+        public void RetryFailed()
+        {
+            retryEvent.Set();
+        }
+
+        /* Retries the failed uploads. */
+        private void RetryWorker()
+        {
+            var rnd = new Random();
+            while (true)
+            {
+                var delay = rnd.Next(minDelayBetweenFailedRetriesSeconds, 
+                    maxDelayBetweenFailedRetriesSeconds) * 1000;                
+                retryEvent.WaitOne(delay);
+
+                var count = queueFailed.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    IDatasetInfo info = null;
+                    if (!queueFailed.TryDequeue(out info))
+                    {
+                        break;
+                    }
+
+                    Interlocked.Increment(ref ActiveUploadCount);
+                    UploadDo(info, true);
+                    Interlocked.Decrement(ref ActiveUploadCount);
+                }
+                retryEvent.Reset();
             }
         }
 

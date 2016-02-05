@@ -55,7 +55,7 @@ namespace UnitTests.DataManager
             settings["MaxRetryCount"] = "3";
             settings["WaitBetweenRetriesSeconds"] = "234";
             settings["RemoteFileNameFormat"] = @"\{0}\{1}\{2}\{3}\{4}";
-            settings["MaxDelayBeforeUploadMs"] = "352";
+            settings["MaxDelayBeforeUploadMilliseconds"] = "352";
             settings["EnableDelayBeforeUpload"] = "false";
             count = 0;
             timeout = 10000;
@@ -231,6 +231,7 @@ namespace UnitTests.DataManager
             directoryMock.Verify(o => o.CreateDirectory("failed"), Times.Once());
             fileMock.Verify(o => o.Move("data0.zip", @"failed\data0.zip"),
                 Times.Once());
+            Assert.AreEqual(info.ArchivePath, @"failed\data0.zip");
         }
     }
 }

@@ -23,12 +23,13 @@ namespace Utils.DataManager
         string FullPath(string file);
         bool isSameFile(IDatasetInfo other);
         bool isSameFile(DateTime other);
+        string ArchivePath { get; set; }
     }
 
     /* Stores the information about the dataset naming in a convenient way. */
     public class DatasetInfo : IDatasetInfo
     {
-        private string dataCacheFolder, channelNameX, channelNameY, channelNameZ, 
+        private string dataCacheFolder, channelNameX, channelNameY, channelNameZ,
             channelNameTime, dataFileNameFormat, timeFileNameFormat,
             zipFileNameFormat;
         private IConfigurationManagerWrap ConfigurationManager;
@@ -41,6 +42,7 @@ namespace Utils.DataManager
         public string SamplingRate { get; set; }
         public string StationName { get; set; }
         public DateTime StartDate { get; set; }
+        public string ArchivePath { get; set; }
 
         /* Initializes settings from the configuration file. */
         private void ReadAppConfig()
