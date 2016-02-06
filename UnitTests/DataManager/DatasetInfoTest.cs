@@ -46,6 +46,7 @@ namespace UnitTests.DataManager
             Assert.AreEqual("05", data.Month);
             Assert.AreEqual("23", data.Day);
             Assert.AreEqual("12", data.Hour);
+            Assert.AreEqual("test", data.StationName);
             Assert.AreEqual(name, data.ArchivePath);
             Assert.AreEqual(time, data.StartDate);
         }

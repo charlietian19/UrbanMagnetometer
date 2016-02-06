@@ -27,6 +27,7 @@ namespace Utils.DataManager
     {
         void UploadMagneticData(IDatasetInfo info);
         int ActiveUploads { get; }
+        void RetryFailed();
         event UploadFinishedEventHandler FinishedEvent;
         event UploadStartedEventHandler StartedEvent;
     }
@@ -83,7 +84,7 @@ namespace Utils.DataManager
         public UploadScheduler(IUploader uploader)
         {
             UseSystemWrapper();
-            InitNoQueueBound(uploader);
+            InitNoQueueBound(uploader);            
         }
 
         /* Creates an uploader with a pre-defined queue bound. */
@@ -141,6 +142,7 @@ namespace Utils.DataManager
             ReadAppConfig();
             this.uploader = uploader;
             queue = new BlockingCollection<IDatasetInfo>();
+            EnqueueFailed();
             StartWorkerThreads();
         }
 
@@ -150,6 +152,7 @@ namespace Utils.DataManager
             ReadAppConfig();
             this.uploader = uploader;
             queue = new BlockingCollection<IDatasetInfo>(maxQueueLength);
+            EnqueueFailed();
             StartWorkerThreads();
         }
         /* Initializes settings from the configuration file. */
@@ -243,26 +246,28 @@ namespace Utils.DataManager
         }
 
         /* Adds the files from the dataset into a zip archive. */
-        private void ArchiveFiles(IDatasetInfo info)
+        private string ArchiveFiles(IDatasetInfo info)
         {
             string tmpDirFullPath = "";
-            info.ArchivePath = Path.Combine(info.FolderPath, info.ZipFileName);
+            string path = Path.Combine(info.FolderPath, info.ZipFileName);
             tmpDirFullPath = MoveDataToTmpDir(info);
-            zip.CreateFromDirectory(tmpDirFullPath, info.ArchivePath);
+            zip.CreateFromDirectory(tmpDirFullPath, path);
             DeleteTemporaryDirectory(tmpDirFullPath);
+            return path;
         }
 
         /* Uploads the files given DatasetInfo. */
-        private void UploadDo(IDatasetInfo info, bool archive)
+        private void UploadDo(IDatasetInfo info)
         {
+            OnStarted(info);
             string parent = string.Format(remoteFileName, info.Year,
                             info.Month, info.Day, info.Hour, info.StationName);
-            OnStarted(info);
-            if (archive)
+
+            if (info.ArchivePath == null)
             {
                 try
                 {
-                    ArchiveFiles(info);
+                    info.ArchivePath = ArchiveFiles(info);
                 }
                 catch (Exception e)
                 {
@@ -286,7 +291,7 @@ namespace Utils.DataManager
                     {
                         ProcessFailedUpload(info);
                         OnFinished(info, false, e.Message);                        
-                        break;
+                        return;
                     }
                     else
                     {
@@ -296,7 +301,7 @@ namespace Utils.DataManager
                 catch (Exception e)
                 {
                     OnFinished(info, false, e.Message);
-                    break;
+                    return;
                 }
             }
         }
@@ -344,13 +349,13 @@ namespace Utils.DataManager
                         ThreadWrap.Sleep(rnd.Next(maxDelayBeforeUploadMilliseconds));
                     }
                     Interlocked.Increment(ref ActiveUploadCount);
-                    UploadDo(info, true);
+                    UploadDo(info);
                     Interlocked.Decrement(ref ActiveUploadCount);
                 }
             }
         }
 
-        /* Triggers the upload of failed files. */
+        /* Triggers uploading of the files for which upload has failed. */
         public void RetryFailed()
         {
             retryEvent.Set();
@@ -365,7 +370,8 @@ namespace Utils.DataManager
                     + Path.GetExtension(zipFileNameFormat));
                 foreach (var name in failed)
                 {
-                    queueFailed.Enqueue(new DatasetInfo(name, ConfigurationManager));
+                    var info = new DatasetInfo(name, ConfigurationManager);
+                    queueFailed.Enqueue(info);
                 }
             }
             catch (Exception) { }
@@ -391,7 +397,7 @@ namespace Utils.DataManager
                     }
 
                     Interlocked.Increment(ref ActiveUploadCount);
-                    UploadDo(info, true);
+                    UploadDo(info);
                     Interlocked.Decrement(ref ActiveUploadCount);
                 }
                 retryEvent.Reset();
