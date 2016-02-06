@@ -52,6 +52,7 @@ namespace Utils.DataManager
             minDelayBetweenFailedRetriesSeconds,
             maxDelayBetweenFailedRetriesSeconds;
         bool enableDelayBeforeUpload, enableFailedRetryWorker;
+        private string dataCacheFolder, zipFileNameFormat;
         private string remoteFileName;
         private int ActiveUploadCount = 0;
         private BlockingCollection<IDatasetInfo> queue;
@@ -67,6 +68,12 @@ namespace Utils.DataManager
         private AutoResetEvent retryEvent = new AutoResetEvent(false);
         public event UploadFinishedEventHandler FinishedEvent;
         public event UploadStartedEventHandler StartedEvent;
+        private string failedPath
+        {
+            get { return Path.Combine(dataCacheFolder, "failed"); }
+        }
+
+
         public int ActiveUploads
         {
             get { return ActiveUploadCount; }
@@ -166,6 +173,9 @@ namespace Utils.DataManager
                 settings["MinDelayBetweenFailedRetriesSeconds"]);
             maxDelayBetweenFailedRetriesSeconds = Convert.ToInt32(
                 settings["MaxDelayBetweenFailedRetriesSeconds"]);
+
+            dataCacheFolder = settings["DataCacheFolder"];
+            zipFileNameFormat = settings["ZipFileNameFormat"];
         }
 
         /* Starts the worker threads. */
@@ -233,14 +243,13 @@ namespace Utils.DataManager
         }
 
         /* Adds the files from the dataset into a zip archive. */
-        private string ArchiveFiles(IDatasetInfo info)
+        private void ArchiveFiles(IDatasetInfo info)
         {
-            string archivePath = "", tmpDirFullPath = "";
-            archivePath = Path.Combine(info.FolderPath, info.ZipFileName);
+            string tmpDirFullPath = "";
+            info.ArchivePath = Path.Combine(info.FolderPath, info.ZipFileName);
             tmpDirFullPath = MoveDataToTmpDir(info);
-            zip.CreateFromDirectory(tmpDirFullPath, archivePath);
+            zip.CreateFromDirectory(tmpDirFullPath, info.ArchivePath);
             DeleteTemporaryDirectory(tmpDirFullPath);
-            return archivePath;
         }
 
         /* Uploads the files given DatasetInfo. */
@@ -253,7 +262,7 @@ namespace Utils.DataManager
             {
                 try
                 {
-                    info.ArchivePath = ArchiveFiles(info);
+                    ArchiveFiles(info);
                 }
                 catch (Exception e)
                 {
@@ -296,16 +305,20 @@ namespace Utils.DataManager
         it to the failed files queue. */
         private void ProcessFailedUpload(IDatasetInfo info)
         {
-            var dir = Path.GetDirectoryName(info.ArchivePath);
             var file = Path.GetFileName(info.ArchivePath);
-            var dstDir = Path.Combine(dir, "failed");            
+            var dstDir = failedPath;            
             if (!Directory.Exists(dstDir))
             {
                 Directory.CreateDirectory(dstDir);
             }
+
             var dst = Path.Combine(dstDir, file);
-            File.Move(info.ArchivePath, dst);
-            info.ArchivePath = dst;
+            if (Path.GetFullPath(dst) != Path.GetFullPath(info.ArchivePath))
+            {
+                File.Move(info.ArchivePath, dst);
+                info.ArchivePath = dst;
+            }             
+
             queueFailed.Enqueue(info);
         }
 
@@ -341,6 +354,21 @@ namespace Utils.DataManager
         public void RetryFailed()
         {
             retryEvent.Set();
+        }
+
+        /* Adds all files in "failed" folder into retryQueue. */
+        private void EnqueueFailed()
+        {
+            try
+            {
+                var failed = Directory.GetFiles(failedPath, "*" 
+                    + Path.GetExtension(zipFileNameFormat));
+                foreach (var name in failed)
+                {
+                    queueFailed.Enqueue(new DatasetInfo(name, ConfigurationManager));
+                }
+            }
+            catch (Exception) { }
         }
 
         /* Retries the failed uploads. */

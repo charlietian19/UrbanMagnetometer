@@ -57,6 +57,11 @@ namespace UnitTests.DataManager
             settings["RemoteFileNameFormat"] = @"\{0}\{1}\{2}\{3}\{4}";
             settings["MaxDelayBeforeUploadMilliseconds"] = "352";
             settings["EnableDelayBeforeUpload"] = "false";
+            settings["EnableFailedRetryWorker"] = "false";
+            settings["MinDelayBetweenFailedRetriesSeconds"] = "36000";
+            settings["MaxDelayBetweenFailedRetriesSeconds"] = "36000";
+            settings["DataCacheFolder"] = "";
+            settings["ZipFileNameFormat"] = "{0}-{1}-{2}_{3}-xx.zip";
             count = 0;
             timeout = 10000;
             finished = new Semaphore(0, 1);
@@ -98,6 +103,9 @@ namespace UnitTests.DataManager
             infoMock.Setup(o => o.ZipFileName)
                 .Returns(string.Format("data{0}.zip", count));
             infoMock.Setup(o => o.FolderPath).Returns("");
+
+            infoMock.SetupProperty(o => o.ArchivePath);
+
             pathMock.Setup(o => o.Combine(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns<string, string>((s1, s2) => Path.Combine(s1, s2));
             pathMock.Setup(o => o.GetRandomFileName())
@@ -105,6 +113,8 @@ namespace UnitTests.DataManager
             pathMock.Setup(o => o.GetDirectoryName(It.IsAny<string>()))
                 .Returns("");
             pathMock.Setup(o => o.GetFileName(It.IsAny<string>()))
+                .Returns<string>(x => x);
+            pathMock.Setup(o => o.GetFullPath(It.IsAny<string>()))
                 .Returns<string>(x => x);
             threadMock.Setup(o => o.Sleep(It.IsAny<int>()));
 
@@ -116,6 +126,19 @@ namespace UnitTests.DataManager
             info = infoMock.Object;
             path = pathMock.Object;
             thread = threadMock.Object;
+        }
+
+        [TestMethod]
+        public void RetryFailedSingle()
+        {
+            settings["EnableFailedRetryWorker"] = "true";
+            var scheduler = new UploadScheduler(uploader, config, file,
+                dir, zip, path, thread);
+            scheduler.FinishedEvent +=
+                new UploadFinishedEventHandler(SignalFinished);
+            scheduler.UploadMagneticData(info);
+            finished.WaitOne(timeout);
+            threadMock.Verify(o => o.Sleep(It.IsAny<int>()), Times.Once());
         }
 
         [TestMethod]

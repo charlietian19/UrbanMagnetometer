@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using SystemWrapper.Configuration;
+using System.Text.RegularExpressions;
 
 namespace Utils.DataManager
 {
@@ -29,9 +30,9 @@ namespace Utils.DataManager
     /* Stores the information about the dataset naming in a convenient way. */
     public class DatasetInfo : IDatasetInfo
     {
-        private string dataCacheFolder, channelNameX, channelNameY, channelNameZ,
-            channelNameTime, dataFileNameFormat, timeFileNameFormat,
-            zipFileNameFormat;
+        private string dataCacheFolder, channelNameX, channelNameY, 
+            channelNameZ, channelNameTime, dataFileNameFormat, 
+            timeFileNameFormat, zipFileNameFormat;
         private IConfigurationManagerWrap ConfigurationManager;
 
         public string Hour { get; set; }
@@ -70,6 +71,27 @@ namespace Utils.DataManager
             Day = time.Day.ToString();
             Month = time.Month.ToString();
             StartDate = time;
+        }
+
+        public DatasetInfo(string fullPath, IConfigurationManagerWrap config)
+        {
+            ConfigurationManager = config;
+            ReadAppConfig();
+            ArchivePath = fullPath;
+            string formatPattern = @"(\{[0-9]\})";
+            string newFormatPattern = @"([0-9]+)";
+            string fileNamePattern = Regex.Replace(zipFileNameFormat,
+                formatPattern, newFormatPattern);
+            Regex re = new Regex(fileNamePattern);
+            GroupCollection groups = re.Matches(Path.GetFileName(fullPath))[0]
+                .Groups;
+            Year = groups[1].Value;
+            Month = groups[2].Value;
+            Day = groups[3].Value;
+            Hour = groups[4].Value;
+            StartDate = new DateTime(Convert.ToInt32(Year),
+                Convert.ToInt32(Month), Convert.ToInt32(Day),
+                Convert.ToInt32(Hour), 0, 0);
         }
 
         /* Returns file name for X, Y or Z data file. */
