@@ -43,7 +43,7 @@ namespace UnitTests.DataManager
             var data = new DatasetInfo(name, config);
             var time = new DateTime(2014, 5, 23, 12, 0, 0);
             Assert.AreEqual("2014", data.Year);
-            Assert.AreEqual("05", data.Month);
+            Assert.AreEqual("5", data.Month);
             Assert.AreEqual("23", data.Day);
             Assert.AreEqual("12", data.Hour);
             Assert.AreEqual("test", data.StationName);

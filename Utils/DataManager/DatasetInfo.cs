@@ -85,10 +85,11 @@ namespace Utils.DataManager
             Regex re = new Regex(fileNamePattern);
             GroupCollection groups = re.Matches(Path.GetFileName(fullPath))[0]
                 .Groups;
-            Year = groups[1].Value;
-            Month = groups[2].Value;
-            Day = groups[3].Value;
-            Hour = groups[4].Value;
+            var zero = new char[] { '0' };
+            Year = groups[1].Value.TrimStart(zero);
+            Month = groups[2].Value.TrimStart(zero);
+            Day = groups[3].Value.TrimStart(zero);
+            Hour = groups[4].Value.TrimStart(zero);
             StartDate = new DateTime(Convert.ToInt32(Year),
                 Convert.ToInt32(Month), Convert.ToInt32(Day),
                 Convert.ToInt32(Hour), 0, 0);

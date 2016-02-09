@@ -157,13 +157,64 @@ namespace UnitTests.DataManager
         [TestMethod]
         public void RetryFailedMultipleSuccess()
         {
-
+            string fp1 = @"failed\2014-3-2_14-xx.zip";
+            string fp2 = @"failed\2015-05-23_09-xx.zip";
+            string fp3 = @"failed\2010-8-31_1-xx.zip";
+            var filePathList = new string[] { fp1, fp2, fp3 };
+            settings["EnableFailedRetryWorker"] = "true";
+            directoryMock.Setup(o => o.GetFiles(
+                It.IsAny<string>(), It.IsAny<string>()))
+                .Returns<string, string>(
+                (path, pattern) => filePathList);
+            var scheduler = new UploadScheduler(uploader, config, file,
+                dir, zip, path, thread);
+            scheduler.FinishedEvent +=
+                new UploadFinishedEventHandler(SignalFinished);
+            scheduler.RetryFailed();
+            finished.WaitOne(timeout);
+            uploaderMock.Verify(o => o.Upload(fp1,
+                @"\2014\3\2\14\TestStation"), Times.Once());
+            fileMock.Verify(o => o.Delete(fp1), Times.Once());
+            uploaderMock.Verify(o => o.Upload(fp2,
+                @"\2015\5\23\9\TestStation"), Times.Once());
+            fileMock.Verify(o => o.Delete(fp2), Times.Once());
+            uploaderMock.Verify(o => o.Upload(fp3,
+                @"\2010\8\31\1\TestStation"), Times.Once());
+            fileMock.Verify(o => o.Delete(fp3), Times.Once());
+            threadMock.Verify(o => o.Sleep(It.IsAny<int>()), Times.Never());
         }
 
         [TestMethod]
         public void RetryFailedSingleFail()
         {
-
+            string filePath = @"failed\2014-3-2_14-xx.zip";
+            var retries = Convert.ToInt32(settings["MaxRetryCount"]);
+            var sleepMs = Convert.ToInt32(
+                settings["WaitBetweenRetriesSeconds"]) * 1000;
+            settings["EnableFailedRetryWorker"] = "true";
+            pathMock.Setup(o => o.GetFileName(@"failed\2014-3-2_14-xx.zip"))
+                .Returns(@"2014-3-2_14-xx.zip");
+            uploaderMock.Setup(o => o.Upload(It.IsAny<string>(),
+                It.IsAny<string>())).Throws(new FileUploadException());
+            directoryMock.Setup(o => o.GetFiles(
+                It.IsAny<string>(), It.IsAny<string>()))
+                .Returns<string, string>(
+                (path, pattern) => new string[] { filePath });
+            directoryMock.Setup(o => o.Exists("failed")).Returns(true);
+            var scheduler = new UploadScheduler(uploader, config, file,
+                dir, zip, path, thread);
+            scheduler.FinishedEvent +=
+                new UploadFinishedEventHandler(SignalFinished);
+            scheduler.RetryFailed();
+            finished.WaitOne(timeout);
+            uploaderMock.Verify(o => o.Upload(filePath,
+                @"\2014\3\2\14\TestStation"), Times.Exactly(retries));
+            threadMock.Verify(o => o.Sleep(sleepMs),
+                Times.Exactly(retries - 1));
+            fileMock.Verify(o => o.Delete(filePath), Times.Never());
+            directoryMock.Verify(o => o.CreateDirectory("failed"), Times.Never());
+            fileMock.Verify(o => o.Move(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never());
         }
 
         [TestMethod]
@@ -250,7 +301,8 @@ namespace UnitTests.DataManager
                 It.IsAny<string>())).Throws(new FileUploadException());
             var scheduler = new UploadScheduler(uploader, config, file,
                 dir, zip, path, thread);
-            var sleepMs = Convert.ToInt32(settings["WaitBetweenRetriesSeconds"]) * 1000;
+            var sleepMs = Convert.ToInt32(
+                settings["WaitBetweenRetriesSeconds"]) * 1000;
             scheduler.FinishedEvent +=
                 new UploadFinishedEventHandler(SignalFinished);
             scheduler.UploadMagneticData(info);
