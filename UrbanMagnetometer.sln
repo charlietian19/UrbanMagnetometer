@@ -13,7 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "Utils\Utils.csproj
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Biomed-eMains-eFM-x", "..\Biomed-eMains-eFM-x\Biomed-eMains-eFM-x\Biomed-eMains-eFM-x.vcxproj", "{4BE35E45-8C2F-4F40-AF10-0C77881F703F}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "NURI_Station_Installer", "NURI_Station_Installer\NURI_Station_Installer.vdproj", "{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "NURI_station_installer", "NURI_Station_Installer\NURI_Station_Installer.vdproj", "{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GDriveFolderMerge", "GDriveFolderMerge\GDriveFolderMerge.csproj", "{81050E80-5021-4869-94C7-2AF33F04F96B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,6 +91,18 @@ Global
 		{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}.Release|Any CPU.ActiveCfg = Release
 		{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}.Release|x64.ActiveCfg = Release
 		{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}.Release|x86.ActiveCfg = Release
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Debug|x64.Build.0 = Debug|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Debug|x86.Build.0 = Debug|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Release|x64.ActiveCfg = Release|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Release|x64.Build.0 = Release|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Release|x86.ActiveCfg = Release|Any CPU
+		{81050E80-5021-4869-94C7-2AF33F04F96B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

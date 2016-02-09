@@ -68,6 +68,7 @@ namespace Utils.Configuration
             }
         }
 
+        /* Maximum number of active google uploads at a time*/
         public static string MaxActiveUploads
         {
             get
@@ -76,6 +77,7 @@ namespace Utils.Configuration
             }
         }
 
+        /* Sampling rate of the magnetometer */
         public static string SamplingRate
         {
             get
@@ -84,6 +86,7 @@ namespace Utils.Configuration
             }
         }
 
+        /* Units of the magnetic data */
         public static string DataUnits
         {
             get
@@ -91,5 +94,23 @@ namespace Utils.Configuration
                 return ConfigurationManager.AppSettings["DataUnits"];
             }
         }
-    }
+
+        /* Name of the google drive folder where the magnetic data is stored. */
+        public static string RemoteDataFolder
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["RemoteDataFolder"];
+            }
+        }
+
+        /* Mime type for GDrive folders. */
+        public static string FoldersMimeType
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["FoldersMimeType"];
+            }
+        }
+        }
 }

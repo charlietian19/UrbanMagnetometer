@@ -24,6 +24,7 @@ namespace Utils.GDrive
         AboutResource About { get; }
         FilesResource Files { get; }
         ChildrenResource Children { get; }
+        ParentsResource Parents { get; }
     }
 
     /* The adapter class makes DriveService conform to the testing interface */
@@ -39,6 +40,7 @@ namespace Utils.GDrive
         public AboutResource About { get { return service.About; } }
         public FilesResource Files { get { return service.Files; } }
         public ChildrenResource Children { get { return service.Children; } }
+        public ParentsResource Parents { get { return service.Parents; } }
     }
 
     public delegate void UploadProgressDelegate(string name, long bytesSent, 
@@ -103,6 +105,12 @@ namespace Utils.GDrive
             }
         }
 
+        /* Returns the google file corresponding to the given absolute path. */
+        public Google.Apis.Drive.v2.Data.File PathToGoogleFile(string path)
+        {
+            return pathHelper.PathToGoogleFile(path);
+        }
+
         /* Returns the root folder ID. */
         public string GetRootFolderId()
         {
@@ -125,6 +133,25 @@ namespace Utils.GDrive
             listRequest.MaxResults = maxListResults;
             IList<ChildReference> files = listRequest.Execute().Items;
             return files;
+        }
+
+        /* Deletes a file by id. */
+        public void DeleteFile(string fileId)
+        {
+            service.Files.Delete(fileId).Execute();
+        }
+
+        /* Sets the patent of the file */
+        public void SetParent(string fileId, string parentId)
+        {
+            var file = GetFileInfo(fileId);
+            foreach (var parent in file.Parents)
+            {
+                service.Parents.Delete(fileId, parent.Id).Execute();
+            }
+            var newParentReference = new ParentReference();
+            newParentReference.Id = parentId;
+            service.Parents.Insert(newParentReference, file.Id).Execute();
         }
 
         /* Synchronously uploads a file given by path to Google Drive. 
