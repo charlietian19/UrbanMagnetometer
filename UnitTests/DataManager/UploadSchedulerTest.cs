@@ -56,7 +56,7 @@ namespace UnitTests.DataManager
             settings["WaitBetweenRetriesSeconds"] = "234";
             settings["StationName"] = "TestStation";
             settings["RemoteFileNameFormat"] = @"\{0}\{1}\{2}\{3}\{4}";
-            settings["MaxDelayBeforeUploadMilliseconds"] = "352";
+            settings["MaxDelayBeforeUploadSeconds"] = "352";
             settings["EnableDelayBeforeUpload"] = "false";
             settings["EnableFailedRetryWorker"] = "false";
             settings["MinDelayBetweenFailedRetriesSeconds"] = "36000";

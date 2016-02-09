@@ -49,7 +49,7 @@ namespace Utils.DataManager
     public class UploadScheduler : IUploadScheduler
     {
         private int maxActiveUploads, maxRetryCount, waitBetweenRetriesSeconds,
-            maxDelayBeforeUploadMilliseconds, 
+            maxDelayBeforeUploadSeconds, 
             minDelayBetweenFailedRetriesSeconds,
             maxDelayBetweenFailedRetriesSeconds;
         bool enableDelayBeforeUpload, enableFailedRetryWorker;
@@ -167,8 +167,8 @@ namespace Utils.DataManager
 
             enableDelayBeforeUpload = Convert.ToBoolean(
                 settings["EnableDelayBeforeUpload"]);
-            maxDelayBeforeUploadMilliseconds = Convert.ToInt32(
-                settings["MaxDelayBeforeUploadMilliseconds"]);
+            maxDelayBeforeUploadSeconds = Convert.ToInt32(
+                settings["MaxDelayBeforeUploadSeconds"]);
 
             enableFailedRetryWorker = Convert.ToBoolean(
                 settings["EnableFailedRetryWorker"]);
@@ -346,7 +346,8 @@ namespace Utils.DataManager
                     if (enableDelayBeforeUpload)
                     {
                         Random rnd = new Random();
-                        ThreadWrap.Sleep(rnd.Next(maxDelayBeforeUploadMilliseconds));
+                        ThreadWrap.Sleep(rnd.Next(maxDelayBeforeUploadSeconds)
+                            * 1000);
                     }
                     Interlocked.Increment(ref ActiveUploadCount);
                     UploadDo(info);
