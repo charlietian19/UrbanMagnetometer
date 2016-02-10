@@ -83,8 +83,8 @@ namespace Utils.DataManager
             string fileNamePattern = Regex.Replace(zipFileNameFormat,
                 formatPattern, newFormatPattern);
             string name = Path.GetFileName(fullPath);
-            Console.WriteLine(string.Format("Matching {0} against {1}"),
-                name, fileNamePattern);
+            Console.WriteLine(string.Format("Matching {0} against {1}",
+                name, fileNamePattern));
             Regex re = new Regex(fileNamePattern);
             GroupCollection groups = re.Matches(name)[0]
                 .Groups;

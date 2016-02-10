@@ -319,7 +319,7 @@ namespace Utils.DataManager
             Thread thread = Thread.CurrentThread;
             thread.Priority = ThreadPriority.Lowest;
             Console.WriteLine(string.Format("Background worker {0} has started",
-                thread));
+                thread.ManagedThreadId));
             while (!queue.IsCompleted)
             {
                 IDatasetInfo info = null;
@@ -332,8 +332,9 @@ namespace Utils.DataManager
                         info.ArchivePath = ArchiveFiles(info);
                         Console.WriteLine(string.Format(
                             "Worker {0} received a new dataset to upload, "
-                            + "StartDate = {1}, ArchivePath = {2}", thread,
-                            info.StartDate, info.ArchivePath));
+                            + "StartDate = {1}, ArchivePath = {2}",
+                            thread.ManagedThreadId, info.StartDate,
+                            info.ArchivePath));
 
                         if (enableDelayBeforeUpload)
                         {
@@ -352,7 +353,7 @@ namespace Utils.DataManager
                     {
                         Console.WriteLine(string.Format(
                             "Worker {0} received a null dataset to upload",
-                            thread));
+                            thread.ManagedThreadId));
                     }
                 }
                 catch (InvalidOperationException)
@@ -393,7 +394,10 @@ namespace Utils.DataManager
                         var info = new DatasetInfo(name, ConfigurationManager);
                         queueFailed.Enqueue(info);
                     }
-                    catch (Exception) { }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 }
             }
             catch (Exception e)
@@ -408,7 +412,7 @@ namespace Utils.DataManager
             Thread thread = Thread.CurrentThread;
             thread.Priority = ThreadPriority.Lowest;
             Console.WriteLine(string.Format("Background worker {0} has started",
-                thread));
+                thread.ManagedThreadId));
             var rnd = new Random();
             while (true)
             {
