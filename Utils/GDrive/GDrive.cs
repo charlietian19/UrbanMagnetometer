@@ -200,6 +200,8 @@ namespace Utils.GDrive
         private void UploadProgressChanged(IUploadProgress progress, 
             FileStream stream)
         {
+            Console.WriteLine(string.Format("Uploading {0}, {1} out of {2} bytes",
+                stream.Name, progress.BytesSent, stream.Length));
             if (ProgressEvent == null)
                 return;
             ProgressEvent(stream.Name, progress.BytesSent, stream.Length);            

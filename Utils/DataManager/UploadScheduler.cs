@@ -280,6 +280,7 @@ namespace Utils.DataManager
                     }
                     else
                     {
+                        Console.WriteLine("Upload failed: " + e.Message);
                         ThreadWrap.Sleep(waitBetweenRetriesSeconds * 1000);
                         continue;
                     }
@@ -339,6 +340,8 @@ namespace Utils.DataManager
                             Random rnd = new Random();
                             ThreadWrap.Sleep(rnd.Next(
                                 maxDelayBeforeUploadSeconds * 1000));
+                            Console.WriteLine(string.Format(
+                                "Sleeping for {0}ms before starting the upload"));
                         }
 
                         Interlocked.Increment(ref ActiveUploadCount);
@@ -416,9 +419,15 @@ namespace Utils.DataManager
                     var delay = rnd.Next(
                         minDelayBetweenFailedRetriesSeconds * 1000,
                         maxDelayBetweenFailedRetriesSeconds * 1000);
+                    Console.WriteLine(string.Format(
+                        "Sleeping for {0} ms before retrying the failed uploads",
+                        delay));
                     retryEvent.WaitOne(delay);
 
                     var count = queueFailed.Count;
+                    Console.WriteLine(string.Format(
+                        "RetryWoker wakes up, there are {0} datasets in the queue",
+                        count));
                     for (int i = 0; i < count; i++)
                     {
                         IDatasetInfo info = null;
@@ -433,7 +442,10 @@ namespace Utils.DataManager
                     }
                     retryEvent.Reset();
                 }
-                catch (Exception) { }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
         }
 
@@ -446,6 +458,8 @@ namespace Utils.DataManager
         /* Invoke the event when an upload starts. */
         protected virtual void OnStarted(IDatasetInfo info)
         {
+            Console.WriteLine(string.Format(
+                "Started uploading dataset {0}", info.ArchivePath));
             if (StartedEvent == null)
                 return;
             StartedEvent(info);
@@ -455,6 +469,9 @@ namespace Utils.DataManager
         protected virtual void OnFinished(IDatasetInfo info, bool success,
             string msg)
         {
+            Console.WriteLine(string.Format(
+                "Done uploading dataset {0}, success = {1}, msg = {2}",
+                info.ArchivePath, success, msg));
             if (FinishedEvent == null)
                 return;
             FinishedEvent(info, success, msg);
