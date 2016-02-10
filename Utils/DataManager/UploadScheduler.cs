@@ -262,20 +262,6 @@ namespace Utils.DataManager
             OnStarted(info);
             string parent = string.Format(remoteFileName, info.Year,
                             info.Month, info.Day, info.Hour, info.StationName);
-
-            if (info.ArchivePath == null)
-            {
-                try
-                {
-                    info.ArchivePath = ArchiveFiles(info);
-                }
-                catch (Exception e)
-                {
-                    OnFinished(info, false, e.Message);
-                    return;
-                }
-            }
-
             for (int i = 0; i < maxRetryCount; i++)
             {
                 try
@@ -331,19 +317,22 @@ namespace Utils.DataManager
             thread.Priority = ThreadPriority.Lowest;
             while (!queue.IsCompleted)
             {
+                IDatasetInfo info = null;
                 try
                 {
-                    IDatasetInfo info = null;
                     info = queue.Take();
 
                     if (info != null)
                     {
+                        info.ArchivePath = ArchiveFiles(info);
+
                         if (enableDelayBeforeUpload)
                         {
                             Random rnd = new Random();
                             ThreadWrap.Sleep(rnd.Next(
                                 maxDelayBeforeUploadSeconds * 1000));
                         }
+
                         Interlocked.Increment(ref ActiveUploadCount);
                         UploadDo(info);
                         Interlocked.Decrement(ref ActiveUploadCount);
@@ -353,7 +342,13 @@ namespace Utils.DataManager
                 {
                     return;
                 }
-                catch (Exception) { }
+                catch (Exception e)
+                {
+                    if (info != null)
+                    {
+                        OnFinished(info, false, e.Message);
+                    }
+                }
             }
         }
 
