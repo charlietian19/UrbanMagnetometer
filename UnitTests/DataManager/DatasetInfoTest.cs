@@ -52,6 +52,21 @@ namespace UnitTests.DataManager
         }
 
         [TestMethod]
+        public void CreateFromFileNameFullPath()
+        {
+            var name = @"D:\NURI\cache\failed\2014-05-23_12-xx.zip";
+            var data = new DatasetInfo(name, config);
+            var time = new DateTime(2014, 5, 23, 12, 0, 0);
+            Assert.AreEqual("2014", data.Year);
+            Assert.AreEqual("5", data.Month);
+            Assert.AreEqual("23", data.Day);
+            Assert.AreEqual("12", data.Hour);
+            Assert.AreEqual("test", data.StationName);
+            Assert.AreEqual(name, data.ArchivePath);
+            Assert.AreEqual(time, data.StartDate);
+        }
+
+        [TestMethod]
         public void CreateAndReadDateTime()
         {
             // year, month, day, hour, minute, second

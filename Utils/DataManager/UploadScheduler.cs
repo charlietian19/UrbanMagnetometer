@@ -341,8 +341,8 @@ namespace Utils.DataManager
                         if (enableDelayBeforeUpload)
                         {
                             Random rnd = new Random();
-                            ThreadWrap.Sleep(rnd.Next(maxDelayBeforeUploadSeconds)
-                                * 1000);
+                            ThreadWrap.Sleep(rnd.Next(
+                                maxDelayBeforeUploadSeconds * 1000));
                         }
                         Interlocked.Increment(ref ActiveUploadCount);
                         UploadDo(info);
@@ -372,8 +372,12 @@ namespace Utils.DataManager
                     + Path.GetExtension(zipFileNameFormat));
                 foreach (var name in failed)
                 {
-                    var info = new DatasetInfo(name, ConfigurationManager);
-                    queueFailed.Enqueue(info);
+                    try
+                    {
+                        var info = new DatasetInfo(name, ConfigurationManager);
+                        queueFailed.Enqueue(info);
+                    }
+                    catch (Exception) { }
                 }
             }
             catch (Exception) { }
@@ -389,8 +393,9 @@ namespace Utils.DataManager
             {
                 try
                 {
-                    var delay = rnd.Next(minDelayBetweenFailedRetriesSeconds,
-                        maxDelayBetweenFailedRetriesSeconds) * 1000;
+                    var delay = rnd.Next(
+                        minDelayBetweenFailedRetriesSeconds * 1000,
+                        maxDelayBetweenFailedRetriesSeconds * 1000);
                     retryEvent.WaitOne(delay);
 
                     var count = queueFailed.Count;
