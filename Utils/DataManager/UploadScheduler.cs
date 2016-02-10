@@ -184,6 +184,7 @@ namespace Utils.DataManager
         /* Starts the worker threads. */
         private void StartWorkerThreads()
         {
+            Console.WriteLine("Launching background upload workers");
             for (int i = 0; i < maxActiveUploads; i++)
             {
                 Task.Run(() => Worker());
@@ -191,6 +192,7 @@ namespace Utils.DataManager
 
             if (enableFailedRetryWorker)
             {
+                Console.WriteLine("Launching failed upload worker");
                 Task.Run(() => RetryWorker());
             }
         }
@@ -355,6 +357,7 @@ namespace Utils.DataManager
         /* Triggers uploading of the files for which upload has failed. */
         public void RetryFailed()
         {
+            Console.WriteLine("Triggering retryEvent");
             retryEvent.Set();
         }
 
