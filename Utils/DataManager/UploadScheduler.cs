@@ -382,6 +382,8 @@ namespace Utils.DataManager
         /* Retries the failed uploads. */
         private void RetryWorker()
         {
+            Thread thread = Thread.CurrentThread;
+            thread.Priority = ThreadPriority.Lowest;
             var rnd = new Random();
             while (true)
             {
