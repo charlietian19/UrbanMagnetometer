@@ -8,7 +8,7 @@ using SystemWrapper.Threading;
 using System.IO.Compression;
 using Utils.GDrive;
 
-/* Example code taken from 
+/* Example code taken from
 
     https://msdn.microsoft.com/en-us/library/dd997371(v=vs.110).aspx
     https://msdn.microsoft.com/en-us/library/aa645739(v=vs.71).aspx
@@ -20,7 +20,7 @@ using Utils.GDrive;
 namespace Utils.DataManager
 {
     public delegate void UploadStartedEventHandler(IDatasetInfo info);
-    public delegate void UploadFinishedEventHandler(IDatasetInfo info, 
+    public delegate void UploadFinishedEventHandler(IDatasetInfo info,
         bool success, string message);
 
     public interface IUploadScheduler
@@ -49,7 +49,7 @@ namespace Utils.DataManager
     public class UploadScheduler : IUploadScheduler
     {
         private int maxActiveUploads, maxRetryCount, waitBetweenRetriesSeconds,
-            maxDelayBeforeUploadSeconds, 
+            maxDelayBeforeUploadSeconds,
             minDelayBetweenFailedRetriesSeconds,
             maxDelayBetweenFailedRetriesSeconds;
         bool enableDelayBeforeUpload, enableFailedRetryWorker;
@@ -57,7 +57,7 @@ namespace Utils.DataManager
         private string remoteFileName;
         private int ActiveUploadCount = 0;
         private BlockingCollection<IDatasetInfo> queue;
-        private ConcurrentQueue<IDatasetInfo> queueFailed 
+        private ConcurrentQueue<IDatasetInfo> queueFailed
             = new ConcurrentQueue<IDatasetInfo>();
         private IUploader uploader;
         private IConfigurationManagerWrap ConfigurationManager;
@@ -84,7 +84,7 @@ namespace Utils.DataManager
         public UploadScheduler(IUploader uploader)
         {
             UseSystemWrapper();
-            InitNoQueueBound(uploader);            
+            InitNoQueueBound(uploader);
         }
 
         /* Creates an uploader with a pre-defined queue bound. */
@@ -95,7 +95,7 @@ namespace Utils.DataManager
         }
 
         /* Creates an uploader that uses provided wrappers and no queue bound*/
-        public UploadScheduler(IUploader uploader, 
+        public UploadScheduler(IUploader uploader,
             IConfigurationManagerWrap config, IFileWrap file, IDirectoryWrap dir,
             IZipFile zip, IPathWrap path, IThreadWrap thread)
         {
@@ -124,7 +124,7 @@ namespace Utils.DataManager
         }
 
         /* Assigns the wrappers to use the provided objects. */
-        private void UseCustomWrapper(IConfigurationManagerWrap config, 
+        private void UseCustomWrapper(IConfigurationManagerWrap config,
             IFileWrap file, IDirectoryWrap dir, IZipFile zip, IPathWrap path,
             IThreadWrap thread)
         {
@@ -275,7 +275,7 @@ namespace Utils.DataManager
                     if (i + 1 >= maxRetryCount)
                     {
                         ProcessFailedUpload(info);
-                        OnFinished(info, false, e.Message);                        
+                        OnFinished(info, false, e.Message);
                         return;
                     }
                     else
@@ -291,12 +291,12 @@ namespace Utils.DataManager
             }
         }
 
-        /* Moves the files into the failed uploads folder and adds 
+        /* Moves the files into the failed uploads folder and adds
         it to the failed files queue. */
         private void ProcessFailedUpload(IDatasetInfo info)
         {
             var file = Path.GetFileName(info.ArchivePath);
-            var dstDir = failedPath;            
+            var dstDir = failedPath;
             if (!Directory.Exists(dstDir))
             {
                 Directory.CreateDirectory(dstDir);
@@ -307,7 +307,7 @@ namespace Utils.DataManager
             {
                 File.Move(info.ArchivePath, dst);
                 info.ArchivePath = dst;
-            }             
+            }
 
             queueFailed.Enqueue(info);
         }
@@ -317,6 +317,8 @@ namespace Utils.DataManager
         {
             Thread thread = Thread.CurrentThread;
             thread.Priority = ThreadPriority.Lowest;
+            Console.WriteLine(string.Format("Background worker {0} has started",
+                thread));
             while (!queue.IsCompleted)
             {
                 IDatasetInfo info = null;
@@ -327,6 +329,10 @@ namespace Utils.DataManager
                     if (info != null)
                     {
                         info.ArchivePath = ArchiveFiles(info);
+                        Console.WriteLine(string.Format(
+                            "Worker {0} received a new dataset to upload, "
+                            + "StartDate = {1}, ArchivePath = {2}", thread,
+                            info.StartDate, info.ArchivePath));
 
                         if (enableDelayBeforeUpload)
                         {
@@ -338,6 +344,12 @@ namespace Utils.DataManager
                         Interlocked.Increment(ref ActiveUploadCount);
                         UploadDo(info);
                         Interlocked.Decrement(ref ActiveUploadCount);
+                    }
+                    else
+                    {
+                        Console.WriteLine(string.Format(
+                            "Worker {0} received a null dataset to upload",
+                            thread));
                     }
                 }
                 catch (InvalidOperationException)
@@ -364,10 +376,12 @@ namespace Utils.DataManager
         /* Adds all files in "failed" folder into retryQueue. */
         private void EnqueueFailed()
         {
+            Console.WriteLine("Enqueuing failed uploads");
             try
             {
-                var failed = Directory.GetFiles(failedPath, "*" 
+                var failed = Directory.GetFiles(failedPath, "*"
                     + Path.GetExtension(zipFileNameFormat));
+                Console.WriteLine("Files found in " + failedPath);
                 foreach (var name in failed)
                 {
                     try
@@ -376,9 +390,15 @@ namespace Utils.DataManager
                         queueFailed.Enqueue(info);
                     }
                     catch (Exception) { }
+                    Console.WriteLine("Enqueuing " + name);
+                    var info = new DatasetInfo(name, ConfigurationManager);
+                    queueFailed.Enqueue(info);
                 }
             }
-            catch (Exception) { }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         /* Retries the failed uploads. */
@@ -386,6 +406,8 @@ namespace Utils.DataManager
         {
             Thread thread = Thread.CurrentThread;
             thread.Priority = ThreadPriority.Lowest;
+            Console.WriteLine(string.Format("Background worker {0} has started",
+                thread));
             var rnd = new Random();
             while (true)
             {
@@ -430,7 +452,7 @@ namespace Utils.DataManager
         }
 
         /* Invoke the event when an upload finishes. */
-        protected virtual void OnFinished(IDatasetInfo info, bool success, 
+        protected virtual void OnFinished(IDatasetInfo info, bool success,
             string msg)
         {
             if (FinishedEvent == null)
