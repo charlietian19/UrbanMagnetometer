@@ -281,13 +281,10 @@ namespace Utils.DataManager
                 try
                 {
                     uploader.Upload(info.ArchivePath, parent);
-                    File.Delete(info.ArchivePath);
-                    OnFinished(info, true, "Upload successful");
-                    break;
                 }
-                catch (FileUploadException e)
+                catch (Exception e)
                 {
-                    if (i + 1 == maxRetryCount)
+                    if (i + 1 >= maxRetryCount)
                     {
                         ProcessFailedUpload(info);
                         OnFinished(info, false, e.Message);                        
@@ -296,13 +293,13 @@ namespace Utils.DataManager
                     else
                     {
                         ThreadWrap.Sleep(waitBetweenRetriesSeconds * 1000);
+                        continue;
                     }
                 }
-                catch (Exception e)
-                {
-                    OnFinished(info, false, e.Message);
-                    return;
-                }
+
+                File.Delete(info.ArchivePath);
+                OnFinished(info, true, "Upload successful");
+                return;
             }
         }
 
@@ -334,25 +331,29 @@ namespace Utils.DataManager
             thread.Priority = ThreadPriority.Lowest;
             while (!queue.IsCompleted)
             {
-                IDatasetInfo info = null;
                 try
                 {
+                    IDatasetInfo info = null;
                     info = queue.Take();
-                }
-                catch (InvalidOperationException) { }
 
-                if (info != null)
-                {
-                    if (enableDelayBeforeUpload)
+                    if (info != null)
                     {
-                        Random rnd = new Random();
-                        ThreadWrap.Sleep(rnd.Next(maxDelayBeforeUploadSeconds)
-                            * 1000);
+                        if (enableDelayBeforeUpload)
+                        {
+                            Random rnd = new Random();
+                            ThreadWrap.Sleep(rnd.Next(maxDelayBeforeUploadSeconds)
+                                * 1000);
+                        }
+                        Interlocked.Increment(ref ActiveUploadCount);
+                        UploadDo(info);
+                        Interlocked.Decrement(ref ActiveUploadCount);
                     }
-                    Interlocked.Increment(ref ActiveUploadCount);
-                    UploadDo(info);
-                    Interlocked.Decrement(ref ActiveUploadCount);
                 }
+                catch (InvalidOperationException)
+                {
+                    return;
+                }
+                catch (Exception) { }
             }
         }
 
