@@ -389,13 +389,11 @@ namespace Utils.DataManager
                 {
                     try
                     {
+                        Console.WriteLine("Enqueuing " + name);
                         var info = new DatasetInfo(name, ConfigurationManager);
                         queueFailed.Enqueue(info);
                     }
                     catch (Exception) { }
-                    Console.WriteLine("Enqueuing " + name);
-                    var info = new DatasetInfo(name, ConfigurationManager);
-                    queueFailed.Enqueue(info);
                 }
             }
             catch (Exception e)
