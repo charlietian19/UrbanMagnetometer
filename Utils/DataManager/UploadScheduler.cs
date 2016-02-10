@@ -339,10 +339,12 @@ namespace Utils.DataManager
                         if (enableDelayBeforeUpload)
                         {
                             Random rnd = new Random();
-                            ThreadWrap.Sleep(rnd.Next(
-                                maxDelayBeforeUploadSeconds * 1000));
+                            var delay = rnd.Next(
+                                maxDelayBeforeUploadSeconds * 1000);
                             Console.WriteLine(string.Format(
-                                "Sleeping for {0}ms before starting the upload"));
+                                "Sleeping for {0}ms before starting the upload",
+                                delay));
+                            ThreadWrap.Sleep(delay);
                         }
 
                         Interlocked.Increment(ref ActiveUploadCount);
