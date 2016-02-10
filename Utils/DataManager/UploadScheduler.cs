@@ -387,24 +387,28 @@ namespace Utils.DataManager
             var rnd = new Random();
             while (true)
             {
-                var delay = rnd.Next(minDelayBetweenFailedRetriesSeconds, 
-                    maxDelayBetweenFailedRetriesSeconds) * 1000;                
-                retryEvent.WaitOne(delay);
-
-                var count = queueFailed.Count;
-                for (int i = 0; i < count; i++)
+                try
                 {
-                    IDatasetInfo info = null;
-                    if (!queueFailed.TryDequeue(out info))
-                    {
-                        break;
-                    }
+                    var delay = rnd.Next(minDelayBetweenFailedRetriesSeconds,
+                        maxDelayBetweenFailedRetriesSeconds) * 1000;
+                    retryEvent.WaitOne(delay);
 
-                    Interlocked.Increment(ref ActiveUploadCount);
-                    UploadDo(info);
-                    Interlocked.Decrement(ref ActiveUploadCount);
+                    var count = queueFailed.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        IDatasetInfo info = null;
+                        if (!queueFailed.TryDequeue(out info))
+                        {
+                            break;
+                        }
+
+                        Interlocked.Increment(ref ActiveUploadCount);
+                        UploadDo(info);
+                        Interlocked.Decrement(ref ActiveUploadCount);
+                    }
+                    retryEvent.Reset();
                 }
-                retryEvent.Reset();
+                catch (Exception) { }
             }
         }
 
