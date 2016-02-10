@@ -87,9 +87,13 @@ namespace Utils.DataManager
                 .Groups;
             var zero = new char[] { '0' };
             Year = groups[1].Value.TrimStart(zero);
+            Year = (Year == "") ? "0" : Year ;
             Month = groups[2].Value.TrimStart(zero);
+            Month = (Month == "") ? "0" : Month;
             Day = groups[3].Value.TrimStart(zero);
+            Day = (Day == "") ? "0" : Day;
             Hour = groups[4].Value.TrimStart(zero);
+            Hour = (Hour == "") ? "0" : Hour;
             StartDate = new DateTime(Convert.ToInt32(Year),
                 Convert.ToInt32(Month), Convert.ToInt32(Day),
                 Convert.ToInt32(Hour), 0, 0);

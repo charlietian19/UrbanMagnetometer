@@ -37,7 +37,7 @@ namespace UnitTests.DataManager
         }
 
         [TestMethod]
-        public void CreateFromFileName()
+        public void CreateFromFileName1()
         {
             var name = "2014-05-23_12-xx.zip";
             var data = new DatasetInfo(name, config);
@@ -46,6 +46,21 @@ namespace UnitTests.DataManager
             Assert.AreEqual("5", data.Month);
             Assert.AreEqual("23", data.Day);
             Assert.AreEqual("12", data.Hour);
+            Assert.AreEqual("test", data.StationName);
+            Assert.AreEqual(name, data.ArchivePath);
+            Assert.AreEqual(time, data.StartDate);
+        }
+
+        [TestMethod]
+        public void CreateFromFileName2()
+        {
+            var name = "2016-2-5_0-xx.zip";
+            var data = new DatasetInfo(name, config);
+            var time = new DateTime(2016, 2, 5, 0, 0, 0);
+            Assert.AreEqual("2016", data.Year);
+            Assert.AreEqual("2", data.Month);
+            Assert.AreEqual("5", data.Day);
+            Assert.AreEqual("0", data.Hour);
             Assert.AreEqual("test", data.StationName);
             Assert.AreEqual(name, data.ArchivePath);
             Assert.AreEqual(time, data.StartDate);
