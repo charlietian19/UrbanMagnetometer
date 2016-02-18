@@ -198,7 +198,7 @@
             this.Controls.Add(this.sensorList);
             this.Controls.Add(this.stationNameLabel);
             this.Name = "MainForm";
-            this.Text = "Magnetic Data Recorder";
+            this.Text = "Magnetic Data Recorder Debug Version";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.dataGraph)).EndInit();
             this.statusStrip.ResumeLayout(false);

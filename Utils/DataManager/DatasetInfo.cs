@@ -2,6 +2,7 @@
 using System.IO;
 using SystemWrapper.Configuration;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace Utils.DataManager
 {
@@ -82,8 +83,11 @@ namespace Utils.DataManager
             string newFormatPattern = @"([0-9]+)";
             string fileNamePattern = Regex.Replace(zipFileNameFormat,
                 formatPattern, newFormatPattern);
+            string name = Path.GetFileName(fullPath);
+            Debug.WriteLine(string.Format("Matching {0} against {1}",
+                name, fileNamePattern));
             Regex re = new Regex(fileNamePattern);
-            GroupCollection groups = re.Matches(Path.GetFileName(fullPath))[0]
+            GroupCollection groups = re.Matches(name)[0]
                 .Groups;
             var zero = new char[] { '0' };
             Year = groups[1].Value.TrimStart(zero);
