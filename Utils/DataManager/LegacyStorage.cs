@@ -35,6 +35,7 @@ namespace Utils.DataManager
             }
         }
 
+        public delegate bool PartitionCondition(DateTime start, DateTime now);
         private IUploadScheduler scheduler;
         private IBinaryWriterWrap x, y, z, t;
         private IBinaryWriterFactory _BinaryWriterFactory;
@@ -47,6 +48,9 @@ namespace Utils.DataManager
 
         private bool isWriting = false;
         private long index;
+        PartitionCondition partitionCondition;
+        PartitionCondition defaultCondition = 
+            (start, now) => start.Hour != now.Hour;
 
         public bool HasCachedData
         {
@@ -57,6 +61,47 @@ namespace Utils.DataManager
         public LegacyStorage(IUploadScheduler scheduler)
         {
             this.scheduler = scheduler;
+            partitionCondition = defaultCondition;
+            UseDefaultWrappers();
+        }
+
+        /* Constructs the data writer given a Google Drive connection
+        and a condition to partition the datastream into files. */
+        public LegacyStorage(IUploadScheduler scheduler,
+            PartitionCondition condition)
+        {
+            this.scheduler = scheduler;
+            partitionCondition = condition;
+            UseDefaultWrappers();
+        }
+
+        /* Constructs the data writer given a Google Drive connection 
+        and the wrappers. */
+        public LegacyStorage(IUploadScheduler scheduler, IFileWrap file,
+            IDirectoryWrap dir, IBinaryWriterFactory binaryWriterFactory,
+            IConfigurationManagerWrap configManager)
+        {
+            this.scheduler = scheduler;
+            partitionCondition = defaultCondition;
+            UseCustomWrappers(file, dir, binaryWriterFactory, configManager);
+        }
+
+        /* Constructs the data writer given a Google Drive connection, 
+        partition condition and the wrappers. */
+        public LegacyStorage(IUploadScheduler scheduler, 
+            PartitionCondition condition,
+            IFileWrap file, IDirectoryWrap dir, 
+            IBinaryWriterFactory binaryWriterFactory,
+            IConfigurationManagerWrap configManager)
+        {
+            this.scheduler = scheduler;
+            partitionCondition = condition;
+            UseCustomWrappers(file, dir, binaryWriterFactory, configManager);
+        }
+
+        /* Constructs the object with default filesystem wrappers. */
+        public void UseDefaultWrappers()
+        {
             IFile = new FileWrap();
             _BinaryWriterFactory = new BinaryWriterFactory();
             ConfigurationManager = new ConfigurationManagerWrap();
@@ -65,11 +110,10 @@ namespace Utils.DataManager
         }
 
         /* Constructs the object with custom filesystem wrappers for testing. */
-        public LegacyStorage(IUploadScheduler scheduler, IFileWrap file,
-            IDirectoryWrap dir, IBinaryWriterFactory binaryWriterFactory,
+        private void UseCustomWrappers(IFileWrap file, IDirectoryWrap dir, 
+            IBinaryWriterFactory binaryWriterFactory,
             IConfigurationManagerWrap configManager)
         {
-            this.scheduler = scheduler;
             IFile = file;
             _BinaryWriterFactory = binaryWriterFactory;
             ConfigurationManager = configManager;
@@ -86,7 +130,7 @@ namespace Utils.DataManager
                 CreateFiles(time);
             }
 
-            if (info.StartDate.Hour != time.Hour)
+            if (partitionCondition(info.StartDate, time))
             {
                 CloseAndUploadAll(time);
                 CreateFiles(time);
