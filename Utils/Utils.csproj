@@ -112,11 +112,13 @@
   <ItemGroup>
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="DataManager\DatasetInfo.cs" />
+    <Compile Include="DataManager\SampleDatasetInfo.cs" />
     <Compile Include="DataReader\DatasetChunk.cs" />
     <Compile Include="DataReader\DatasetReader.cs" />
     <Compile Include="DataReader\LegacyReader.cs" />
     <Compile Include="DataManager\LegacyStorage.cs" />
     <Compile Include="DataManager\UploadScheduler.cs" />
+    <Compile Include="Filters\AbstractSimpleFilter.cs" />
     <Compile Include="GDrive\FileUploadException.cs" />
     <Compile Include="GDrive\GDrive.cs" />
     <Compile Include="GDrive\GDrivePathHelper.cs" />

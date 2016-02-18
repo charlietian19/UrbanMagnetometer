@@ -97,6 +97,7 @@
     <Compile Include="DataManager\DatasetInfoTest.cs" />
     <Compile Include="DataReader\DatasetReaderTest.cs" />
     <Compile Include="DataManager\UploadSchedulerTest.cs" />
+    <Compile Include="Filters\AbstractSimpleFilterTest.cs" />
     <Compile Include="GDrive\GDrivePathHelperTest.cs" />
     <Compile Include="GDrive\GDriveTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -112,5 +112,9 @@ namespace Utils.Configuration
                 return ConfigurationManager.AppSettings["FoldersMimeType"];
             }
         }
+
+        /* Path for the signal sample files */
+        public static string SampleName = @"TestSample\Test";
+
         }
 }

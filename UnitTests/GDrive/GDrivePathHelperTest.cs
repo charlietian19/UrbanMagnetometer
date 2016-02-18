@@ -100,6 +100,20 @@ namespace UnitTests.GDriveTests
         }
 
         [TestMethod]
+        /* Checks that Lookup("\\\foo\\\\bar") returns the expected object. */
+        public void LookupNestedManySlashes()
+        {
+            google.Setup(o => o.ChildList(root)).Returns(
+                new ChildReference[] { fooChild.Object });
+            google.Setup(o => o.ChildList(foo)).Returns(
+                new ChildReference[] { barChild.Object });
+            IGDrivePathHelper path = new GDrivePathHelper(google.Object);
+
+            Assert.AreEqual(bar.Title,
+                path.PathToGoogleFile(@"\\\foo\\\\\bar").Title);
+        }
+
+        [TestMethod]
         /* Checks that Lookup("\foo\bar\baz") returns the expected object. */
         public void LookupNestedTwice()
         {
