@@ -181,10 +181,17 @@ namespace Utils.DataManager
             writer.Write(precisionCounter);
         }
 
+        /* Creates a new dataset. */
+        virtual protected IDatasetInfo NewDatasetInfo(DateTime time, 
+            IConfigurationManagerWrap configuration)
+        {
+            return new DatasetInfo(time, ConfigurationManager);
+        }
+
         /* Creates the data files in cache folder. */
         private void CreateFiles(DateTime time)
         {
-            info = new DatasetInfo(time, ConfigurationManager);
+            info = NewDatasetInfo(time, ConfigurationManager);
             x = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.XFileName),
                 FileMode.Append, FileAccess.Write));
             y = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.YFileName),

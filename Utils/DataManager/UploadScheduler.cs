@@ -55,7 +55,7 @@ namespace Utils.DataManager
             maxDelayBetweenFailedRetriesSeconds;
         bool enableDelayBeforeUpload, enableFailedRetryWorker;
         private string dataCacheFolder, zipFileNameFormat;
-        private string remoteFileName;
+        private string remoteRoot;
         private int ActiveUploadCount = 0;
         private BlockingCollection<IDatasetInfo> queue;
         private ConcurrentQueue<IDatasetInfo> queueFailed
@@ -164,7 +164,7 @@ namespace Utils.DataManager
             maxRetryCount = Convert.ToInt32(settings["MaxRetryCount"]);
             waitBetweenRetriesSeconds = Convert.ToInt32(
                 settings["WaitBetweenRetriesSeconds"]);
-            remoteFileName = settings["RemoteFileNameFormat"];
+            remoteRoot = settings["RemoteRoot"];
 
             enableDelayBeforeUpload = Convert.ToBoolean(
                 settings["EnableDelayBeforeUpload"]);
@@ -263,8 +263,7 @@ namespace Utils.DataManager
         private void UploadDo(IDatasetInfo info)
         {
             OnStarted(info);
-            string parent = string.Format(remoteFileName, info.Year,
-                            info.Month, info.Day, info.Hour, info.StationName);
+            string parent = Path.Combine(remoteRoot, info.RemotePath);
             for (int i = 0; i < maxRetryCount; i++)
             {
                 try

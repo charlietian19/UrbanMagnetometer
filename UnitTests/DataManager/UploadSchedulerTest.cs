@@ -55,7 +55,7 @@ namespace UnitTests.DataManager
             settings["MaxRetryCount"] = "3";
             settings["WaitBetweenRetriesSeconds"] = "234";
             settings["StationName"] = "TestStation";
-            settings["RemoteFileNameFormat"] = @"\{0}\{1}\{2}\{3}\{4}";
+            settings["RemoteRoot"] = @"\root";
             settings["MaxDelayBeforeUploadSeconds"] = "352";
             settings["EnableDelayBeforeUpload"] = "false";
             settings["EnableFailedRetryWorker"] = "false";
@@ -109,6 +109,7 @@ namespace UnitTests.DataManager
                 .Returns(string.Format("data{0}.zip", count));
             infoMock.Setup(o => o.FolderPath).Returns("");
             infoMock.SetupProperty(o => o.ArchivePath);
+            infoMock.Setup(o => o.RemotePath).Returns("RemotePath");
 
             pathMock.Setup(o => o.Combine(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns<string, string>((s1, s2) => Path.Combine(s1, s2));
@@ -147,8 +148,8 @@ namespace UnitTests.DataManager
                 new UploadFinishedEventHandler(SignalFinished);
             scheduler.RetryFailed();
             finished.WaitOne(timeout);
-            uploaderMock.Verify(o => o.Upload(filePath, 
-                @"\2014\3\2\14\TestStation"), Times.Once());
+            uploaderMock.Verify(o => o.Upload(filePath,
+                @"\root\2014\3\2\14\TestStation"), Times.Once());
             fileMock.Verify(o => o.Delete(filePath), 
                 Times.Once());
             threadMock.Verify(o => o.Sleep(It.IsAny<int>()), Times.Never());
@@ -173,13 +174,13 @@ namespace UnitTests.DataManager
             scheduler.RetryFailed();
             finished.WaitOne(timeout);
             uploaderMock.Verify(o => o.Upload(fp1,
-                @"\2014\3\2\14\TestStation"), Times.Once());
+                @"\root\2014\3\2\14\TestStation"), Times.Once());
             fileMock.Verify(o => o.Delete(fp1), Times.Once());
             uploaderMock.Verify(o => o.Upload(fp2,
-                @"\2015\5\23\9\TestStation"), Times.Once());
+                @"\root\2015\5\23\9\TestStation"), Times.Once());
             fileMock.Verify(o => o.Delete(fp2), Times.Once());
             uploaderMock.Verify(o => o.Upload(fp3,
-                @"\2010\8\31\1\TestStation"), Times.Once());
+                @"\root\2010\8\31\1\TestStation"), Times.Once());
             fileMock.Verify(o => o.Delete(fp3), Times.Once());
             threadMock.Verify(o => o.Sleep(It.IsAny<int>()), Times.Never());
         }
@@ -208,7 +209,7 @@ namespace UnitTests.DataManager
             scheduler.RetryFailed();
             finished.WaitOne(timeout);
             uploaderMock.Verify(o => o.Upload(filePath,
-                @"\2014\3\2\14\TestStation"), Times.Exactly(retries));
+                @"\root\2014\3\2\14\TestStation"), Times.Exactly(retries));
             threadMock.Verify(o => o.Sleep(sleepMs),
                 Times.Exactly(retries - 1));
             fileMock.Verify(o => o.Delete(filePath), Times.Never());
@@ -256,7 +257,7 @@ namespace UnitTests.DataManager
             threadMock.Verify(o => o.Sleep(It.IsAny<int>()), Times.Never());
             directoryMock.Verify(o => o.Delete("random0", true), Times.Once());
             uploaderMock.Verify(o => o.Upload("data0.zip",
-                @"\2015\5\30\15\TestStation"), Times.Once());
+                @"\root\RemotePath"), Times.Once());
             fileMock.Verify(o => o.Delete("data0.zip"), Times.Once());
         }
 
@@ -287,8 +288,8 @@ namespace UnitTests.DataManager
             zipMock.Verify(o => o.CreateFromDirectory("random0", "data0.zip"),
                 Times.Once());
             directoryMock.Verify(o => o.Delete("random0", true), Times.Never());
-            uploaderMock.Verify(o => o.Upload("data0.zip",
-                @"\2015\5\30\15\TestStation"), Times.Never());
+            uploaderMock.Verify(o => o.Upload("data0.zip", It.IsAny<string>()),
+                Times.Never());
             threadMock.Verify(o => o.Sleep(It.IsAny<int>()), Times.Never());
             fileMock.Verify(o => o.Delete("data0.zip"), Times.Never());
         }
@@ -323,7 +324,7 @@ namespace UnitTests.DataManager
                 Times.Once());
             directoryMock.Verify(o => o.Delete("random0", true), Times.Once());
             uploaderMock.Verify(o => o.Upload("data0.zip",
-                @"\2015\5\30\15\TestStation"), Times.Exactly(retries));
+                @"\root\RemotePath"), Times.Exactly(retries));
             threadMock.Verify(o => o.Sleep(sleepMs), 
                 Times.Exactly(retries - 1));
             fileMock.Verify(o => o.Delete("data0.zip"), Times.Never());

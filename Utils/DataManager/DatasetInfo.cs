@@ -26,6 +26,7 @@ namespace Utils.DataManager
         bool isSameFile(IDatasetInfo other);
         bool isSameFile(DateTime other);
         string ArchivePath { get; set; }
+        string RemotePath { get; }
     }
 
     /* Stores the information about the dataset naming in a convenient way. */
@@ -104,14 +105,14 @@ namespace Utils.DataManager
         }
 
         /* Returns file name for X, Y or Z data file. */
-        private string FormatFileName(String channel)
+        virtual protected string FormatFileName(string channel)
         {
-            return String.Format(dataFileNameFormat, Year, Month, Day, Hour, 
+            return string.Format(dataFileNameFormat, Year, Month, Day, Hour, 
                 channel, Units, SamplingRate);
         }
 
         /* Returns file name for the X data file. */
-        public string XFileName
+        virtual public string XFileName
         {
             get
             {
@@ -120,7 +121,7 @@ namespace Utils.DataManager
         }
 
         /* Returns file name for the Y data file. */
-        public string YFileName
+        virtual public string YFileName
         {
             get
             {
@@ -129,7 +130,7 @@ namespace Utils.DataManager
         }
 
         /* Returns file name for the Z data file. */
-        public String ZFileName
+        virtual public string ZFileName
         {
             get
             {
@@ -138,27 +139,27 @@ namespace Utils.DataManager
         }
 
         /* Returns file name for time data file. */
-        public string TFileName
+        virtual public string TFileName
         {
             get
             {
-                return String.Format(timeFileNameFormat,
+                return string.Format(timeFileNameFormat,
                     Year, Month, Day, Hour, channelNameTime);
             }
         }
 
         /* Returns the archive name for this dataset. */
-        public string ZipFileName
+        virtual public string ZipFileName
         {
             get
             {
-                return String.Format(zipFileNameFormat,
+                return string.Format(zipFileNameFormat,
                     Year, Month, Day, Hour);
             }
         }
 
         /* Returns full path to the folder containing the data. */
-        public string FolderPath
+        virtual public string FolderPath
         {
             get
             {
@@ -167,7 +168,7 @@ namespace Utils.DataManager
         }
 
         /* Returns full path to a data file. */
-        public string FullPath(string file)
+        virtual public string FullPath(string file)
         {
             return Path.Combine(FolderPath, file);
         }
@@ -202,6 +203,16 @@ namespace Utils.DataManager
                 (StartDate.Month == other.Month) &&
                 (StartDate.Day == other.Day) &&
                 (StartDate.Hour == other.Hour);
+        }
+
+        /* Returns the remote path where to upload the file. */
+        virtual public string RemotePath
+        {
+            get
+            {
+                return string.Format(@"{0}\{1}\{2}\{3}\{4}", 
+                    Year, Month, Day, Hour, StationName);
+            }
         }
     }
 }
