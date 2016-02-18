@@ -7,6 +7,7 @@ using SystemWrapper.IO;
 using SystemWrapper.Threading;
 using System.IO.Compression;
 using Utils.GDrive;
+using System.Diagnostics;
 
 /* Example code taken from
 
@@ -184,7 +185,7 @@ namespace Utils.DataManager
         /* Starts the worker threads. */
         private void StartWorkerThreads()
         {
-            Console.WriteLine("Launching background upload workers");
+            Debug.WriteLine("Launching background upload workers");
             for (int i = 0; i < maxActiveUploads; i++)
             {
                 Task.Run(() => Worker());
@@ -192,7 +193,7 @@ namespace Utils.DataManager
 
             if (enableFailedRetryWorker)
             {
-                Console.WriteLine("Launching failed upload worker");
+                Debug.WriteLine("Launching failed upload worker");
                 Task.Run(() => RetryWorker());
             }
         }
@@ -280,7 +281,7 @@ namespace Utils.DataManager
                     }
                     else
                     {
-                        Console.WriteLine("Upload failed: " + e.Message);
+                        Debug.WriteLine("Upload failed: " + e.Message);
                         ThreadWrap.Sleep(waitBetweenRetriesSeconds * 1000);
                         continue;
                     }
@@ -318,7 +319,7 @@ namespace Utils.DataManager
         {
             Thread thread = Thread.CurrentThread;
             thread.Priority = ThreadPriority.Lowest;
-            Console.WriteLine(string.Format("Background worker {0} has started",
+            Debug.WriteLine(string.Format("Background worker {0} has started",
                 thread.ManagedThreadId));
             while (!queue.IsCompleted)
             {
@@ -330,7 +331,7 @@ namespace Utils.DataManager
                     if (info != null)
                     {
                         info.ArchivePath = ArchiveFiles(info);
-                        Console.WriteLine(string.Format(
+                        Debug.WriteLine(string.Format(
                             "Worker {0} received a new dataset to upload, "
                             + "StartDate = {1}, ArchivePath = {2}",
                             thread.ManagedThreadId, info.StartDate,
@@ -341,7 +342,7 @@ namespace Utils.DataManager
                             Random rnd = new Random();
                             var delay = rnd.Next(
                                 maxDelayBeforeUploadSeconds * 1000);
-                            Console.WriteLine(string.Format(
+                            Debug.WriteLine(string.Format(
                                 "Sleeping for {0}ms before starting the upload",
                                 delay));
                             ThreadWrap.Sleep(delay);
@@ -353,7 +354,7 @@ namespace Utils.DataManager
                     }
                     else
                     {
-                        Console.WriteLine(string.Format(
+                        Debug.WriteLine(string.Format(
                             "Worker {0} received a null dataset to upload",
                             thread.ManagedThreadId));
                     }
@@ -375,36 +376,36 @@ namespace Utils.DataManager
         /* Triggers uploading of the files for which upload has failed. */
         public void RetryFailed()
         {
-            Console.WriteLine("Triggering retryEvent");
+            Debug.WriteLine("Triggering retryEvent");
             retryEvent.Set();
         }
 
         /* Adds all files in "failed" folder into retryQueue. */
         private void EnqueueFailed()
         {
-            Console.WriteLine("Enqueuing failed uploads");
+            Debug.WriteLine("Enqueuing failed uploads");
             try
             {
                 var failed = Directory.GetFiles(failedPath, "*"
                     + Path.GetExtension(zipFileNameFormat));
-                Console.WriteLine("Files found in " + failedPath);
+                Debug.WriteLine("Files found in " + failedPath);
                 foreach (var name in failed)
                 {
                     try
                     {
-                        Console.WriteLine("Enqueuing " + name);
+                        Debug.WriteLine("Enqueuing " + name);
                         var info = new DatasetInfo(name, ConfigurationManager);
                         queueFailed.Enqueue(info);
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.Message);
+                        Debug.WriteLine(e.Message);
                     }
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Debug.WriteLine(e.Message);
             }
         }
 
@@ -413,7 +414,7 @@ namespace Utils.DataManager
         {
             Thread thread = Thread.CurrentThread;
             thread.Priority = ThreadPriority.Lowest;
-            Console.WriteLine(string.Format("Background worker {0} has started",
+            Debug.WriteLine(string.Format("Background worker {0} has started",
                 thread.ManagedThreadId));
             var rnd = new Random();
             while (true)
@@ -423,13 +424,13 @@ namespace Utils.DataManager
                     var delay = rnd.Next(
                         minDelayBetweenFailedRetriesSeconds * 1000,
                         maxDelayBetweenFailedRetriesSeconds * 1000);
-                    Console.WriteLine(string.Format(
+                    Debug.WriteLine(string.Format(
                         "Sleeping for {0} ms before retrying the failed uploads",
                         delay));
                     retryEvent.WaitOne(delay);
 
                     var count = queueFailed.Count;
-                    Console.WriteLine(string.Format(
+                    Debug.WriteLine(string.Format(
                         "RetryWoker wakes up, there are {0} datasets in the queue",
                         count));
                     for (int i = 0; i < count; i++)
@@ -448,7 +449,7 @@ namespace Utils.DataManager
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Debug.WriteLine(e.Message);
                 }
             }
         }
@@ -462,7 +463,7 @@ namespace Utils.DataManager
         /* Invoke the event when an upload starts. */
         protected virtual void OnStarted(IDatasetInfo info)
         {
-            Console.WriteLine(string.Format(
+            Debug.WriteLine(string.Format(
                 "Started uploading dataset {0}", info.ArchivePath));
             if (StartedEvent == null)
                 return;
@@ -473,7 +474,7 @@ namespace Utils.DataManager
         protected virtual void OnFinished(IDatasetInfo info, bool success,
             string msg)
         {
-            Console.WriteLine(string.Format(
+            Debug.WriteLine(string.Format(
                 "Done uploading dataset {0}, success = {1}, msg = {2}",
                 info.ArchivePath, success, msg));
             if (FinishedEvent == null)

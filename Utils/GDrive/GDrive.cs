@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Diagnostics;
 
 /* Example code taken from 
 
@@ -200,7 +201,7 @@ namespace Utils.GDrive
         private void UploadProgressChanged(IUploadProgress progress, 
             FileStream stream)
         {
-            Console.WriteLine(string.Format("Uploading {0}, {1} out of {2} bytes",
+            Debug.WriteLine(string.Format("Uploading {0}, {1} out of {2} bytes",
                 stream.Name, progress.BytesSent, stream.Length));
             if (ProgressEvent == null)
                 return;
