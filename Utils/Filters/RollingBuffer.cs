@@ -9,9 +9,19 @@ namespace Utils.Filters
     {
         private int size;
         double[] buffer;
-        Mutex mutex = new Mutex();        
+        Mutex mutex = new Mutex();
 
         public RollingBuffer(int size)
+        {
+            InitFilter(size, 0.0);
+        }
+
+        public RollingBuffer(int size, double initValue)
+        {
+            InitFilter(size, initValue);
+        }
+
+        private void InitFilter(int size, double initValue)
         {
             if (size < 1)
             {
@@ -20,7 +30,7 @@ namespace Utils.Filters
             }
 
             this.size = size;
-            buffer = Enumerable.Repeat<double>(0, size).ToArray();
+            buffer = Enumerable.Repeat(initValue, size).ToArray();
         }
 
         override protected double[] Filter(double[] data)
@@ -33,9 +43,9 @@ namespace Utils.Filters
             mutex.WaitOne();
             if (data.Length < buffer.Length)
             {
-                for (int i = 0; i < data.Length; i++)
+                for (int i = 0; i < buffer.Length - data.Length; i++)
                 {
-                    buffer[i] = buffer[i + buffer.Length - data.Length];
+                    buffer[i] = buffer[i + data.Length];
                 }
                 for (int i = 0; i < data.Length; i++)
                 {

@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using Utils.GDrive;
 using Utils.DataManager;
 using Utils.Configuration;
+using Utils.Filters;
 using Biomed_eMains_eFMx;
 using System.IO;
 
@@ -17,6 +18,10 @@ namespace SampleGrabber
         private bool convertToMicroTesla;
         private DateTime lastUpdated = DateTime.Now;
         private bool doneUploading = true;
+
+        private IFilter[] averages = new MovingAverage[3];
+        private IFilter[] subsamples = new Subsample[3];
+        private RollingBuffer[] buffers = new RollingBuffer[3];
 
         enum UI_State
         {
@@ -37,8 +42,8 @@ namespace SampleGrabber
             try
             {
                 eMains.LoadDLL();
-                stationName.Text = Settings.StationName;
-                samplingRate = Convert.ToInt32(Settings.SamplingRate);
+                sampleName.Text = Settings.SampleName;
+                samplingRate = Convert.ToDouble(Settings.SamplingRate);
                 var units = Settings.DataUnits;
                 convertToMicroTesla = (units == "uT");
                 var google = new GDrive("nuri-station.json");
@@ -55,6 +60,34 @@ namespace SampleGrabber
             }
         }
 
+        /* Updates the data filters */
+        private void UpdateFilters()
+        {
+            int avgPoints = Convert.ToInt32(Convert.ToInt32(samplingRate)
+                    * averagingPeriodMs.Value / 1000);
+            InitializeFilters(avgPoints,
+                Convert.ToInt32(displayPoints.Value));
+        }
+
+        /* Initializes a chain of data filters for X, Y, Z channels. */
+        private void InitializeFilters(int averagePoints, int bufferSize)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                InitializeFilter(averagePoints, bufferSize, i);
+            }
+        }
+
+        /* Initializes a chain of data filters for a single channel. */
+        private void InitializeFilter(int averagePoints, int bufferSize, int i)
+        {
+            averagePoints = Math.Max(1, averagePoints);
+            averages[i] = new MovingAverage(averagePoints);
+            subsamples[i] = new Subsample(averagePoints);
+            buffers[i] = new RollingBuffer(bufferSize, double.NaN);
+            averages[i].output += new FilterEvent(subsamples[i].InputData);
+            subsamples[i].output += new FilterEvent(buffers[i].InputData);
+        }
 
         private void Google_ProgressEvent(string fullPath, long bytesSent,
             long bytesTotal)
@@ -97,7 +130,7 @@ namespace SampleGrabber
 
         private void stationName_TextChanged(object sender, EventArgs e)
         {
-            Settings.StationName = stationName.Text;
+            Settings.SampleName = sampleName.Text;
         }
 
         void SetUI(UI_State state)
@@ -105,24 +138,39 @@ namespace SampleGrabber
             switch (state)
             {
                 case UI_State.Ready:
-                    stationName.Enabled = true;
+                    sampleName.Enabled = true;
                     sensorList.Enabled = true;
+                    averagingPeriodMs.Enabled = true;
+                    powerLineFilter.Enabled = false;
+                    comment.Enabled = true;
+                    plotUpdateTimer.Enabled = false;
+                    displayPoints.Enabled = true;
                     refreshButton.Enabled = true;
                     recordButton.Enabled = true;
                     cancelButton.Enabled = false;
                     uploadButton.Enabled = true;
                     return;
                 case UI_State.Recording:
-                    stationName.Enabled = false;
+                    sampleName.Enabled = false;
                     sensorList.Enabled = false;
+                    averagingPeriodMs.Enabled = false;
+                    powerLineFilter.Enabled = false;
+                    comment.Enabled = false;
+                    plotUpdateTimer.Enabled = true;
+                    displayPoints.Enabled = false;
                     refreshButton.Enabled = false;
                     recordButton.Enabled = false;
                     cancelButton.Enabled = true;
                     uploadButton.Enabled = false;
                     return;
                 case UI_State.NoSensorFound:
-                    stationName.Enabled = true;
+                    sampleName.Enabled = true;
                     sensorList.Enabled = true;
+                    averagingPeriodMs.Enabled = true;
+                    powerLineFilter.Enabled = false;
+                    comment.Enabled = true;
+                    plotUpdateTimer.Enabled = false;
+                    displayPoints.Enabled = true;
                     refreshButton.Enabled = true;
                     recordButton.Enabled = false;
                     cancelButton.Enabled = false;
@@ -196,6 +244,7 @@ namespace SampleGrabber
                 sensor.DAQInitialize(samplingRate, range, 1, 1);
                 sensor.NewDataHandler -= Sensor_NewDataHandler;
                 sensor.NewDataHandler += Sensor_NewDataHandler;
+                UpdateFilters();
                 sensor.DAQStart(convertToMicroTesla);
                 doneUploading = false;
                 SetUI(UI_State.Recording);
@@ -207,43 +256,39 @@ namespace SampleGrabber
             }
         }
 
+        /* Triggers the graph update. */
+        private void plotUpdateTimer_Tick(object sender, EventArgs e)
+        {
+            UpdatePlot("X", buffers[0].GetData());
+            UpdatePlot("Y", buffers[1].GetData());
+            UpdatePlot("Z", buffers[2].GetData());
+        }
+
+        /* Updates the given series in the graph. */
+        private void UpdatePlot(string series, double[] data)
+        {
+            var Points = dataGraph.Series.FindByName(series).Points;
+            Points.Clear();
+            int i = 0;
+            double dx = Convert.ToDouble(averagingPeriodMs.Value) / 1000;
+            foreach (var point in data)
+            {
+                if (!double.IsNaN(point))
+                {
+                    Points.AddXY(i * dx, point);
+                    i++;
+                }
+            }
+        }
+
         private void Sensor_NewDataHandler(double[] dataX, double[] dataY,
             double[] dataZ, double systemSeconds, DateTime time)
         {
             storage.Store(dataX, dataY, dataZ, systemSeconds, time);
-            if (time.Subtract(lastUpdated).TotalSeconds > 1)
-            {
-                UpdateGraphThreadSafe(dataX, dataY, dataZ);
-                lastUpdated = time;
-            }
-        }
-
-        private void UpdateGraphThreadSafe(double[] dataX, double[] dataY, 
-            double[] dataZ)
-        {
-            UpdatePlotThreadSafe("X", dataX);
-            UpdatePlotThreadSafe("Y", dataY);
-            UpdatePlotThreadSafe("Z", dataZ);
-        }
-
-        delegate void UpdatePlotCallback(string series, double[] data);
-        private void UpdatePlotThreadSafe(string series, double[] data)
-        {
-            if (dataGraph.InvokeRequired)
-            {
-                var f = new UpdatePlotCallback(UpdatePlotThreadSafe);
-                Invoke(f, new object[] { series, data });
-            }
-            else
-            {
-                var Points = dataGraph.Series.FindByName(series).Points;
-                Points.Clear();
-                foreach (var point in data)
-                {
-                    Points.Add(point);
-                }
-            }
-        }
+            averages[0].InputData(dataX);
+            averages[1].InputData(dataY);
+            averages[2].InputData(dataZ);
+        }        
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
@@ -281,18 +326,33 @@ namespace SampleGrabber
                 SetUI(UI_State.Ready);
             }
 
-            if (storage.HasCachedData)
-            {
-                storage.Close();
-                doneUploading = false;
-            }
+            //if (storage.HasCachedData)
+            //{
+            //    storage.Close();
+            //    doneUploading = false;
+            //}
 
-            if (!doneUploading)
-            {
-                e.Cancel = true;
-                toolStripStatusLabel.Text
-                    = "Please wait until the files are uploaded.";
-            }
+            //if (!doneUploading)
+            //{
+            //    e.Cancel = true;
+            //    toolStripStatusLabel.Text
+            //        = "Please wait until the files are uploaded.";
+            //}
+        }
+
+        private void averagingPeriodMs_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateFilters();
+        }
+
+        private void displayPoints_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateFilters();
+        }
+
+        private void dataGraph_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

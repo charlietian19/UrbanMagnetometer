@@ -38,7 +38,7 @@ namespace DataGrabber
             {
                 eMains.LoadDLL();
                 stationName.Text = Settings.StationName;
-                samplingRate = Convert.ToInt32(Settings.SamplingRate);
+                samplingRate = Convert.ToDouble(Settings.SamplingRate);
                 var units = Settings.DataUnits;
                 convertToMicroTesla = (units == "uT");
                 var google = new GDrive("nuri-station.json");
