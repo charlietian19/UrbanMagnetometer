@@ -49,28 +49,29 @@ namespace Utils.DataManager
 
     public class UploadScheduler : IUploadScheduler
     {
-        private int maxActiveUploads, maxRetryCount, waitBetweenRetriesSeconds,
+        protected int maxActiveUploads, maxRetryCount, waitBetweenRetriesSeconds,
             maxDelayBeforeUploadSeconds,
             minDelayBetweenFailedRetriesSeconds,
             maxDelayBetweenFailedRetriesSeconds;
-        bool enableDelayBeforeUpload, enableFailedRetryWorker;
+        protected bool enableDelayBeforeUpload, enableFailedRetryWorker;
         private string dataCacheFolder, zipFileNameFormat;
         private string remoteRoot;
         private int ActiveUploadCount = 0;
-        private BlockingCollection<IDatasetInfo> queue;
-        private ConcurrentQueue<IDatasetInfo> queueFailed
+        protected BlockingCollection<IDatasetInfo> queue;
+        protected ConcurrentQueue<IDatasetInfo> queueFailed
             = new ConcurrentQueue<IDatasetInfo>();
-        private IUploader uploader;
-        private IConfigurationManagerWrap ConfigurationManager;
-        private IFileWrap File;
-        private IDirectoryWrap Directory;
-        private IPathWrap Path;
-        private IThreadWrap ThreadWrap;
-        private IZipFile zip;
-        private AutoResetEvent retryEvent = new AutoResetEvent(false);
+        protected IUploader uploader;
+        protected IConfigurationManagerWrap ConfigurationManager;
+        protected IFileWrap File;
+        protected IDirectoryWrap Directory;
+        protected IPathWrap Path;
+        protected IThreadWrap ThreadWrap;
+        protected IZipFile zip;
+        protected AutoResetEvent retryEvent = new AutoResetEvent(false);
         public event UploadFinishedEventHandler FinishedEvent;
         public event UploadStartedEventHandler StartedEvent;
-        private string failedPath
+
+        protected string failedPath
         {
             get { return Path.Combine(dataCacheFolder, "failed"); }
         }

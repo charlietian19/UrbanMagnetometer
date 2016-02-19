@@ -48,10 +48,10 @@ namespace Utils.DataManager
         public string StationName { get; set; }
         public DateTime StartDate { get; set; }
         public string ArchivePath { get; set; }
-        private IZipFile zip;
-        private IFileWrap File;
-        private IDirectoryWrap Directory;
-        private IPathWrap Path;
+        protected IZipFile zip;
+        protected IFileWrap File;
+        protected IDirectoryWrap Directory;
+        protected IPathWrap Path;
 
         /* Initializes settings from the configuration file. */
         private void ReadAppConfig()
@@ -267,7 +267,7 @@ namespace Utils.DataManager
 
         /* Adds the magnetic field dataset to an archive and returns full path
         to the archive. */
-        private string MoveDataToTmpDir()
+        virtual protected string MoveDataToTmpDir()
         {
             string tmpDirFullPath, newXFileName, newYFileName, newZFileName,
                 newTFileName;

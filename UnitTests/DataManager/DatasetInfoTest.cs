@@ -1,10 +1,10 @@
 ﻿using System;
+using Utils.DataManager;
 using System.Collections.Specialized;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SystemWrapper.Configuration;
 using SystemWrapper.IO;
 using System.IO;
-using Utils.DataManager;
 using Moq;
 
 namespace UnitTests.DataManager
@@ -23,8 +23,6 @@ namespace UnitTests.DataManager
         private IDirectoryWrap dir;
         private IPathWrap path;
         NameValueCollection settings;
-
-        private int count;
 
         [TestInitialize]
         public void SetupMocks()
@@ -84,7 +82,6 @@ namespace UnitTests.DataManager
             path = pathMock.Object;
             config = ConfigMock.Object;
             zip = zipMock.Object;
-
         }
 
         [TestMethod]

@@ -2,11 +2,10 @@
 using SystemWrapper.Configuration;
 using SystemWrapper.IO;
 using Utils.Configuration;
-using System.IO;
 
 namespace Utils.DataManager
 {
-    class SampleDatasetInfo : DatasetInfo, IDatasetInfo
+    public class SampleDatasetInfo : DatasetInfo, IDatasetInfo
     {
         public SampleDatasetInfo(DateTime time, IConfigurationManagerWrap config,
             IZipFile zip, IFileWrap file, IDirectoryWrap dir, IPathWrap path) 
@@ -26,8 +25,17 @@ namespace Utils.DataManager
         {
             get
             {
-                return Path.GetFileName(Settings.SampleName);
+                return Path.GetFileName(Settings.SampleName) + ".zip";
             }
+        }
+
+        /* Places the comment file into the tmp folder before it's archived. */
+        protected override string MoveDataToTmpDir()
+        {
+            var tmpPath = base.MoveDataToTmpDir();
+            File.WriteAllText(Path.Combine(tmpPath, "comment.txt"),
+                Settings.SampleComment);
+            return tmpPath;
         }
     }
 }

@@ -42,6 +42,7 @@ namespace SampleGrabber
             {
                 eMains.LoadDLL();
                 sampleName.Text = Settings.SampleName;
+                comment.Text = Settings.SampleComment;
                 samplingRate = Convert.ToDouble(Settings.SamplingRate);
                 var units = Settings.DataUnits;
                 convertToMicroTesla = (units == "uT");
@@ -312,7 +313,7 @@ namespace SampleGrabber
 
         private void uploadButton_Click(object sender, EventArgs e)
         {
-            storage.Close();
+            storage.Upload();
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -336,7 +337,12 @@ namespace SampleGrabber
 
         private void discardButton_Click(object sender, EventArgs e)
         {
+            storage.Discard();
+        }
 
+        private void comment_TextChanged(object sender, EventArgs e)
+        {
+            Settings.SampleComment = comment.Text;
         }
     }
 }

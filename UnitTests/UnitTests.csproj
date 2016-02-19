@@ -95,6 +95,7 @@
   <ItemGroup>
     <Compile Include="DataManager\StorageTest.cs" />
     <Compile Include="DataManager\DatasetInfoTest.cs" />
+    <Compile Include="DataManager\SampleDatasetInfoTest.cs" />
     <Compile Include="DataReader\DatasetReaderTest.cs" />
     <Compile Include="DataManager\UploadSchedulerTest.cs" />
     <Compile Include="Filters\AbstractSimpleFilterTest.cs" />

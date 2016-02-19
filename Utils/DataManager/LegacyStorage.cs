@@ -15,6 +15,7 @@ namespace Utils.DataManager
             DateTime time);
         void Close();
         void Discard();
+        void Upload();
         bool UploadOnClose { get; set; }
     }
 
@@ -218,6 +219,17 @@ namespace Utils.DataManager
         time indicates when the latest chunk of data was received. */
         private void CloseAll(DateTime time)
         {
+            CloseDataFiles();
+
+            if (uploadOnClose)
+            {
+                Upload();
+            }
+        }
+
+        /* Closes the data files. */
+        private void CloseDataFiles()
+        {
             if (!isWriting)
             {
                 return;
@@ -228,11 +240,6 @@ namespace Utils.DataManager
             z.Close();
             t.Close();
             isWriting = false;
-
-            if (uploadOnClose)
-            {
-                scheduler.UploadMagneticData(info);
-            }
         }
         
         /* Closes the data files (eg. when the application exits).
@@ -241,6 +248,13 @@ namespace Utils.DataManager
         public void Close()
         {
             CloseAll(DateTime.Now);
+        }
+
+        /* Hands the files over to the Upload Scheduler*/
+        public void Upload()
+        {
+            CloseDataFiles();
+            scheduler.UploadMagneticData(info);
         }
 
         /* Discard (truncate) the current data files. */

@@ -116,5 +116,8 @@ namespace Utils.Configuration
         /* Path for the signal sample files */
         public static string SampleName = @"TestSample\Test";
 
+        /* Comment for the signal sample files */
+        public static string SampleComment = "";
+
         }
 }

@@ -208,6 +208,7 @@
             this.comment.Name = "comment";
             this.comment.Size = new System.Drawing.Size(1248, 38);
             this.comment.TabIndex = 11;
+            this.comment.TextChanged += new System.EventHandler(this.comment_TextChanged);
             // 
             // commentLabel
             // 
