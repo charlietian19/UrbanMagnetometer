@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace Utils.Filters
 {
@@ -6,6 +7,7 @@ namespace Utils.Filters
     {
         int skipped;
         int skipmax;
+        Mutex mutex = new Mutex();
 
         /* Creates a downsampling filter that returns one in every ratio points. */
         public Subsample(int ratio)
@@ -23,6 +25,7 @@ namespace Utils.Filters
         {
             var result = new double[(data.Length + skipped) / skipmax];
             int j = 0;
+            mutex.WaitOne();
             foreach (var x in data)
             {
                 skipped++;
@@ -33,6 +36,7 @@ namespace Utils.Filters
                     j++;
                 }
             }
+            mutex.ReleaseMutex();
             return result;
         }
     }

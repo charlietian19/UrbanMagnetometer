@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Threading;
 
 namespace Utils.Filters
 {
     public class MovingAverage : AbstractSimpleFilter
     {
-        double a;
-        double yz_1;
+        private double a;
+        private double yz_1;
+        Mutex mutex = new Mutex();
 
         /* Creates a running average filter given how many points to average
         and zero initial conditions. */
@@ -37,11 +39,13 @@ namespace Utils.Filters
         override protected double[] Filter(double[] data)
         {
             var result = new double[data.Length];
+            mutex.WaitOne();
             for (int i = 0; i < data.Length; i++)
             {
                 result[i] = a * data[i] + (1 - a) * yz_1;
                 yz_1 = result[i];
             }
+            mutex.ReleaseMutex();
             return result;
         }
     }

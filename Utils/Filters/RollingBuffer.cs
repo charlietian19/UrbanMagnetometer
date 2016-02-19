@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Utils.Filters
 {
@@ -11,6 +9,7 @@ namespace Utils.Filters
     {
         private int size;
         double[] buffer;
+        Mutex mutex = new Mutex();        
 
         public RollingBuffer(int size)
         {
@@ -31,6 +30,7 @@ namespace Utils.Filters
                 return buffer;
             }
 
+            mutex.WaitOne();
             if (data.Length < buffer.Length)
             {
                 for (int i = 0; i < data.Length; i++)
@@ -49,8 +49,18 @@ namespace Utils.Filters
                     buffer[i - (data.Length - buffer.Length)] = data[i];
                 }
             }
+            mutex.ReleaseMutex();
 
             return buffer;
+        }
+
+        /* Returns the current buffer contents. */
+        public double[] GetData()
+        {
+            mutex.WaitOne();
+            double[] result = buffer;
+            mutex.ReleaseMutex();
+            return result;
         }
     }
 }
