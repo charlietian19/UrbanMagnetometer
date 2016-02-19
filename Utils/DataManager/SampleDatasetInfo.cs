@@ -1,6 +1,7 @@
 ﻿using System;
 using SystemWrapper.Configuration;
 using Utils.Configuration;
+using System.IO;
 
 namespace Utils.DataManager
 {
@@ -15,6 +16,15 @@ namespace Utils.DataManager
             get
             {
                 return string.Format(@"Signal Samples\{0}", Settings.SampleName);
+            }
+        }
+
+        /* Returns the archive name */
+        public override string ZipFileName
+        {
+            get
+            {
+                return Path.GetFileName(Settings.SampleName);
             }
         }
     }

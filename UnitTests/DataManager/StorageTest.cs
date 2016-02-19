@@ -25,6 +25,7 @@ namespace UnitTests.DataManager
                 mock.Setup(o => o.Write(It.IsAny<long>()));
                 mock.Setup(o => o.Write(It.IsAny<double>()));
                 mock.Setup(o => o.Write(It.IsAny<int>()));
+                mock.Setup(o => o.BaseStream.SetLength(It.IsAny<int>()));
                 mock.Setup(o => o.Close())
                     .Callback(() =>
                     {
@@ -91,6 +92,7 @@ namespace UnitTests.DataManager
             directoryMock = new Mock<IDirectoryWrap>();
             FileMock.Setup(o => o.Open(It.IsAny<string>(),
                 It.IsAny<FileMode>(), It.IsAny<FileAccess>()));
+            FileMock.Setup(o => o.Delete(It.IsAny<string>()));
             ConfigMock.Setup(o => o.AppSettings).Returns(settings);
             schedulerMock.Setup(o => o.UploadMagneticData(It.IsAny<IDatasetInfo>()));
             directoryMock.Setup(o => o.Exists(It.IsAny<string>()))
@@ -200,6 +202,69 @@ namespace UnitTests.DataManager
             storage.Store(x, y, z, seconds, time3);
             schedulerMock.Verify(o => o.UploadMagneticData(
                 It.IsAny<IDatasetInfo>()), Times.Once());
+            xWriter.Verify(o => o.Close(), Times.Once());
+            yWriter.Verify(o => o.Close(), Times.Once());
+            zWriter.Verify(o => o.Close(), Times.Once());
+            tWriter.Verify(o => o.Close(), Times.Once());
+        }
+
+        [TestMethod]
+        public void UploadOnCustomPartitioningCondition()
+        {
+            var storage = new LegacyStorage(scheduler,
+                (start, now) => start.Minute != now.Minute, 
+                file, dir, factory, config);
+            double[] x = { 123.532 }, y = { 21.2 }, z = { 2.0 };
+            DateTime time1, time2, time3;
+            time1 = new DateTime(2016, 1, 1, 0, 0, 0);
+            time2 = new DateTime(2016, 1, 1, 0, 0, 0); // same minute
+            time3 = new DateTime(2016, 1, 1, 0, 2, 0);  // different minute
+            double seconds = 125.54323;
+
+            storage.Store(x, y, z, seconds, time1);
+            var xWriter = factory.x;
+            var yWriter = factory.y;
+            var zWriter = factory.z;
+            var tWriter = factory.z;
+            storage.Store(x, y, z, seconds, time2);
+            schedulerMock.Verify(o => o.UploadMagneticData(
+                It.IsAny<IDatasetInfo>()), Times.Never());
+            xWriter.Verify(o => o.Close(), Times.Never());
+            yWriter.Verify(o => o.Close(), Times.Never());
+            zWriter.Verify(o => o.Close(), Times.Never());
+            tWriter.Verify(o => o.Close(), Times.Never());
+
+            storage.Store(x, y, z, seconds, time3);
+            schedulerMock.Verify(o => o.UploadMagneticData(
+                It.IsAny<IDatasetInfo>()), Times.Once());
+            xWriter.Verify(o => o.Close(), Times.Once());
+            yWriter.Verify(o => o.Close(), Times.Once());
+            zWriter.Verify(o => o.Close(), Times.Once());
+            tWriter.Verify(o => o.Close(), Times.Once());
+        }
+
+        [TestMethod]
+        public void UploadOnCloseDisabled()
+        {
+            var storage = new LegacyStorage(scheduler,
+                (start, now) => start.Minute != now.Minute,
+                file, dir, factory, config);
+            storage.UploadOnClose = false;
+            double[] x = { 123.532 }, y = { 21.2 }, z = { 2.0 };
+            DateTime time1, time2;
+            time1 = new DateTime(2016, 1, 1, 0, 0, 0);
+            time2 = new DateTime(2016, 1, 1, 0, 2, 0);  // different minute
+            double seconds = 125.54323;
+
+            storage.Store(x, y, z, seconds, time1);
+            var xWriter = factory.x;
+            var yWriter = factory.y;
+            var zWriter = factory.z;
+            var tWriter = factory.z;
+
+            storage.Store(x, y, z, seconds, time2);
+            schedulerMock.Verify(o => o.UploadMagneticData(
+                It.IsAny<IDatasetInfo>()), Times.Never());
             xWriter.Verify(o => o.Close(), Times.Once());
             yWriter.Verify(o => o.Close(), Times.Once());
             zWriter.Verify(o => o.Close(), Times.Once());

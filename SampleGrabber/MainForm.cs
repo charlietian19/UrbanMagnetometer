@@ -17,7 +17,6 @@ namespace SampleGrabber
         private Range range = Range.NEG_10_TO_PLUS_10V;
         private bool convertToMicroTesla;
         private DateTime lastUpdated = DateTime.Now;
-        private bool doneUploading = true;
 
         private IFilter[] averages = new MovingAverage[3];
         private IFilter[] subsamples = new Subsample[3];
@@ -51,7 +50,9 @@ namespace SampleGrabber
                 var scheduler = new UploadScheduler(google);
                 scheduler.StartedEvent += Scheduler_StartedEvent;
                 scheduler.FinishedEvent += Scheduler_FinishedEvent;
-                storage = new LegacyStorage(scheduler);
+                storage = new LegacySampleStorage(scheduler,
+                    (start, now) => false);
+                storage.UploadOnClose = false;
             }
             catch (Exception exception)
             {
@@ -60,7 +61,7 @@ namespace SampleGrabber
             }
         }
 
-        /* Updates the data filters */
+        /* Resets the data filters */
         private void UpdateFilters()
         {
             int avgPoints = Convert.ToInt32(Convert.ToInt32(samplingRate)
@@ -117,7 +118,6 @@ namespace SampleGrabber
             string message)
         {
             SetTextThreadSafe(message);
-            doneUploading = true;
         }
 
         private void Scheduler_StartedEvent(IDatasetInfo info)
@@ -125,7 +125,6 @@ namespace SampleGrabber
             var msg = string.Format("Uploading dataset from {0}", 
                 info.StartDate);
             SetTextThreadSafe(msg);
-            doneUploading = false;
         }
 
         private void stationName_TextChanged(object sender, EventArgs e)
@@ -246,7 +245,6 @@ namespace SampleGrabber
                 sensor.NewDataHandler += Sensor_NewDataHandler;
                 UpdateFilters();
                 sensor.DAQStart(convertToMicroTesla);
-                doneUploading = false;
                 SetUI(UI_State.Recording);
             }
             catch (Exception exception)
@@ -315,7 +313,6 @@ namespace SampleGrabber
         private void uploadButton_Click(object sender, EventArgs e)
         {
             storage.Close();
-            doneUploading = false;
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -325,19 +322,6 @@ namespace SampleGrabber
                 sensor.DAQStop();
                 SetUI(UI_State.Ready);
             }
-
-            //if (storage.HasCachedData)
-            //{
-            //    storage.Close();
-            //    doneUploading = false;
-            //}
-
-            //if (!doneUploading)
-            //{
-            //    e.Cancel = true;
-            //    toolStripStatusLabel.Text
-            //        = "Please wait until the files are uploaded.";
-            //}
         }
 
         private void averagingPeriodMs_ValueChanged(object sender, EventArgs e)
@@ -350,7 +334,7 @@ namespace SampleGrabber
             UpdateFilters();
         }
 
-        private void dataGraph_Click(object sender, EventArgs e)
+        private void discardButton_Click(object sender, EventArgs e)
         {
 
         }

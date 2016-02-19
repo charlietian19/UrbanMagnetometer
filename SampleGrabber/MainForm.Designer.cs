@@ -56,6 +56,7 @@
             this.previewBox = new System.Windows.Forms.GroupBox();
             this.powerLineFilter = new System.Windows.Forms.CheckBox();
             this.plotUpdateTimer = new System.Windows.Forms.Timer(this.components);
+            this.discardButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGraph)).BeginInit();
             this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.averagingPeriodMs)).BeginInit();
@@ -86,9 +87,9 @@
             // recordButton
             // 
             this.recordButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
-            this.recordButton.Location = new System.Drawing.Point(843, 12);
+            this.recordButton.Location = new System.Drawing.Point(827, 12);
             this.recordButton.Name = "recordButton";
-            this.recordButton.Size = new System.Drawing.Size(140, 53);
+            this.recordButton.Size = new System.Drawing.Size(120, 53);
             this.recordButton.TabIndex = 2;
             this.recordButton.Text = "Record";
             this.recordButton.UseVisualStyleBackColor = true;
@@ -96,9 +97,9 @@
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(990, 12);
+            this.cancelButton.Location = new System.Drawing.Point(953, 12);
             this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(140, 53);
+            this.cancelButton.Size = new System.Drawing.Size(115, 53);
             this.cancelButton.TabIndex = 3;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
@@ -117,7 +118,7 @@
             // 
             this.refreshButton.Location = new System.Drawing.Point(696, 12);
             this.refreshButton.Name = "refreshButton";
-            this.refreshButton.Size = new System.Drawing.Size(140, 53);
+            this.refreshButton.Size = new System.Drawing.Size(125, 53);
             this.refreshButton.TabIndex = 5;
             this.refreshButton.Text = "Refresh";
             this.refreshButton.UseVisualStyleBackColor = true;
@@ -170,10 +171,9 @@
             this.dataGraph.Series.Add(series1);
             this.dataGraph.Series.Add(series2);
             this.dataGraph.Series.Add(series3);
-            this.dataGraph.Size = new System.Drawing.Size(1242, 598);
+            this.dataGraph.Size = new System.Drawing.Size(1369, 598);
             this.dataGraph.TabIndex = 7;
             this.dataGraph.Text = "Magnetic Data Sample";
-            this.dataGraph.Click += new System.EventHandler(this.dataGraph_Click);
             // 
             // statusStrip
             // 
@@ -182,7 +182,7 @@
             this.toolStripStatusLabel});
             this.statusStrip.Location = new System.Drawing.Point(0, 865);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1309, 46);
+            this.statusStrip.Size = new System.Drawing.Size(1436, 46);
             this.statusStrip.TabIndex = 8;
             this.statusStrip.Text = "statusStrip1";
             // 
@@ -194,7 +194,7 @@
             // 
             // uploadButton
             // 
-            this.uploadButton.Location = new System.Drawing.Point(1137, 12);
+            this.uploadButton.Location = new System.Drawing.Point(1281, 12);
             this.uploadButton.Name = "uploadButton";
             this.uploadButton.Size = new System.Drawing.Size(140, 53);
             this.uploadButton.TabIndex = 9;
@@ -206,7 +206,7 @@
             // 
             this.comment.Location = new System.Drawing.Point(173, 74);
             this.comment.Name = "comment";
-            this.comment.Size = new System.Drawing.Size(1104, 38);
+            this.comment.Size = new System.Drawing.Size(1248, 38);
             this.comment.TabIndex = 11;
             // 
             // commentLabel
@@ -305,7 +305,7 @@
             this.previewBox.Controls.Add(this.averagingPeriodMs);
             this.previewBox.Location = new System.Drawing.Point(29, 129);
             this.previewBox.Name = "previewBox";
-            this.previewBox.Size = new System.Drawing.Size(1265, 720);
+            this.previewBox.Size = new System.Drawing.Size(1392, 720);
             this.previewBox.TabIndex = 16;
             this.previewBox.TabStop = false;
             this.previewBox.Text = "Sample preview";
@@ -325,11 +325,22 @@
             // 
             this.plotUpdateTimer.Tick += new System.EventHandler(this.plotUpdateTimer_Tick);
             // 
+            // discardButton
+            // 
+            this.discardButton.Location = new System.Drawing.Point(1135, 12);
+            this.discardButton.Name = "discardButton";
+            this.discardButton.Size = new System.Drawing.Size(140, 53);
+            this.discardButton.TabIndex = 17;
+            this.discardButton.Text = "Discard";
+            this.discardButton.UseVisualStyleBackColor = true;
+            this.discardButton.Click += new System.EventHandler(this.discardButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1309, 911);
+            this.ClientSize = new System.Drawing.Size(1436, 911);
+            this.Controls.Add(this.discardButton);
             this.Controls.Add(this.previewBox);
             this.Controls.Add(this.comment);
             this.Controls.Add(this.commentLabel);
@@ -379,6 +390,7 @@
         private System.Windows.Forms.GroupBox previewBox;
         private System.Windows.Forms.CheckBox powerLineFilter;
         private System.Windows.Forms.Timer plotUpdateTimer;
+        private System.Windows.Forms.Button discardButton;
     }
 }
 

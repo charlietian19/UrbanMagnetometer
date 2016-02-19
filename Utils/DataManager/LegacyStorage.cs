@@ -14,6 +14,8 @@ namespace Utils.DataManager
         void Store(double[] dataX, double[] dataY, double[] dataZ, double systemSeconds, 
             DateTime time);
         void Close();
+        void Discard();
+        bool UploadOnClose { get; set; }
     }
 
     /* Interface for IBinaryWriterWrap object factory */
@@ -51,6 +53,12 @@ namespace Utils.DataManager
         PartitionCondition partitionCondition;
         PartitionCondition defaultCondition = 
             (start, now) => start.Hour != now.Hour;
+        private bool uploadOnClose = true;
+        public bool UploadOnClose
+        {
+            get { return uploadOnClose; }
+            set { uploadOnClose = value; }
+        }
 
         public bool HasCachedData
         {
@@ -132,7 +140,7 @@ namespace Utils.DataManager
 
             if (partitionCondition(info.StartDate, time))
             {
-                CloseAndUploadAll(time);
+                CloseAll(time);
                 CreateFiles(time);
             }
 
@@ -206,7 +214,7 @@ namespace Utils.DataManager
 
         /* Closes the data files and sends them to the Google Drive.
         time indicates when the latest chunk of data was received. */
-        private void CloseAndUploadAll(DateTime time)
+        private void CloseAll(DateTime time)
         {
             if (!isWriting)
             {
@@ -219,7 +227,10 @@ namespace Utils.DataManager
             t.Close();
             isWriting = false;
 
-            scheduler.UploadMagneticData(info);
+            if (uploadOnClose)
+            {
+                scheduler.UploadMagneticData(info);
+            }
         }
         
         /* Closes the data files (eg. when the application exits).
@@ -227,7 +238,27 @@ namespace Utils.DataManager
         the data files, or creating new files. */
         public void Close()
         {
-            CloseAndUploadAll(DateTime.Now);
+            CloseAll(DateTime.Now);
+        }
+
+        /* Discard (truncate) the current data files. */
+        public void Discard()
+        {
+            if (isWriting)
+            {
+                x.BaseStream.SetLength(0);
+                y.BaseStream.SetLength(0);
+                z.BaseStream.SetLength(0);
+                t.BaseStream.SetLength(0);
+                index = 0;
+            }
+            else
+            {
+                IFile.Delete(info.FullPath(info.XFileName));
+                IFile.Delete(info.FullPath(info.YFileName));
+                IFile.Delete(info.FullPath(info.ZFileName));
+                IFile.Delete(info.FullPath(info.TFileName));
+            }
         }
     }
 
