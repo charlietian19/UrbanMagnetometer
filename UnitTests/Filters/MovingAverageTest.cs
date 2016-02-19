@@ -19,7 +19,6 @@ namespace UnitTests.Filters
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void NOutOfRangeSingleArgConstructor()
         {
-            var data = new double[] { 1, 2, 3, 4, 5, 6 };
             var filter = new MovingAverage(0);
         }
 
@@ -27,7 +26,6 @@ namespace UnitTests.Filters
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void NOutOfRangeTwoArgsConstructor()
         {
-            var data = new double[] { 1, 2, 3, 4, 5, 6 };
             var filter = new MovingAverage(0, 0);
         }
 

@@ -100,6 +100,7 @@
     <Compile Include="Filters\AbstractSimpleFilterTest.cs" />
     <Compile Include="Filters\SubsampleTest.cs" />
     <Compile Include="Filters\MovingAverageTest.cs" />
+    <Compile Include="Filters\BufferTest.cs" />
     <Compile Include="GDrive\GDrivePathHelperTest.cs" />
     <Compile Include="GDrive\GDriveTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

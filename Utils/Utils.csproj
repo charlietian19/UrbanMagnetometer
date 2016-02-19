@@ -119,6 +119,7 @@
     <Compile Include="DataManager\LegacyStorage.cs" />
     <Compile Include="DataManager\UploadScheduler.cs" />
     <Compile Include="Filters\AbstractSimpleFilter.cs" />
+    <Compile Include="Filters\RollingBuffer.cs" />
     <Compile Include="Filters\MovingAverage.cs" />
     <Compile Include="Filters\Subsample.cs" />
     <Compile Include="GDrive\FileUploadException.cs" />

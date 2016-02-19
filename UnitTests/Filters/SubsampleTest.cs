@@ -96,7 +96,6 @@ namespace UnitTests.Filters
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void RatioOutOfRange()
         {
-            var data = new double[] { 1, 2, 3, 4, 5, 6 };
             var filter = new Subsample(0);
         }
     }
