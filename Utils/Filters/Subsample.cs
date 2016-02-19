@@ -16,8 +16,8 @@ namespace Utils.Filters
         {
             if (ratio < 1)
             {
-                throw new ArgumentOutOfRangeException(
-                    "Filter ratio can't be smaller than one");
+                var msg = "Filter ratio can't be smaller than one";
+                throw new ArgumentOutOfRangeException(msg);
             }
             skipmax = ratio;
             skipped = 0;

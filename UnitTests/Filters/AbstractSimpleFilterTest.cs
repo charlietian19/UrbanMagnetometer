@@ -13,11 +13,11 @@ namespace UnitTests.Filters
         class UnityFilter : AbstractSimpleFilter
         {
             public UnityFilter() { }
-            override protected double[] Filter(double[] x)
+            override protected double[] Filter(double[] data)
             {
-                lastInput = x;
+                lastInput = data;
                 timesCalled++;
-                return x;
+                return data;
             }
 
             public int timesCalled = 0;
