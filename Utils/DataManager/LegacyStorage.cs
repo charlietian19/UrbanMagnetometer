@@ -193,7 +193,9 @@ namespace Utils.DataManager
         virtual protected IDatasetInfo NewDatasetInfo(DateTime time, 
             IConfigurationManagerWrap configuration)
         {
-            return new DatasetInfo(time, ConfigurationManager);
+            return new DatasetInfo(time, ConfigurationManager,
+                new ZipFileWrapper(), new FileWrap(), new DirectoryWrap(),
+                new PathWrap());
         }
 
         /* Creates the data files in cache folder. */

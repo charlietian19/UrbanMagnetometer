@@ -25,7 +25,9 @@ namespace Utils.DataManager
         protected override IDatasetInfo NewDatasetInfo(DateTime time, 
             IConfigurationManagerWrap configuration)
         {
-            return new SampleDatasetInfo(time, configuration);
+            return new SampleDatasetInfo(time, configuration, 
+                new ZipFileWrapper(), new FileWrap(), new DirectoryWrap(),
+                new PathWrap());
         }
     }
 }

@@ -64,9 +64,9 @@ namespace Utils.DataManager
         private IConfigurationManagerWrap ConfigurationManager;
         private IFileWrap File;
         private IDirectoryWrap Directory;
-        private IZipFile zip;
         private IPathWrap Path;
         private IThreadWrap ThreadWrap;
+        private IZipFile zip;
         private AutoResetEvent retryEvent = new AutoResetEvent(false);
         public event UploadFinishedEventHandler FinishedEvent;
         public event UploadStartedEventHandler StartedEvent;
@@ -198,67 +198,6 @@ namespace Utils.DataManager
             }
         }
 
-        /* Creates a new temporary directory in the folder containing data. */
-        private Mutex tmpDirMutex = new Mutex();
-        private string CreateTemporaryDirectory(IDatasetInfo info)
-        {
-            string name = null;
-            bool success = false;
-            tmpDirMutex.WaitOne();
-            while (!success)
-            {
-                name = Path.Combine(info.FolderPath, Path.GetRandomFileName());
-                if (!Directory.Exists(name))
-                {
-                    Directory.CreateDirectory(name);
-                    success = true;
-                }
-            }
-            tmpDirMutex.ReleaseMutex();
-            return name;
-        }
-
-        /* Removes the temporary directory. */
-        private void DeleteTemporaryDirectory(string name)
-        {
-            tmpDirMutex.WaitOne();
-            Directory.Delete(name, true);
-            tmpDirMutex.ReleaseMutex();
-        }
-
-
-        /* Adds the magnetic field dataset to an archive and returns full path
-        to the archive. */
-        private string MoveDataToTmpDir(IDatasetInfo info)
-        {
-            string tmpDirFullPath, newXFileName, newYFileName, newZFileName,
-                newTFileName;
-
-            tmpDirFullPath = CreateTemporaryDirectory(info);
-            newXFileName = Path.Combine(tmpDirFullPath, info.XFileName);
-            newYFileName = Path.Combine(tmpDirFullPath, info.YFileName);
-            newZFileName = Path.Combine(tmpDirFullPath, info.ZFileName);
-            newTFileName = Path.Combine(tmpDirFullPath, info.TFileName);
-
-            File.Move(info.FullPath(info.XFileName), newXFileName);
-            File.Move(info.FullPath(info.YFileName), newYFileName);
-            File.Move(info.FullPath(info.ZFileName), newZFileName);
-            File.Move(info.FullPath(info.TFileName), newTFileName);
-
-            return tmpDirFullPath;
-        }
-
-        /* Adds the files from the dataset into a zip archive. */
-        private string ArchiveFiles(IDatasetInfo info)
-        {
-            string tmpDirFullPath = "";
-            string path = Path.Combine(info.FolderPath, info.ZipFileName);
-            tmpDirFullPath = MoveDataToTmpDir(info);
-            zip.CreateFromDirectory(tmpDirFullPath, path);
-            DeleteTemporaryDirectory(tmpDirFullPath);
-            return path;
-        }
-
         /* Uploads the files given DatasetInfo. */
         private void UploadDo(IDatasetInfo info)
         {
@@ -329,7 +268,7 @@ namespace Utils.DataManager
 
                     if (info != null)
                     {
-                        info.ArchivePath = ArchiveFiles(info);
+                        info.ArchiveFiles();
                         Debug.WriteLine(string.Format(
                             "Worker {0} received a new dataset to upload, "
                             + "StartDate = {1}, ArchivePath = {2}",
@@ -393,7 +332,8 @@ namespace Utils.DataManager
                     try
                     {
                         Debug.WriteLine("Enqueuing " + name);
-                        var info = new DatasetInfo(name, ConfigurationManager);
+                        var info = new DatasetInfo(name, ConfigurationManager,
+                            zip, File, Directory, Path);
                         queueFailed.Enqueue(info);
                     }
                     catch (Exception e)

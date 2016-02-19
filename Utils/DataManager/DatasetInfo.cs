@@ -1,8 +1,9 @@
 ﻿using System;
-using System.IO;
+using SystemWrapper.IO;
 using SystemWrapper.Configuration;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Utils.DataManager
 {
@@ -27,6 +28,7 @@ namespace Utils.DataManager
         bool isSameFile(DateTime other);
         string ArchivePath { get; set; }
         string RemotePath { get; }
+        string ArchiveFiles();
     }
 
     /* Stores the information about the dataset naming in a convenient way. */
@@ -46,6 +48,10 @@ namespace Utils.DataManager
         public string StationName { get; set; }
         public DateTime StartDate { get; set; }
         public string ArchivePath { get; set; }
+        private IZipFile zip;
+        private IFileWrap File;
+        private IDirectoryWrap Directory;
+        private IPathWrap Path;
 
         /* Initializes settings from the configuration file. */
         private void ReadAppConfig()
@@ -64,21 +70,36 @@ namespace Utils.DataManager
             dataFileNameFormat = settings["DataFileNameFormat"];
         }
 
-        public DatasetInfo(DateTime time, IConfigurationManagerWrap config)
+        public DatasetInfo(DateTime time) : this(time,
+            new ConfigurationManagerWrap(), new ZipFileWrapper(),
+            new FileWrap(), new DirectoryWrap(), new PathWrap())
+        { }
+
+        public DatasetInfo(string fullPath) : this(fullPath,
+            new ConfigurationManagerWrap(), new ZipFileWrapper(),
+            new FileWrap(), new DirectoryWrap(), new PathWrap())
+        { }
+
+        public DatasetInfo(DateTime time, IConfigurationManagerWrap config,
+            IZipFile zip, IFileWrap file, IDirectoryWrap dir, IPathWrap path)
         {
-            ConfigurationManager = config;
-            ReadAppConfig();
+            ConfigurationManager = config;            
             Hour = time.Hour.ToString();
             Year = time.Year.ToString();
             Day = time.Day.ToString();
             Month = time.Month.ToString();
+            File = file;
+            Directory = dir;
+            Path = path;
             StartDate = time;
+            this.zip = zip;
+            ReadAppConfig();
         }
 
-        public DatasetInfo(string fullPath, IConfigurationManagerWrap config)
+        public DatasetInfo(string fullPath, IConfigurationManagerWrap config,
+            IZipFile zip, IFileWrap file, IDirectoryWrap dir, IPathWrap path)
+            : this(DateTime.Now, config, zip, file, dir, path)
         {
-            ConfigurationManager = config;
-            ReadAppConfig();
             ArchivePath = fullPath;
             string formatPattern = @"(\{[0-9]\})";
             string newFormatPattern = @"([0-9]+)";
@@ -213,6 +234,68 @@ namespace Utils.DataManager
                 return string.Format(@"{0}\{1}\{2}\{3}\{4}", 
                     Year, Month, Day, Hour, StationName);
             }
+        }
+
+        /* Creates a new temporary directory in the folder containing data. */
+        private Mutex tmpDirMutex = new Mutex();
+        private string CreateTemporaryDirectory()
+        {
+            string name = null;
+            bool success = false;
+            tmpDirMutex.WaitOne();
+            while (!success)
+            {
+                name = Path.Combine(FolderPath, Path.GetRandomFileName());
+                if (!Directory.Exists(name))
+                {
+                    Directory.CreateDirectory(name);
+                    success = true;
+                }
+            }
+            tmpDirMutex.ReleaseMutex();
+            return name;
+        }
+
+        /* Removes the temporary directory. */
+        private void DeleteTemporaryDirectory(string name)
+        {
+            tmpDirMutex.WaitOne();
+            Directory.Delete(name, true);
+            tmpDirMutex.ReleaseMutex();
+        }
+
+
+        /* Adds the magnetic field dataset to an archive and returns full path
+        to the archive. */
+        private string MoveDataToTmpDir()
+        {
+            string tmpDirFullPath, newXFileName, newYFileName, newZFileName,
+                newTFileName;
+
+            tmpDirFullPath = CreateTemporaryDirectory();
+            newXFileName = Path.Combine(tmpDirFullPath, XFileName);
+            newYFileName = Path.Combine(tmpDirFullPath, YFileName);
+            newZFileName = Path.Combine(tmpDirFullPath, ZFileName);
+            newTFileName = Path.Combine(tmpDirFullPath, TFileName);
+
+            File.Move(FullPath(XFileName), newXFileName);
+            File.Move(FullPath(YFileName), newYFileName);
+            File.Move(FullPath(ZFileName), newZFileName);
+            File.Move(FullPath(TFileName), newTFileName);
+
+            return tmpDirFullPath;
+        }
+
+        /* Adds the files from the dataset into a zip archive. */
+        public string ArchiveFiles()
+        {
+            string tmpDirFullPath = "";
+            string path = Path.Combine(FolderPath, ZipFileName);
+            ArchivePath = path;
+            tmpDirFullPath = MoveDataToTmpDir();
+            zip.CreateFromDirectory(tmpDirFullPath, path);
+            DeleteTemporaryDirectory(tmpDirFullPath);
+            return path;
         }
     }
 }
