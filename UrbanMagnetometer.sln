@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataGrabber", "DogeStation2\DataGrabber.csproj", "{BED00A72-9EDE-402B-87D1-046B36F48385}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataGrabber", "DataGrabber\DataGrabber.csproj", "{BED00A72-9EDE-402B-87D1-046B36F48385}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{DC96D414-7682-40A6-A186-4EB5A0C0B0DF}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "NURI_station_installer", "NURI_Station_Installer\NURI_Station_Installer.vdproj", "{708E8B71-1A69-4B5F-9DF3-D0413B4D218E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GDriveFolderMerge", "GDriveFolderMerge\GDriveFolderMerge.csproj", "{81050E80-5021-4869-94C7-2AF33F04F96B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleGrabber", "SampleGrabber\SampleGrabber.csproj", "{8EE6A644-11F0-4F65-840A-132E35AE833C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,6 +105,18 @@ Global
 		{81050E80-5021-4869-94C7-2AF33F04F96B}.Release|x64.Build.0 = Release|Any CPU
 		{81050E80-5021-4869-94C7-2AF33F04F96B}.Release|x86.ActiveCfg = Release|Any CPU
 		{81050E80-5021-4869-94C7-2AF33F04F96B}.Release|x86.Build.0 = Release|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Debug|x64.Build.0 = Debug|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Debug|x86.Build.0 = Debug|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Release|x64.ActiveCfg = Release|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Release|x64.Build.0 = Release|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Release|x86.ActiveCfg = Release|Any CPU
+		{8EE6A644-11F0-4F65-840A-132E35AE833C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

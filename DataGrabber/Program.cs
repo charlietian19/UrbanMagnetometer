@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
-namespace DogeStation2
+namespace DataGrabber
 {
     static class Program
     {

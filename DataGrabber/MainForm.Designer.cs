@@ -1,4 +1,4 @@
-﻿namespace DogeStation2
+﻿namespace DataGrabber
 {
     partial class MainForm
     {

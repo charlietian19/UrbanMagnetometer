@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DogeStation2.Properties
+namespace SampleGrabber.Properties
 {
 
 

@@ -6,7 +6,7 @@ using Utils.Configuration;
 using Biomed_eMains_eFMx;
 using System.IO;
 
-namespace DogeStation2
+namespace DataGrabber
 {
     public partial class MainForm : Form
     {
