@@ -143,6 +143,7 @@ namespace SampleGrabber
                     averagingPeriodMs.Enabled = true;
                     powerLineFilter.Enabled = false;
                     comment.Enabled = true;
+                    discardButton.Enabled = true;
                     plotUpdateTimer.Enabled = false;
                     displayPoints.Enabled = true;
                     refreshButton.Enabled = true;
@@ -156,6 +157,7 @@ namespace SampleGrabber
                     averagingPeriodMs.Enabled = false;
                     powerLineFilter.Enabled = false;
                     comment.Enabled = false;
+                    discardButton.Enabled = false;
                     plotUpdateTimer.Enabled = true;
                     displayPoints.Enabled = false;
                     refreshButton.Enabled = false;
@@ -169,6 +171,7 @@ namespace SampleGrabber
                     averagingPeriodMs.Enabled = true;
                     powerLineFilter.Enabled = false;
                     comment.Enabled = true;
+                    discardButton.Enabled = true;
                     plotUpdateTimer.Enabled = false;
                     displayPoints.Enabled = true;
                     refreshButton.Enabled = true;

@@ -260,21 +260,11 @@ namespace Utils.DataManager
         /* Discard (truncate) the current data files. */
         public void Discard()
         {
-            if (isWriting)
-            {
-                x.BaseStream.SetLength(0);
-                y.BaseStream.SetLength(0);
-                z.BaseStream.SetLength(0);
-                t.BaseStream.SetLength(0);
-                index = 0;
-            }
-            else
-            {
-                IFile.Delete(info.FullPath(info.XFileName));
-                IFile.Delete(info.FullPath(info.YFileName));
-                IFile.Delete(info.FullPath(info.ZFileName));
-                IFile.Delete(info.FullPath(info.TFileName));
-            }
+            CloseDataFiles();
+            IFile.Delete(info.FullPath(info.XFileName));
+            IFile.Delete(info.FullPath(info.YFileName));
+            IFile.Delete(info.FullPath(info.ZFileName));
+            IFile.Delete(info.FullPath(info.TFileName));
         }
     }
 
