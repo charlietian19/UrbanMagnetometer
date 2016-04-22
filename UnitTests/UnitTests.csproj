@@ -102,8 +102,10 @@
     <Compile Include="Filters\SubsampleTest.cs" />
     <Compile Include="Filters\MovingAverageTest.cs" />
     <Compile Include="Filters\BufferTest.cs" />
+    <Compile Include="GDriveFolderMerge\GDriveFolderMerge.cs" />
     <Compile Include="GDrive\GDrivePathHelperTest.cs" />
     <Compile Include="GDrive\GDriveTest.cs" />
+    <Compile Include="GDrive\GDriveTestHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -111,11 +113,16 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GDriveFolderMerge\GDriveFolderMerge.csproj">
+      <Project>{81050e80-5021-4869-94c7-2af33f04f96b}</Project>
+      <Name>GDriveFolderMerge</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utils\Utils.csproj">
       <Project>{6d794f57-90e8-477e-af63-7d22fba88a37}</Project>
       <Name>Utils</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

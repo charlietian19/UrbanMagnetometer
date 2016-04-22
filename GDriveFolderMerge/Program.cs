@@ -1,38 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Utils.Configuration;
 using Utils.GDrive;
 using Google.Apis.Drive.v2.Data;
 
 namespace GDriveFolderMerge
 {
-    class Program
-    {        
+    public class Program
+    {   
+        public static string foldersMimeType;
         public static void Main(string[] args)
         {
             var google = new GDrive("nuri-station.json");
             try
             {
-                CleanUpGDrive(google);
+                foldersMimeType = Settings.FoldersMimeType;
+                CleanUpGDrive(google, Settings.RemoteDataFolder);
             }     
             catch (Exception e)
             {
-
                 Console.WriteLine(e.Message);
             }       
         }
 
-        public static void CleanUpGDrive(GDrive google)
+        public static void CleanUpGDrive(IGDrive google, string rootPath)
         {
-            var root = google.PathToGoogleFile(Settings.RemoteDataFolder);
+            var root = google.PathToGoogleFile(rootPath);
             Merge(google, root);
         }
 
-        public static void Merge(GDrive google, File folder)
+        /* 
+            Merges all the folders with repeating names in the given folder,
+            calls itself recursively on every remaining child folder
+        */
+        public static void Merge(IGDrive google, File folder)
         {            
-            if (folder.MimeType != Settings.FoldersMimeType)
+            if (folder.MimeType != foldersMimeType)
             {
                 var msg = "Can't merge something that isn't a folder";
                 throw new Exception(msg);
@@ -40,12 +43,14 @@ namespace GDriveFolderMerge
 
             Console.WriteLine("Merging files inside " + folder.Title 
                 + " (Id = " + folder.Id + ")");
+
+            /* Set of all folders with non-repeating names in this folder */
             var uniqueFolders = new Dictionary<string, File>();
             var children = google.ChildList(folder);
             foreach (var child in children)
             {
                 var file = google.GetFileInfo(child.Id);
-                if (file.MimeType == Settings.FoldersMimeType)
+                if (file.MimeType == foldersMimeType)
                 {
                     if (uniqueFolders.ContainsKey(file.Title))
                     {
@@ -67,10 +72,10 @@ namespace GDriveFolderMerge
 
         /* Sets folder1 to be parent of every child in folder2.
         Deletes folder2. */
-        public static void MergeTrees(GDrive google, File folder1, File folder2)
+        public static void MergeTrees(IGDrive google, File folder1, File folder2)
         {
-            if ((folder1.MimeType != Settings.FoldersMimeType) 
-                || (folder2.MimeType != Settings.FoldersMimeType))
+            if ((folder1.MimeType != foldersMimeType) 
+                || (folder2.MimeType != foldersMimeType))
             {
                 var msg = "One of the tree branches isn't a folder";
                 throw new Exception(msg);

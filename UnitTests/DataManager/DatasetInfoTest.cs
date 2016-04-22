@@ -208,6 +208,7 @@ namespace UnitTests.DataManager
             var time4 = new DateTime(2016, 9, 25, 22, 0, 0);
             var time5 = new DateTime(2016, 10, 14, 22, 0, 0);
             var time6 = new DateTime(2016, 10, 25, 17, 0, 0);
+            var blah = time6.ToBinary();
             var data1 = new DatasetInfo(time1, config, zip, file, dir, path);
             Assert.IsTrue(data1.isSameFile(time2));
             Assert.IsFalse(data1.isSameFile(time3));

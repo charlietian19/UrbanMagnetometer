@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Google.Apis.Drive.v2.Data;
 using Utils.GDrive;
+using UnitTests.GDrive;
 using Moq;
 
 namespace UnitTests.GDriveTests
@@ -15,17 +13,6 @@ namespace UnitTests.GDriveTests
         private File root, bar, foo, baz;
         private Mock<ChildReference> fooChild, barChild, bazChild;
         private Mock<IGDrive> google;
-
-        /* Returns a file mock given title. */
-        private Mock<File> SetupMockFile(string title)
-        {
-            var mock = new Mock<File>();
-            mock.Setup(o => o.Title).Returns(title);
-            mock.Setup(o => o.Id).Returns(title + "ID");
-            google.Setup(o => o.GetFileInfo(mock.Object.Id))
-                .Returns(mock.Object);
-            return mock;
-        }
 
         /* When google.NewFolder is called the mock is updated to seem like
         there is an empty child folder inside the parent folder. */
@@ -47,13 +34,13 @@ namespace UnitTests.GDriveTests
         {
             google = new Mock<IGDrive>();
 
-            rootMock = SetupMockFile("Root");
+            rootMock = TestHelper.SetupMockFile(google, "Root");
             root = rootMock.Object;
-            fooMock = SetupMockFile("foo");
+            fooMock = TestHelper.SetupMockFile(google, "foo");
             foo = fooMock.Object;
-            barMock = SetupMockFile("bar");
+            barMock = TestHelper.SetupMockFile(google, "bar");
             bar = barMock.Object;
-            bazMock = SetupMockFile("baz");
+            bazMock = TestHelper.SetupMockFile(google, "baz");
             baz = bazMock.Object;
             fooChild = new Mock<ChildReference>();
             barChild = new Mock<ChildReference>();
@@ -231,7 +218,7 @@ namespace UnitTests.GDriveTests
         /* Creating a directory tree. */
         public void CreateDirectoryTree()
         {
-            var mewMock = SetupMockFile("mew");
+            var mewMock = TestHelper.SetupMockFile(google, "mew");
             var mew = mewMock.Object;
             var mewChild = new Mock<ChildReference>();
             mewChild.Setup(o => o.Id).Returns(mew.Id);

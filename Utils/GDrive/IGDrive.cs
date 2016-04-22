@@ -8,6 +8,9 @@ namespace Utils.GDrive
         string GetRootFolderId();
         File GetFileInfo(string id);
         IList<ChildReference> ChildList(File file);
-        void NewFolder(string name, File parent);        
+        void NewFolder(string name, File parent);
+        void DeleteFile(string fileId);
+        void SetParent(string fileId, string parentId);
+        File PathToGoogleFile(string path);
     }
 }
