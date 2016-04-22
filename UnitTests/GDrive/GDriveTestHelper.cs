@@ -14,6 +14,8 @@ namespace UnitTests.GDrive
             mock.Setup(o => o.Id).Returns(title + mock.GetHashCode());
             google.Setup(o => o.GetFileInfo(mock.Object.Id))
                 .Returns(mock.Object);
+            google.Setup(o => o.ChildList(mock.Object))
+                .Returns(new ChildReference[] { });
             return mock;
         }
 
@@ -45,6 +47,20 @@ namespace UnitTests.GDrive
             {
                 childList[i] = children[i].Object;
             }
+            google.Setup(o => o.ChildList(parent.Object)).Returns(childList);
+        }
+
+        /* Nest folders into parent. */
+        public static void SetChildren(Mock<IGDrive> google,
+            Mock<File> parent, Mock<File>[] children)
+        {
+            var childrenTotal = children.Length;
+            var childList = new ChildReference[childrenTotal];
+            for (int i = 0; i < childrenTotal; i++)
+            {
+                childList[i] = GetChild(google, children[i]).Object;
+            }
+
             google.Setup(o => o.ChildList(parent.Object)).Returns(childList);
         }
     }

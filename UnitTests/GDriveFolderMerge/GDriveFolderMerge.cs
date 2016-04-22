@@ -33,20 +33,12 @@ namespace UnitTests.GDriveFolderMerge
         
 
         [TestMethod]
-        public void MergeTwoEmptyFolders()
+        public void CleanUpTwoEmptyFolders()
         {
             Mock<File> folder1 = TestHelper.SetupMockFile(google, "1", folder);
             Mock<File> folder2 = TestHelper.SetupMockFile(google, "1", folder);
-            TestHelper.SetChildren(google, rootMock,
-                new Mock<ChildReference>[]
-                {
-                    TestHelper.GetChild(google, folder1),
-                    TestHelper.GetChild(google, folder2)
-                });
-            TestHelper.SetChildren(google, folder1, 
-                new Mock<ChildReference>[]{ });
-            TestHelper.SetChildren(google, folder2,
-                new Mock<ChildReference>[] { });
+            TestHelper.SetChildren(google, rootMock, 
+                new Mock<File>[] { folder1, folder2 });
 
             Program.CleanUpGDrive(google.Object, "\\");
             google.Verify(o => o.DeleteFile(root.Id), Times.Never);
@@ -54,6 +46,12 @@ namespace UnitTests.GDriveFolderMerge
             google.Verify(o => o.DeleteFile(folder2.Object.Id), Times.Once);
             google.Verify(o => o.SetParent(It.IsAny<string>(), 
                 It.IsAny<string>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void MergeTwoFolders()
+        {
+
         }
     }
 }
