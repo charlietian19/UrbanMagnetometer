@@ -16,7 +16,32 @@ namespace UnitTests.GDrive
                 .Returns(mock.Object);
             google.Setup(o => o.ChildList(mock.Object))
                 .Returns(new ChildReference[] { });
+            google.Setup(o => o.DeleteFile(mock.Object.Id))
+                .Callback(() => DeleteFileCallback(google, mock.Object));
+            google.Setup(o => o.SetParent(mock.Object.Id, It.IsAny<string>()))
+                .Callback((string id, string parent) => 
+                SetParentCallback(google, mock, google.Object.GetFileInfo(parent)));
             return mock;
+        }
+
+        /* Updates the children list of the parent when a new parent is set */
+        private static void SetParentCallback(Mock<IGDrive> google, Mock<File> child, File parent)
+        {
+            var childListOld = google.Object.ChildList(parent);
+            var childrenTotalOld = childListOld.Count;
+            var childListNew = new ChildReference[childrenTotalOld + 1];
+            for (int i = 0; i < childrenTotalOld; i++)
+            {
+                childListNew[i] = childListOld[i];
+            }
+            childListNew[childrenTotalOld] = GetChild(google, child).Object;
+            google.Setup(o => o.ChildList(parent)).Returns(childListNew);
+        }
+
+        /* Updates the children list of the parent when a child is deleted */
+        private static void DeleteFileCallback(Mock<IGDrive> google, File child)
+        {
+            // not implemented
         }
 
         /* Returns a mock given a title and mime type */
