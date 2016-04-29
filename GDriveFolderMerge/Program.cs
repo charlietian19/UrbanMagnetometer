@@ -81,12 +81,14 @@ namespace GDriveFolderMerge
                 throw new Exception(msg);
             }
 
-            Console.WriteLine("Merging contents of two" + folder1.Title
-                + "folders" + " (" + folder2.Id + "->" + folder1.Id + ")");
+            Console.WriteLine("Merging contents of two " + folder1.Title
+                + " folders (" + folder2.Id + "->" + folder1.Id + ")");
 
             var children = google.ChildList(folder2);
             foreach (var child in children)
             {
+                Console.WriteLine("Set parent of " + child.Id
+                + " to " + folder1.Title + " (Id = " + folder1.Id + ")");
                 google.SetParent(child.Id, folder1.Id);
             }
 

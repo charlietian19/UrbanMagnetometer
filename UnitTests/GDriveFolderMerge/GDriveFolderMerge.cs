@@ -225,5 +225,124 @@ namespace UnitTests.GDriveFolderMerge
             google.Verify(o => o.SetParent(file3.Object.Id, folder21.Object.Id),
                 Times.Once);
         }
+
+        /**
+            Before:
+            root\
+                |-"1"\
+                |     |-"2"\
+                |     |     \-"3"\
+                |     |           \-"7"\
+                |     |                 \-"file1"
+                |     \-"2"\
+                |           \-"4"\
+                |                 \-"file2"
+                \-"1"\
+                      |-"2"\
+                      |     \-"5"\
+                      |           \-"file3"
+                      \-"2"\
+                            \-"6"\
+                                  \-"file4"
+
+            After:
+            root\
+                 \-"1"\
+                       \-"2"\
+                             |-"3"\
+                             |     \-"7"\
+                             |           \-"file1"
+                             |-"4"\
+                             |     \-"file2"          
+                             |-"5"\
+                             |     \-"file3"
+                             \-"6"\
+                                   \-"file1"
+        */
+        [TestMethod]
+        public void CleanUpSubtrees2()
+        {
+            Mock<File> folder11, folder12, folder21, folder22, folder23, 
+                folder24, folder3, folder4, folder5, folder6, folder7;
+            folder11 = TestHelper.SetupMockFile(google, "1", folderMime);
+            folder12 = TestHelper.SetupMockFile(google, "1", folderMime);
+            folder21 = TestHelper.SetupMockFile(google, "2", folderMime);
+            folder22 = TestHelper.SetupMockFile(google, "2", folderMime);
+            folder23 = TestHelper.SetupMockFile(google, "2", folderMime);
+            folder24 = TestHelper.SetupMockFile(google, "2", folderMime);
+            folder3 = TestHelper.SetupMockFile(google, "3", folderMime);
+            folder4 = TestHelper.SetupMockFile(google, "4", folderMime);
+            folder5 = TestHelper.SetupMockFile(google, "5", folderMime);
+            folder6 = TestHelper.SetupMockFile(google, "6", folderMime);
+            folder7 = TestHelper.SetupMockFile(google, "7", folderMime);
+
+            Mock<File> file1, file2, file3, file4;
+            file1 = TestHelper.SetupMockFile(google, "file1", fileMime);
+            file2 = TestHelper.SetupMockFile(google, "file2", fileMime);
+            file3 = TestHelper.SetupMockFile(google, "file3", fileMime);
+            file4 = TestHelper.SetupMockFile(google, "file4", fileMime);
+
+            TestHelper.SetChildren(google, rootMock, new Mock<File>[] { folder11, folder12 });
+            TestHelper.SetChildren(google, folder11, new Mock<File>[] { folder21, folder22 });
+            TestHelper.SetChildren(google, folder12, new Mock<File>[] { folder23, folder24 });
+            TestHelper.SetChildren(google, folder21, new Mock<File>[] { folder3 });
+            TestHelper.SetChildren(google, folder22, new Mock<File>[] { folder4 });
+            TestHelper.SetChildren(google, folder23, new Mock<File>[] { folder5 });
+            TestHelper.SetChildren(google, folder24, new Mock<File>[] { folder6 });
+            TestHelper.SetChildren(google, folder3, new Mock<File>[] { folder7 });
+            TestHelper.SetChildren(google, folder4, new Mock<File>[] { file2 });
+            TestHelper.SetChildren(google, folder5, new Mock<File>[] { file3 });
+            TestHelper.SetChildren(google, folder6, new Mock<File>[] { file4 });
+            TestHelper.SetChildren(google, folder7, new Mock<File>[] { file1 });
+
+            Program.CleanUpGDrive(google.Object, "\\");
+            google.Verify(o => o.DeleteFile(folder11.Object.Id), Times.Never);
+            google.Verify(o => o.DeleteFile(folder12.Object.Id), Times.Once);
+            google.Verify(o => o.DeleteFile(folder21.Object.Id), Times.Never);
+            google.Verify(o => o.DeleteFile(folder22.Object.Id), Times.Once);
+            google.Verify(o => o.DeleteFile(folder23.Object.Id), Times.Once);
+            google.Verify(o => o.DeleteFile(folder24.Object.Id), Times.Once);
+            google.Verify(o => o.DeleteFile(folder3.Object.Id), Times.Never);
+            google.Verify(o => o.DeleteFile(folder4.Object.Id), Times.Never);
+            google.Verify(o => o.DeleteFile(folder5.Object.Id), Times.Never);
+            google.Verify(o => o.DeleteFile(folder6.Object.Id), Times.Never);
+            google.Verify(o => o.DeleteFile(folder7.Object.Id), Times.Never);
+            google.Verify(o => o.DeleteFile(file1.Object.Id), Times.Never);
+            google.Verify(o => o.DeleteFile(file2.Object.Id), Times.Never);
+            google.Verify(o => o.DeleteFile(file3.Object.Id), Times.Never);
+            google.Verify(o => o.DeleteFile(file4.Object.Id), Times.Never);
+
+            google.Verify(o => o.SetParent(folder11.Object.Id, It.IsAny<string>()),
+                Times.Never);
+            google.Verify(o => o.SetParent(folder12.Object.Id, It.IsAny<string>()),
+                Times.Never);
+            google.Verify(o => o.SetParent(folder21.Object.Id, It.IsAny<string>()),
+                Times.Never);
+            google.Verify(o => o.SetParent(folder22.Object.Id, It.IsAny<string>()),
+                Times.Never);
+            google.Verify(o => o.SetParent(folder23.Object.Id, folder11.Object.Id),
+                Times.Once);
+            google.Verify(o => o.SetParent(folder24.Object.Id, folder11.Object.Id),
+                Times.Once);
+            google.Verify(o => o.SetParent(folder3.Object.Id, It.IsAny<string>()),
+                Times.Never);
+            google.Verify(o => o.SetParent(folder4.Object.Id, folder21.Object.Id),
+                Times.Once);
+            google.Verify(o => o.SetParent(folder5.Object.Id, folder21.Object.Id),
+                Times.Once);
+            google.Verify(o => o.SetParent(folder6.Object.Id, folder21.Object.Id),
+                Times.Once);
+            google.Verify(o => o.SetParent(folder7.Object.Id, It.IsAny<string>()),
+                Times.Never);
+
+            google.Verify(o => o.SetParent(file1.Object.Id, It.IsAny<string>()),
+                Times.Never);
+            google.Verify(o => o.SetParent(file2.Object.Id, It.IsAny<string>()),
+                Times.Never);
+            google.Verify(o => o.SetParent(file3.Object.Id, It.IsAny<string>()),
+                Times.Never);
+            google.Verify(o => o.SetParent(file4.Object.Id, It.IsAny<string>()),
+                Times.Never);
+        }
     }
 }
