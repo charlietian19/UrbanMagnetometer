@@ -34,7 +34,8 @@ namespace Utils.GPS
 
         /* The linear fit coefficients */
         public SimpleLinearRegression regression
-        { get; private set;
+        {
+            get; private set;
         } = null;
 
         /* Mutex that ensures the regression model updates are thread safe */
@@ -124,13 +125,14 @@ namespace Utils.GPS
         }
 
         /* Add the GPS point to the data set. */
-        public void PutTimestamp(GpsData data)
+        public bool PutTimestamp(GpsData data)
         {
             bool valid = storage.Store(data);
             if (valid)
             {
                 UpdateModel();
             }
+            return valid;
         }
 
         /* Reports slope and intercept */

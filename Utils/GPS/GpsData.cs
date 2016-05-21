@@ -14,8 +14,8 @@ namespace Utils.GPS
         public bool valid;
 
         /* Auxilary GPS data (not currently in use) */
-        public string longitude;
-        public string latitude;
+        public double longitude;
+        public double latitude;
         public double speedKnots;
         public double angleDegrees;
         public string ew;

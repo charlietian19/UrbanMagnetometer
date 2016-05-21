@@ -51,30 +51,31 @@ namespace Utils.GPS
         {
             if (threshold < 0)
             {
-                throw new ArgumentException(
+                throw new ArgumentOutOfRangeException(
                     "TimeSource threshold can't be negative");
             }
 
-            if (maxHistory < 1)
+            if (maxHistory < 2)
             {
-                throw new ArgumentException(
-                    "TimeSource history length can't be less than one");
+                throw new ArgumentOutOfRangeException(
+                    "TimeSource history length can't be less than two");
             }
 
             if (lookback < 1)
             {
-                throw new ArgumentException(
+                throw new ArgumentOutOfRangeException(
                     "TimeSource lookback can't be less than one");
             }
 
             if (lookback > maxHistory)
             {
-                throw new ArgumentException(
+                throw new ArgumentOutOfRangeException(
                     "TimeSource lookback can't be larger than history");
             }
 
             this.threshold = Convert.ToInt64(threshold * frequency);
             this.maxHistory = maxHistory;
+            this.lookback = lookback;
             InitializeHistory();
         }
 
@@ -107,6 +108,12 @@ namespace Utils.GPS
             bool valid = IsWithinThreshold(data);
             pointsReceived += 1;
             SavePoint(data, valid);
+
+            if (pointsReceived < lookback)
+            {
+                return false;
+            }
+
             return valid;
         }
 

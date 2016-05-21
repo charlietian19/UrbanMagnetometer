@@ -20,8 +20,9 @@ namespace Utils.GPS
 
         /* Regexp that parses GPRMC messages */
         const string gprmc = @"\$GPRMC,(?<Hour>\d{2})(?<Minute>\d{2})" +
-            @"(?<Second>\d{2}),(?<Active>[A,V]),(?<Latitude>\d+\.\d+,[N,S])," +
-            @"(?<Longitude>\d+\.\d+,[E,W]),(?<Speed>\d+\.\d+),(?<Angle>\d+\.\d+)," +
+            @"(?<Second>\d{2}),(?<Active>[A,V]),(?<Latitude>\d+\.\d+)," +
+            @"(?<NS>[NS]),(?<Longitude>\d+\.\d+),(?<EW>[EW])," +
+            @"(?<Speed>\d+\.\d+),(?<Angle>\d+\.\d+)," +
             @"(?<Day>\d{2})(?<Month>\d{2})(?<Year>\d{2}),.*";
 
         /* Parses GPSRMC message and returns a DateTime object. Throws an 
@@ -51,11 +52,13 @@ namespace Utils.GPS
                 timestamp = new DateTime(year, month, day, hour, minute, second,
                     DateTimeKind.Local),
                 valid = match.Groups["Active"].Value == "A",
-                longitude = match.Groups["Longitude"].Value,
-                latitude = match.Groups["Latitude"].Value,
+                longitude = double.Parse(match.Groups["Longitude"].Value),
+                latitude = double.Parse(match.Groups["Latitude"].Value),
                 speedKnots = double.Parse(match.Groups["Speed"].Value),
                 angleDegrees = double.Parse(match.Groups["Angle"].Value),
-                active = match.Groups["Active"].Value
+                active = match.Groups["Active"].Value,
+                ns = match.Groups["NS"].Value,
+                ew = match.Groups["EW"].Value
             };                
         }   
     }
