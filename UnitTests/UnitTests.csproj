@@ -106,6 +106,7 @@
     <Compile Include="GDrive\GDrivePathHelperTest.cs" />
     <Compile Include="GDrive\GDriveTest.cs" />
     <Compile Include="GDrive\GDriveTestHelper.cs" />
+    <Compile Include="GPS\NaiveTimeSourceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
