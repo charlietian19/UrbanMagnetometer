@@ -33,7 +33,7 @@ namespace Utils.GPS
         has to be smaller than this for the GPS data to be valid. In other
         words, the PPS pulse and the time message have to arrive within the
         same second, or the PPS is likely missing. */
-        readonly long threshold = Stopwatch.Frequency;
+        readonly static long threshold = Stopwatch.Frequency;
 
         public SerialGps(string portName) : base(portName)
         {
@@ -125,7 +125,10 @@ namespace Utils.GPS
                 return;
             }
 
-            data = FixGpsTime(data, ticks);            
+            mutex.WaitOne();
+            data = FixGpsTime(data, ticks);
+            mutex.ReleaseMutex();
+
             if (OnTimeUpdate != null)
             {
                 OnTimeUpdate(data);
@@ -135,9 +138,8 @@ namespace Utils.GPS
         /* Checks this NMEA message corresponds to the last stored PPS pulse.
         If it does, update the ticks field to the PPS pulse arrival. If not,
         mark the GPS data as invalid. */
-        private GpsData FixGpsTime(GpsData data, long ticks)
+        private static GpsData FixGpsTime(GpsData data, long ticks)
         {
-            mutex.WaitOne();
             if (data.ticks - ticks > threshold)
             {
                 data.valid = false;
@@ -145,8 +147,7 @@ namespace Utils.GPS
             else
             {
                 data.ticks = ticks;
-            }
-            mutex.ReleaseMutex();
+            }            
 
             return data;
         }

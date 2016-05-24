@@ -18,9 +18,10 @@ namespace Utils.GPS
     public class NaiveTimeSource : ITimeSource
     {
         /* Minimum points needed to get a valid linear fit */
+        private int minPoints = 2;
         public int MinPointsToFit
         {
-            get { return MinPointsToFit; }
+            get { return minPoints; }
             set
             {
                 if (value < 2)
@@ -28,18 +29,15 @@ namespace Utils.GPS
                     throw new ArgumentOutOfRangeException(
                         "Need at least two point to fit a line");
                 }
-                MinPointsToFit = value;
+                minPoints = value;
             }
         }
 
         /* The linear fit coefficients */
-        public SimpleLinearRegression regression
-        {
-            get; private set;
-        } = null;
+        private SimpleLinearRegression regression = null;
 
         /* Mutex that ensures the regression model updates are thread safe */
-        Mutex mutex = new Mutex();
+        private Mutex mutex = new Mutex();
 
         /* Some initial date and tick that the data will be counted from so 
         the rounding errors are less of a problem */
@@ -53,20 +51,17 @@ namespace Utils.GPS
         /* Creates a NaiveTimeSource using a default NaiveTimeStorage. */
         public NaiveTimeSource()
         {
-            MinPointsToFit = 2;
             storage = new NaiveTimeStorage();
         }
 
         /* Create a NaiveTimeSource provided a TimeStorage */
         public NaiveTimeSource(ITimeStorage storage)
         {
-            MinPointsToFit = 2;
             this.storage = storage;
         }
 
-        /* Updates the linear fit when a new GPS data arrives.
-        I wonder if the long -> double conversion will be an issue. */
-        private void UpdateModel()
+        /* Updates the linear fit when a new GPS data arrives or on demand */
+        public void Update()
         {
             var validCount = storage.ValidPointsCount;
             if (validCount < MinPointsToFit)
@@ -130,24 +125,9 @@ namespace Utils.GPS
             bool valid = storage.Store(data);
             if (valid)
             {
-                UpdateModel();
+                Update();
             }
             return valid;
-        }
-
-        /* Reports slope and intercept */
-        public void ReportModel()
-        {
-            if (regression == null)
-            {
-                return;
-            }
-
-            var color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(string.Format("y = {0}*x + {1}",
-                regression.Slope, regression.Intercept));
-            Console.ForegroundColor = color;            
-        }
+        }        
     }
 }

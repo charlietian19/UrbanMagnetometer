@@ -15,5 +15,8 @@ namespace Utils.GPS
         Returns true if the point is valid.
         TODO: make this void, update PPS_Tracker to not use this flag. */
         bool PutTimestamp(GpsData data);
+
+        /* Re-calculated the prediction model. */
+        void Update();
     }
 }
