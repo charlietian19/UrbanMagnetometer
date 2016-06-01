@@ -92,6 +92,10 @@
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="PInvokeSerialPort, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\..\PPS_tracker\packages\PInvokeSerialPort.1.0.0\lib\PInvokeSerialPort.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -142,11 +146,16 @@
     <Compile Include="GDrive\IUploader.cs" />
     <Compile Include="GPS\Helpers.cs" />
     <Compile Include="GPS\GpsData.cs" />
-    <Compile Include="GPS\ITimeStorage.cs" />
     <Compile Include="GPS\ITimeSource.cs" />
+    <Compile Include="GPS\ITimeStorage.cs" />
+    <Compile Include="GPS\ITimeEstimator.cs" />
     <Compile Include="GPS\NaiveTimeStorage.cs" />
-    <Compile Include="GPS\SerialGps.cs" />
-    <Compile Include="GPS\NaiveTimeSource.cs" />
+    <Compile Include="GPS\SerialGPS\ISerial.cs" />
+    <Compile Include="GPS\SerialGPS\IStopwatch.cs" />
+    <Compile Include="GPS\SerialGPS\SerialGps.cs" />
+    <Compile Include="GPS\NaiveTimeEstimator.cs" />
+    <Compile Include="GPS\SerialGPS\SerialPortWrapper.cs" />
+    <Compile Include="GPS\SerialGPS\StopwatchWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -155,12 +164,6 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\PInvokeSerialPort\PInvokeSerialPort\PInvokeSerialPort.csproj">
-      <Project>{aec711a5-aa9b-4127-a82c-c4d8fda9741a}</Project>
-      <Name>PInvokeSerialPort</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />

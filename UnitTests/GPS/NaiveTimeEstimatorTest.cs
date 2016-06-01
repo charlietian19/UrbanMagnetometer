@@ -6,9 +6,9 @@ using Utils.GPS;
 namespace UnitTests.GPS
 {
     [TestClass]
-    public class NaiveTimeSourceTest
+    public class NaiveTimeEstimatorTest
     {
-        public NaiveTimeSourceTest()
+        public NaiveTimeEstimatorTest()
         {
             //
             // TODO: Add constructor logic here
@@ -38,18 +38,18 @@ namespace UnitTests.GPS
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void MinPointsToFitSetError()
         {
-            var source = new NaiveTimeSource();
-            source.MinPointsToFit = 1; // can't fit a line with 1 point
+            var estimator = new NaiveTimeEstimator();
+            estimator.MinPointsToFit = 1; // can't fit a line with 1 point
         }
 
         
         [TestMethod]
         public void MinPointsToFitSetSuccess()
         {
-            var source = new NaiveTimeSource();
-            Assert.AreNotEqual(8, source.MinPointsToFit);
-            source.MinPointsToFit = 8;
-            Assert.AreEqual(8, source.MinPointsToFit);
+            var estimator = new NaiveTimeEstimator();
+            Assert.AreNotEqual(8, estimator.MinPointsToFit);
+            estimator.MinPointsToFit = 8;
+            Assert.AreEqual(8, estimator.MinPointsToFit);
         }
 
         [TestMethod]
@@ -57,7 +57,7 @@ namespace UnitTests.GPS
         {            
             var storage = new Mock<ITimeStorage>();
             storage.Setup(o => o.Store(It.IsAny<GpsData>()));
-            var source = new NaiveTimeSource(storage.Object);
+            var estimator = new NaiveTimeEstimator(storage.Object);
             var data1 = new GpsData()
             {
                 timestamp = new DateTime(1234),
@@ -70,8 +70,8 @@ namespace UnitTests.GPS
                 timestamp = new DateTime(12637812),
                 valid = false
             };
-            source.PutTimestamp(data1);
-            source.PutTimestamp(data2);
+            estimator.PutTimestamp(data1);
+            estimator.PutTimestamp(data2);
             storage.Verify(o => o.Store(data1), Times.Once());
             storage.Verify(o => o.Store(data2), Times.Once());
         }
@@ -96,10 +96,10 @@ namespace UnitTests.GPS
             var storage = new Mock<ITimeStorage>();
             storage.Setup(o => o.ValidPointsCount).Returns(2);
             storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
-            var source = new NaiveTimeSource(storage.Object);
-            source.Update();
-            Assert.AreEqual(0, source.GetTimeStamp(0).timestamp.Ticks);
-            Assert.AreEqual(30, source.GetTimeStamp(30).timestamp.Ticks);
+            var estimator = new NaiveTimeEstimator(storage.Object);
+            estimator.Update();
+            Assert.AreEqual(0, estimator.GetTimeStamp(0).timestamp.Ticks);
+            Assert.AreEqual(30, estimator.GetTimeStamp(30).timestamp.Ticks);
         }
 
         [TestMethod]
@@ -122,10 +122,10 @@ namespace UnitTests.GPS
             var storage = new Mock<ITimeStorage>();
             storage.Setup(o => o.ValidPointsCount).Returns(2);
             storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
-            var source = new NaiveTimeSource(storage.Object);
-            source.Update();
-            Assert.AreEqual(10, source.GetTimeStamp(0).timestamp.Ticks);
-            Assert.AreEqual(10, source.GetTimeStamp(30).timestamp.Ticks);
+            var estimator = new NaiveTimeEstimator(storage.Object);
+            estimator.Update();
+            Assert.AreEqual(10, estimator.GetTimeStamp(0).timestamp.Ticks);
+            Assert.AreEqual(10, estimator.GetTimeStamp(30).timestamp.Ticks);
         }
 
         [TestMethod]
@@ -148,10 +148,10 @@ namespace UnitTests.GPS
             var storage = new Mock<ITimeStorage>();
             storage.Setup(o => o.ValidPointsCount).Returns(2);
             storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
-            var source = new NaiveTimeSource(storage.Object);
-            source.Update();
-            Assert.AreEqual(10, source.GetTimeStamp(0).timestamp.Ticks);
-            Assert.AreEqual(160, source.GetTimeStamp(300).timestamp.Ticks);
+            var estimator = new NaiveTimeEstimator(storage.Object);
+            estimator.Update();
+            Assert.AreEqual(10, estimator.GetTimeStamp(0).timestamp.Ticks);
+            Assert.AreEqual(160, estimator.GetTimeStamp(300).timestamp.Ticks);
         }
     }
 }

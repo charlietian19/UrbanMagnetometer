@@ -15,7 +15,7 @@ using Accord.Statistics.Models.Regression.Linear;
 
 namespace Utils.GPS
 {
-    public class NaiveTimeSource : ITimeSource
+    public class NaiveTimeEstimator : ITimeEstimator
     {
         /* Minimum points needed to get a valid linear fit */
         private int minPoints = 2;
@@ -49,13 +49,13 @@ namespace Utils.GPS
         ITimeStorage storage;
 
         /* Creates a NaiveTimeSource using a default NaiveTimeStorage. */
-        public NaiveTimeSource()
+        public NaiveTimeEstimator()
         {
             storage = new NaiveTimeStorage();
         }
 
         /* Create a NaiveTimeSource provided a TimeStorage */
-        public NaiveTimeSource(ITimeStorage storage)
+        public NaiveTimeEstimator(ITimeStorage storage)
         {
             this.storage = storage;
         }

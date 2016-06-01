@@ -1,22 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/*
+    Describes a (hardware) source of timing data
+*/
+
+using System;
 
 namespace Utils.GPS
 {
-    public interface ITimeSource
+    interface ITimeSource
     {
-        /* Returns an interpolated timestamp based on previous data. */
-        GpsData GetTimeStamp(long counter);
+        /* Called when a rising PPS edge is received. */
+        event Action<long> PpsReceived;
 
-        /* Add a GPS timing information as a data point.
-        Returns true if the point is valid.
-        TODO: make this void, update PPS_Tracker to not use this flag. */
-        bool PutTimestamp(GpsData data);
+        /* Called when new timing data is received. */
+        event Action<GpsData> TimestampReceived;
 
-        /* Re-calculated the prediction model. */
-        void Update();
+        /* Open the time source */
+        void Open();
+
+        /* Close the time source */
+        void Close();
     }
 }
