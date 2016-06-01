@@ -1,14 +1,13 @@
 ﻿/* Represents a serial port */
 
 using System;
-using PInvokeSerialPort;
 
 namespace Utils.GPS.SerialGPS
 {
     public interface ISerial
     {
-        /* Called when any status pin changes the state */
-        event Action<ModemStatus, ModemStatus> StatusChanged;
+        /* Called when the PPS pin changes the state */
+        event Action<bool> PpsChanged;
 
         /* Called when a byte is received */
         event Action<byte> DataReceived;
@@ -22,7 +21,7 @@ namespace Utils.GPS.SerialGPS
         /* Close the serial port*/
         void Close();
 
-        /* Returns the modem status bits */
-        ModemStatus GetModemStatus();
+        /* Returns the PPS pin state */
+        bool GetPpsLevel();
     }
 }

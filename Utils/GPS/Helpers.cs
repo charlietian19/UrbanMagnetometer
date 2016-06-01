@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Utils.GPS.SerialGPS;
 
 /* Collection of methods to deal with GPS data and converstions. */
 
@@ -8,6 +9,8 @@ namespace Utils.GPS
 {
     public class Helpers
     {
+        public static IStopwatch stopwatch = new StopwatchWrapper();
+
         /* 
             Converts DateTime to Unix time stamp
             http://stackoverflow.com/questions/249760/how-to-convert-a-unix-timestamp-to-datetime-and-vice-versa
@@ -30,7 +33,7 @@ namespace Utils.GPS
         // TODO -- make it check the checksum
         public static GpsData ParseGpsrmc(string msg)
         {
-            var ticks = Stopwatch.GetTimestamp();
+            var ticks = stopwatch.GetTimestamp();
             Regex rgx = new Regex(gprmc);
             Match match = rgx.Match(msg);
             if (!match.Success)

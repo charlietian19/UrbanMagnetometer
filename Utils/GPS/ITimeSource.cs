@@ -6,7 +6,7 @@ using System;
 
 namespace Utils.GPS
 {
-    interface ITimeSource
+    public interface ITimeSource
     {
         /* Called when a rising PPS edge is received. */
         event Action<long> PpsReceived;

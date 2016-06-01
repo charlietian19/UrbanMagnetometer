@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using PInvokeSerialPort;
 using System.Threading;
 
 namespace Utils.GPS.SerialGPS
@@ -36,14 +35,14 @@ namespace Utils.GPS.SerialGPS
         has to be smaller than this for the GPS data to be valid. In other
         words, the PPS pulse and the time message have to arrive within the
         same second, or the PPS is likely missing. */
-        readonly static long threshold;
+        private long threshold;
 
         /* Time source with a GPS receiver connected to a serial port */
         public SerialGps(string portName)
         {
             serial = new SerialPortWrapper(portName);
             stopwatch = new StopwatchWrapper();
-            ConfigureSerialPort();
+            ConfigureSerialGps();
         }
 
         /* Time source with a GPS receiver connected to a serial port 
@@ -52,20 +51,22 @@ namespace Utils.GPS.SerialGPS
         {
             serial = new SerialPortWrapper(portName, baudRate);
             stopwatch = new StopwatchWrapper();
-            ConfigureSerialPort();
+            ConfigureSerialGps();
         }
 
         /* Time source using a custom serial port object and a stopwatch */
         public SerialGps(ISerial serial, IStopwatch stopwatch)
         {
             this.serial = serial;
-            ConfigureSerialPort();
+            this.stopwatch = stopwatch;
+            ConfigureSerialGps();
         }
 
         /* Configures the serial port, subscribes to events */
-        private void ConfigureSerialPort()
-        {            
-            serial.StatusChanged += Serial_StatusChanged;
+        private void ConfigureSerialGps()
+        {
+            threshold = stopwatch.Frequency;
+            serial.PpsChanged += Serial_PpsChanged;
             serial.DataReceived += Serial_DataReceived;
             serial.PortOpened += Serial_PortOpened;
         }
@@ -85,37 +86,35 @@ namespace Utils.GPS.SerialGPS
         /* Called when the port has finished opening */
         private void Serial_PortOpened()
         {
-            CD = serial.GetModemStatus().Rlsd;
+            CD = serial.GetPpsLevel();
         }
 
         /* Called when a byte is received through the serial port*/
-        private void Serial_DataReceived(byte obj)
+        private void Serial_DataReceived(byte data)
         {
-            if (obj == '\r')
+            char letter = Convert.ToChar(data);
+            if (letter == '\r')
             {
                 return;
             }
 
-            if (obj == '\n')
+            if (letter == '\n')
             {
                 ParseNMEA(buffer.ToString());
                 buffer.Clear();
                 return;
             }
 
-            buffer.Append(Convert.ToChar(obj));
+            buffer.Append(letter);
         }
 
         /* Called when a non-data pin has changed level */
-        private void Serial_StatusChanged(ModemStatus mask, ModemStatus state)
+        private void Serial_PpsChanged(bool state)
         {
-            if (mask.Rlsd)
+            CD = state;
+            if (CD)
             {
-                CD = state.Rlsd;
-                if (CD)
-                {
-                    OnPpsPulse();
-                }
+                OnPpsPulse();
             }
         }
 
@@ -160,7 +159,7 @@ namespace Utils.GPS.SerialGPS
         /* Checks this NMEA message corresponds to the last stored PPS pulse.
         If it does, update the ticks field to the PPS pulse arrival. If not,
         mark the GPS data as invalid. */
-        private static GpsData FixGpsTime(GpsData data, long ticks)
+        private GpsData FixGpsTime(GpsData data, long ticks)
         {
             if (data.ticks - ticks > threshold)
             {

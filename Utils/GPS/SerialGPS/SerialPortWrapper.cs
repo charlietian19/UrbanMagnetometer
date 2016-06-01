@@ -7,7 +7,7 @@ namespace Utils.GPS.SerialGPS
 {
     class SerialPortWrapper : SerialPort, ISerial
     {
-        public event Action<ModemStatus, ModemStatus> StatusChanged;
+        public event Action<bool> PpsChanged;
         public event Action PortOpened;
 
         new public void Open()
@@ -21,19 +21,16 @@ namespace Utils.GPS.SerialGPS
         public SerialPortWrapper(string portName, int baudRate) 
             : base(portName, baudRate) { }
 
-        protected override void OnStatusChange(ModemStatus mask, ModemStatus state)
+
+        /* Invokes PpsChanged action when the PPS pin has changed level */
+        protected override void OnStatusChange(ModemStatus mask, 
+            ModemStatus state)
         {            
             base.OnStatusChange(mask, state);
-            if (StatusChanged != null)
+            if (mask.Rlsd && (PpsChanged != null))
             {
-                StatusChanged(mask, state);
+                PpsChanged(state.Rlsd);
             }
-        }
-
-        new public bool AutoReopen
-        {
-            get { return base.AutoReopen; }
-            set { base.AutoReopen = value; }
         }
 
         protected override bool AfterOpen()
@@ -48,6 +45,12 @@ namespace Utils.GPS.SerialGPS
         new public ModemStatus GetModemStatus()
         {
             return base.GetModemStatus();
+        }
+
+        /* Returns the logical level of the PPS (pin 1) */
+        public bool GetPpsLevel()
+        {
+            return GetModemStatus().Rlsd;
         }
     }
 }

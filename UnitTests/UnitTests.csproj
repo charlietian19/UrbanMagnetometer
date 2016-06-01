@@ -113,6 +113,7 @@
     <Compile Include="GPS\HelpersTest.cs" />
     <Compile Include="GPS\NaiveTimeStorageTest.cs" />
     <Compile Include="GPS\NaiveTimeEstimatorTest.cs" />
+    <Compile Include="GPS\SerialGpsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
