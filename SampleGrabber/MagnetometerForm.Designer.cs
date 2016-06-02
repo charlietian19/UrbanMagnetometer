@@ -1,6 +1,6 @@
 ﻿namespace SampleGrabber
 {
-    partial class MagnetometerForm
+    public partial class MagnetometerForm
     {
         /// <summary>
         /// Required designer variable.
@@ -42,7 +42,7 @@
             this.cancelButton = new System.Windows.Forms.Button();
             this.sensorLabel = new System.Windows.Forms.Label();
             this.refreshButton = new System.Windows.Forms.Button();
-            this.sampleName = new System.Windows.Forms.TextBox();
+            this.name = new System.Windows.Forms.TextBox();
             this.dataGraph = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -127,13 +127,13 @@
             this.refreshButton.UseVisualStyleBackColor = true;
             this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
             // 
-            // sampleName
+            // name
             // 
-            this.sampleName.Location = new System.Drawing.Point(130, 20);
-            this.sampleName.Name = "sampleName";
-            this.sampleName.Size = new System.Drawing.Size(302, 38);
-            this.sampleName.TabIndex = 6;
-            this.sampleName.TextChanged += new System.EventHandler(this.stationName_TextChanged);
+            this.name.Location = new System.Drawing.Point(130, 20);
+            this.name.Name = "name";
+            this.name.Size = new System.Drawing.Size(302, 38);
+            this.name.TabIndex = 6;
+            this.name.TextChanged += new System.EventHandler(this.stationName_TextChanged);
             // 
             // dataGraph
             // 
@@ -386,7 +386,7 @@
             this.Controls.Add(this.previewBox);
             this.Controls.Add(this.uploadButton);
             this.Controls.Add(this.statusStrip);
-            this.Controls.Add(this.sampleName);
+            this.Controls.Add(this.name);
             this.Controls.Add(this.refreshButton);
             this.Controls.Add(this.sensorLabel);
             this.Controls.Add(this.cancelButton);
@@ -417,7 +417,7 @@
         protected System.Windows.Forms.Button cancelButton;
         protected System.Windows.Forms.Label sensorLabel;
         protected System.Windows.Forms.Button refreshButton;
-        protected System.Windows.Forms.TextBox sampleName;
+        protected System.Windows.Forms.TextBox name;
         protected System.Windows.Forms.DataVisualization.Charting.Chart dataGraph;
         protected System.Windows.Forms.StatusStrip statusStrip;
         protected System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;

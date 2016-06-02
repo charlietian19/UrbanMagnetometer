@@ -40,12 +40,11 @@ namespace SampleGrabber
             InitializeComponent();
         }
 
-        protected void InitializeResources()
+        protected virtual void InitializeResources()
         {
             try
             {
-                eMains.LoadDLL();
-                sampleName.Text = Settings.SampleName;                
+                eMains.LoadDLL();                              
                 samplingRate = Convert.ToDouble(Settings.SamplingRate);
                 var units = Settings.DataUnits;
                 convertToMicroTesla = (units == "uT");
@@ -55,8 +54,7 @@ namespace SampleGrabber
                 scheduler.StartedEvent += Scheduler_StartedEvent;
                 scheduler.FinishedEvent += Scheduler_FinishedEvent;
                 storage = new LegacySampleStorage(scheduler,
-                    (start, now) => false);
-                storage.UploadOnClose = false;
+                    (start, now) => false);                
                 RefreshGpsList();
             }
             catch (Exception exception)
@@ -134,7 +132,7 @@ namespace SampleGrabber
 
         protected void stationName_TextChanged(object sender, EventArgs e)
         {
-            Settings.SampleName = sampleName.Text;
+            Settings.SampleName = name.Text;
         }
 
         protected virtual void SetUI(UiStateMagnetometer state)
@@ -142,7 +140,7 @@ namespace SampleGrabber
             switch (state)
             {
                 case UiStateMagnetometer.Ready:
-                    sampleName.Enabled = true;
+                    name.Enabled = true;
                     sensorList.Enabled = true;
                     averagingPeriodMs.Enabled = true;
                     powerLineFilter.Enabled = false;
@@ -155,7 +153,7 @@ namespace SampleGrabber
                     break;
 
                 case UiStateMagnetometer.Recording:
-                    sampleName.Enabled = false;
+                    name.Enabled = false;
                     sensorList.Enabled = false;
                     averagingPeriodMs.Enabled = false;
                     powerLineFilter.Enabled = false;
@@ -168,7 +166,7 @@ namespace SampleGrabber
                     break;
 
                 case UiStateMagnetometer.NoSensorFound:
-                    sampleName.Enabled = true;
+                    name.Enabled = true;
                     sensorList.Enabled = true;
                     averagingPeriodMs.Enabled = true;
                     powerLineFilter.Enabled = false;

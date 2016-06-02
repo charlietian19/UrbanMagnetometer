@@ -82,6 +82,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GrabberForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GrabberForm.Designer.cs">
+      <DependentUpon>GrabberForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -123,6 +129,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SampleGrabber\SampleGrabber.csproj">
+      <Project>{8ee6a644-11f0-4f65-840a-132e35ae833c}</Project>
+      <Name>SampleGrabber</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utils\Utils.csproj">
       <Project>{6d794f57-90e8-477e-af63-7d22fba88a37}</Project>
       <Name>Utils</Name>

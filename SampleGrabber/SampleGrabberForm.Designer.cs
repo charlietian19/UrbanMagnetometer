@@ -101,7 +101,7 @@
             this.Controls.SetChildIndex(this.cancelButton, 0);
             this.Controls.SetChildIndex(this.sensorLabel, 0);
             this.Controls.SetChildIndex(this.refreshButton, 0);
-            this.Controls.SetChildIndex(this.sampleName, 0);
+            this.Controls.SetChildIndex(this.name, 0);
             this.Controls.SetChildIndex(this.uploadButton, 0);
             this.Controls.SetChildIndex(this.previewBox, 0);
             this.Controls.SetChildIndex(this.gpsLabel, 0);

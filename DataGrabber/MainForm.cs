@@ -47,8 +47,7 @@ namespace DataGrabber
         {
             try
             {
-                eMains.LoadDLL();
-                stationName.Text = Settings.StationName;
+                eMains.LoadDLL();                
                 samplingRate = Convert.ToDouble(Settings.SamplingRate);
                 var units = Settings.DataUnits;
                 convertToMicroTesla = (units == "uT");

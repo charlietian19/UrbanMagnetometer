@@ -17,9 +17,12 @@ namespace DogeStation2
             InitializeComponent();
         }
 
-        new protected void InitializeResources()
+        protected override void InitializeResources()
         {
+            base.InitializeResources();
+            name.Text = Settings.SampleName;
             comment.Text = Settings.SampleComment;
+            storage.UploadOnClose = true;            
         }
 
         protected override void SetUI(UiStateMagnetometer state)
