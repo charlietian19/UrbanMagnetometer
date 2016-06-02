@@ -7,7 +7,8 @@ namespace LegacyDataUploader
     static class Program
     {
         /// <summary>
-        /// The main entry point for the application.
+        /// The file format used by this program is obsolete, it won't
+        /// read the new files
         /// </summary>
         [STAThread]
         static void Main()

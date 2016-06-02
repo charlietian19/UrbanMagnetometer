@@ -3,8 +3,12 @@ using System.Windows.Forms;
 using Utils.GDrive;
 using Utils.DataManager;
 using Utils.Configuration;
+using Utils.GPS;
+using Utils.GPS.SerialGPS;
+using Utils.Filters;
 using Biomed_eMains_eFMx;
 using System.IO;
+using System.Diagnostics;
 
 namespace DataGrabber
 {
@@ -17,8 +21,14 @@ namespace DataGrabber
         private bool convertToMicroTesla;
         private DateTime lastUpdated = DateTime.Now;
         private bool doneUploading = true;
+        private IFilter[] averages = new MovingAverage[3];
+        private IFilter[] subsamples = new Subsample[3];
+        private RollingBuffer[] buffers = new RollingBuffer[3];
+        private ITimeSource gps;
+        private ITimeEstimator interpolator = new NaiveTimeEstimator();
+        private bool gpsValid = false;
 
-        enum UI_State
+        enum UiStateMagnetometer
         {
             NoSensorFound,
             Ready,
@@ -30,6 +40,7 @@ namespace DataGrabber
             InitializeComponent();
             InitializeResources();
             RefreshSensorList();
+            RefreshGpsList();
         }
 
         private void InitializeResources()
@@ -55,6 +66,34 @@ namespace DataGrabber
             }
         }
 
+        /* Resets the data filters */
+        private void UpdateFilters()
+        {
+            int avgPoints = Convert.ToInt32(Convert.ToInt32(samplingRate)
+                    * averagingPeriodMs.Value / 1000);
+            InitializeFilters(avgPoints,
+                Convert.ToInt32(displayPoints.Value));
+        }
+
+        /* Initializes a chain of data filters for X, Y, Z channels. */
+        private void InitializeFilters(int averagePoints, int bufferSize)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                InitializeFilter(averagePoints, bufferSize, i);
+            }
+        }
+
+        /* Initializes a chain of data filters for a single channel. */
+        private void InitializeFilter(int averagePoints, int bufferSize, int i)
+        {
+            averagePoints = Math.Max(1, averagePoints);
+            averages[i] = new MovingAverage(averagePoints);
+            subsamples[i] = new Subsample(averagePoints);
+            buffers[i] = new RollingBuffer(bufferSize, double.NaN);
+            averages[i].output += new FilterEvent(subsamples[i].InputData);
+            subsamples[i].output += new FilterEvent(buffers[i].InputData);
+        }
 
         private void Google_ProgressEvent(string fullPath, long bytesSent,
             long bytesTotal)
@@ -100,34 +139,39 @@ namespace DataGrabber
             Settings.StationName = stationName.Text;
         }
 
-        void SetUI(UI_State state)
+        void SetUiMagnetometer(UiStateMagnetometer state)
         {
             switch (state)
             {
-                case UI_State.Ready:
+                case UiStateMagnetometer.Ready:
                     stationName.Enabled = true;
                     sensorList.Enabled = true;
                     refreshButton.Enabled = true;
                     recordButton.Enabled = true;
                     cancelButton.Enabled = false;
                     uploadButton.Enabled = true;
+                    powerLineFilter.Enabled = false;
                     return;
-                case UI_State.Recording:
+                case UiStateMagnetometer.Recording:
                     stationName.Enabled = false;
                     sensorList.Enabled = false;
                     refreshButton.Enabled = false;
                     recordButton.Enabled = false;
                     cancelButton.Enabled = true;
                     uploadButton.Enabled = false;
+                    powerLineFilter.Enabled = false;
                     return;
-                case UI_State.NoSensorFound:
+                case UiStateMagnetometer.NoSensorFound:
                     stationName.Enabled = true;
                     sensorList.Enabled = true;
                     refreshButton.Enabled = true;
                     recordButton.Enabled = false;
                     cancelButton.Enabled = false;
                     uploadButton.Enabled = true;
+                    powerLineFilter.Enabled = false;
                     return;
+                default:
+                    throw new InvalidOperationException("Unknown UI state");
             }
         }
 
@@ -157,7 +201,7 @@ namespace DataGrabber
             catch (eMainsException exception)
             {
                 toolStripStatusLabel.Text = exception.Message;
-                SetUI(UI_State.NoSensorFound);
+                SetUiMagnetometer(UiStateMagnetometer.NoSensorFound);
             }
         }
 
@@ -166,12 +210,12 @@ namespace DataGrabber
             try
             {
                 sensor = new eMains(serial);
-                SetUI(UI_State.Ready);
+                SetUiMagnetometer(UiStateMagnetometer.Ready);
             }
             catch (eMainsException exception)
             {
                 toolStripStatusLabel.Text = exception.Message;
-                SetUI(UI_State.NoSensorFound);
+                SetUiMagnetometer(UiStateMagnetometer.NoSensorFound);
             }
         }
 
@@ -186,7 +230,7 @@ namespace DataGrabber
         {
             if (sensor == null)
             {
-                SetUI(UI_State.NoSensorFound);
+                SetUiMagnetometer(UiStateMagnetometer.NoSensorFound);
                 toolStripStatusLabel.Text 
                     = "Magnetic sensor is not initialized.";
             }
@@ -196,60 +240,68 @@ namespace DataGrabber
                 sensor.DAQInitialize(samplingRate, range, 1, 1);
                 sensor.NewDataHandler -= Sensor_NewDataHandler;
                 sensor.NewDataHandler += Sensor_NewDataHandler;
+                UpdateFilters();
                 sensor.DAQStart(convertToMicroTesla);
                 doneUploading = false;
-                SetUI(UI_State.Recording);
+                SetUiMagnetometer(UiStateMagnetometer.Recording);
             }
             catch (Exception exception)
             {
                 toolStripStatusLabel.Text = exception.Message;
-                SetUI(UI_State.Ready);
+                SetUiMagnetometer(UiStateMagnetometer.Ready);
+            }
+        }
+
+        /* Triggers the graph update. */
+        private void plotUpdateTimer_Tick(object sender, EventArgs e)
+        {
+            UpdatePlot("X", buffers[0].GetData());
+            UpdatePlot("Y", buffers[1].GetData());
+            UpdatePlot("Z", buffers[2].GetData());
+
+            if (gpsValid)
+            {
+                gpsStatusLabel.BackColor = System.Drawing.Color.Green;
+            }
+            else
+            {
+                gpsStatusLabel.BackColor = System.Drawing.Color.Red;
+            }
+        }
+
+        /* Updates the given series in the graph. */
+        private void UpdatePlot(string series, double[] data)
+        {
+            var Points = dataGraph.Series.FindByName(series).Points;
+            Points.Clear();
+            int i = 0;
+            double dx = Convert.ToDouble(averagingPeriodMs.Value) / 1000;
+            foreach (var point in data)
+            {
+                if (!double.IsNaN(point))
+                {
+                    Points.AddXY(i * dx, point);
+                    i++;
+                }
             }
         }
 
         private void Sensor_NewDataHandler(double[] dataX, double[] dataY,
             double[] dataZ, double systemSeconds, DateTime time)
         {
-            storage.Store(dataX, dataY, dataZ, systemSeconds, time);
-            if (time.Subtract(lastUpdated).TotalSeconds > 1)
-            {
-                UpdateGraphThreadSafe(dataX, dataY, dataZ);
-                lastUpdated = time;
-            }
-        }
-
-        private void UpdateGraphThreadSafe(double[] dataX, double[] dataY, 
-            double[] dataZ)
-        {
-            UpdatePlotThreadSafe("X", dataX);
-            UpdatePlotThreadSafe("Y", dataY);
-            UpdatePlotThreadSafe("Z", dataZ);
-        }
-
-        delegate void UpdatePlotCallback(string series, double[] data);
-        private void UpdatePlotThreadSafe(string series, double[] data)
-        {
-            if (dataGraph.InvokeRequired)
-            {
-                var f = new UpdatePlotCallback(UpdatePlotThreadSafe);
-                Invoke(f, new object[] { series, data });
-            }
-            else
-            {
-                var Points = dataGraph.Series.FindByName(series).Points;
-                Points.Clear();
-                foreach (var point in data)
-                {
-                    Points.Add(point);
-                }
-            }
+            var gpsData = interpolator.GetTimeStamp(Convert.ToInt64(
+                systemSeconds * Stopwatch.Frequency));
+            storage.Store(dataX, dataY, dataZ, gpsData);
+            averages[0].InputData(dataX);
+            averages[1].InputData(dataY);
+            averages[2].InputData(dataZ);
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
             if (sensor == null)
             {
-                SetUI(UI_State.NoSensorFound);
+                SetUiMagnetometer(UiStateMagnetometer.NoSensorFound);
                 toolStripStatusLabel.Text 
                     = "Magnetic sensor is not initialized.";
             }
@@ -258,12 +310,12 @@ namespace DataGrabber
             {
                 sensor.DAQStop();
                 sensor.NewDataHandler -= Sensor_NewDataHandler;
-                SetUI(UI_State.Ready);
+                SetUiMagnetometer(UiStateMagnetometer.Ready);
             }
             catch (Exception exception)
             {
                 toolStripStatusLabel.Text = exception.Message;
-                SetUI(UI_State.Ready);
+                SetUiMagnetometer(UiStateMagnetometer.Ready);
             }
         }
 
@@ -278,7 +330,7 @@ namespace DataGrabber
             if (sensor != null)
             {
                 sensor.DAQStop();
-                SetUI(UI_State.Ready);
+                SetUiMagnetometer(UiStateMagnetometer.Ready);
             }
 
             if (storage.HasCachedData)
@@ -292,6 +344,121 @@ namespace DataGrabber
                 e.Cancel = true;
                 toolStripStatusLabel.Text
                     = "Please wait until the files are uploaded.";
+            }
+        }
+
+        private void averagingPeriodMs_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateFilters();
+        }
+
+        private void displayPoints_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateFilters();
+        }
+
+        private void discardButton_Click(object sender, EventArgs e)
+        {
+            storage.Discard();
+        }
+
+        private void gpsRefreshButton_Click(object sender, EventArgs e)
+        {
+            RefreshGpsList();
+        }
+
+        private void RefreshGpsList()
+        {
+            try
+            {
+                gpsList.Items.Clear();
+                var portNames = System.IO.Ports.SerialPort.GetPortNames();
+                foreach (var name in portNames)
+                {
+                    gpsList.Items.Add(name);
+                }
+
+                if (portNames.Length == 0)
+                {
+                    SetUiGps(UiStateGps.NoSensor);
+                }
+                else
+                {
+                    SetUiGps(UiStateGps.Closed);
+                }
+            }
+            catch (Exception e)
+            {
+                toolStripStatusLabel.Text = e.Message;
+            }            
+        }
+
+        private void gpsOpenButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                gps = new SerialGps(gpsList.Text);
+                gps.TimestampReceived += data =>
+                {
+                    interpolator.PutTimestamp(data);
+                    gpsValid = data.valid;
+                };                    
+                gps.Open();
+                SetUiGps(UiStateGps.Opened);
+            }
+            catch (Exception exception)
+            {
+                toolStripStatusLabel.Text = exception.Message;
+            }
+        }
+
+        private void gpsCloseButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                gps.Close();
+                SetUiGps(UiStateGps.Closed);
+            }
+            catch (Exception exception)
+            {
+                toolStripStatusLabel.Text = exception.Message;
+            }
+        }
+
+        enum UiStateGps
+        {
+            Opened,
+            Closed,
+            NoSensor
+        }
+
+        private void SetUiGps(UiStateGps state)
+        {
+            switch (state)
+            {
+                case UiStateGps.Opened:
+                    gpsList.Enabled = false;
+                    gpsOpenButton.Enabled = false;
+                    gpsCloseButton.Enabled = true;
+                    gpsRefreshButton.Enabled = false;
+                    gpsStatusLabel.Text = "Connected";
+                    break;
+                case UiStateGps.Closed:
+                    gpsList.Enabled = true;
+                    gpsOpenButton.Enabled = true;
+                    gpsCloseButton.Enabled = false;
+                    gpsRefreshButton.Enabled = true;
+                    gpsStatusLabel.Text = "Disconnected";
+                    break;
+                case UiStateGps.NoSensor:
+                    gpsList.Enabled = true;
+                    gpsOpenButton.Enabled = true;
+                    gpsCloseButton.Enabled = false;
+                    gpsRefreshButton.Enabled = true;
+                    gpsStatusLabel.Text = "Disconnected";
+                    break;
+                default:
+                    throw new InvalidOperationException("Unknown UI state");
             }
         }
     }

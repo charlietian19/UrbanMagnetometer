@@ -137,11 +137,11 @@ namespace Utils.GPS.SerialGPS
         private void ParseNMEA(string msg)
         {
             GpsData data;
-            try
+            if (Helpers.isGpsrmc(msg))
             {
                 data = Helpers.ParseGpsrmc(msg);
             }
-            catch (ArgumentException)
+            else
             {
                 return;
             }

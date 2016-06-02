@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-/* Determines if each given timestamp/tick counter combination
+﻿/* Determines if each given timestamp/tick counter combination
    corresponds to a valid or delayed PPS signal  */
 
 namespace Utils.GPS

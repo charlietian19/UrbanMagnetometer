@@ -2,23 +2,15 @@
 using System.IO;
 using SystemWrapper.IO;
 using SystemWrapper.Configuration;
+using Utils.GPS;
 
 // TODO: proper exception handling
+// Make the written data structure flexible
 // Throws IOException, FileNotFound, etc...
 // Handle DirectoryNotFound?
 
 namespace Utils.DataManager
 {
-    public interface ILegacyStorage
-    {
-        void Store(double[] dataX, double[] dataY, double[] dataZ, double systemSeconds, 
-            DateTime time);
-        void Close();
-        void Discard();
-        void Upload();
-        bool UploadOnClose { get; set; }
-    }
-
     /* Interface for IBinaryWriterWrap object factory */
     public interface IBinaryWriterFactory
     {
@@ -132,20 +124,20 @@ namespace Utils.DataManager
 
         /* Stores the data from the sensor. */
         public void Store(double[] dataX, double[] dataY, double[] dataZ,
-            double precisionCounter, DateTime time)
+            GpsData gps)
         {
             if (!isWriting)
             {
-                CreateFiles(time);
+                CreateFiles(gps.timestamp);
             }
 
-            if (partitionCondition(info.StartDate, time))
+            if (partitionCondition(info.StartDate, gps.timestamp))
             {
-                CloseAll(time);
-                CreateFiles(time);
+                CloseAll(gps.timestamp);
+                CreateFiles(gps.timestamp);
             }
 
-            Append(dataX, dataY, dataZ, precisionCounter, time);
+            Append(dataX, dataY, dataZ, gps);
         }
 
         /* Initializes the cache. */
@@ -161,13 +153,13 @@ namespace Utils.DataManager
 
         /* Appends the data into existing streams. */
         private void Append(double[] dataX, double[] dataY, double[] dataZ,
-            double precisionCounter, DateTime time)
+            GpsData gps)
         {
             int length = dataX.Length;
             WriteArray(x, dataX);
             WriteArray(y, dataY);
             WriteArray(z, dataZ);
-            WriteTime(t, precisionCounter, time, index, length);
+            WriteTime(t, gps, index, length);
             index += length;
         }
 
@@ -182,12 +174,21 @@ namespace Utils.DataManager
 
         /* Writes time data into a binary file. */
         private static void WriteTime(IBinaryWriterWrap writer, 
-            double precisionCounter, DateTime time, long index, int length)
+            GpsData gps, long index, int length)
         {
+            var timestamp = Helpers.DateTimeToUnixTimestamp(gps.timestamp);
             writer.Write(index);
             writer.Write(length);
-            writer.Write(time.ToBinary());
-            writer.Write(precisionCounter);
+            writer.Write(gps.valid);
+            writer.Write(gps.ticks);
+            writer.Write(timestamp);
+            writer.Write(gps.longitude);
+            writer.Write(gps.latitude);
+            writer.Write(gps.ew);
+            writer.Write(gps.longitude);
+            writer.Write(gps.ns);
+            writer.Write(gps.speedKnots);
+            writer.Write(gps.angleDegrees);
         }
 
         /* Creates a new dataset. */

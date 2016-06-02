@@ -28,6 +28,14 @@ namespace Utils.GPS
             @"(?<Speed>\d+\.\d+),(?<Angle>\d+\.\d+)," +
             @"(?<Day>\d{2})(?<Month>\d{2})(?<Year>\d{2}),.*";
 
+        /* Checks if the message is a GPSRMC message */
+        public static bool isGpsrmc(string msg)
+        {
+            Regex rgx = new Regex(gprmc);
+            Match match = rgx.Match(msg);
+            return match.Success;
+        }
+
         /* Parses GPSRMC message and returns a DateTime object. Throws an 
         ArgumentException if the message can't be parsed. */
         // TODO -- make it check the checksum

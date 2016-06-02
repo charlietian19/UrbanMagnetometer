@@ -25,12 +25,12 @@ namespace Utils.GPS.SerialGPS
         /* Invokes PpsChanged action when the PPS pin has changed level */
         protected override void OnStatusChange(ModemStatus mask, 
             ModemStatus state)
-        {            
-            base.OnStatusChange(mask, state);
+        {                        
             if (mask.Rlsd && (PpsChanged != null))
             {
                 PpsChanged(state.Rlsd);
             }
+            base.OnStatusChange(mask, state);
         }
 
         protected override bool AfterOpen()
