@@ -28,14 +28,17 @@ namespace DogeStation2
             {
                 case UiStateMagnetometer.Ready:
                     comment.Enabled = true;
+                    discardButton.Enabled = true;
                     break;
 
                 case UiStateMagnetometer.Recording:
                     comment.Enabled = false;
+                    discardButton.Enabled = false;
                     break;
 
                 case UiStateMagnetometer.NoSensorFound:
                     comment.Enabled = true;
+                    discardButton.Enabled = true;
                     break;
             }
             base.SetUI(state);
@@ -44,6 +47,11 @@ namespace DogeStation2
         protected void comment_TextChanged(object sender, EventArgs e)
         {
             Settings.SampleComment = comment.Text;
+        }
+
+        protected void discardButton_Click(object sender, EventArgs e)
+        {
+            storage.Discard();
         }
     }
 }

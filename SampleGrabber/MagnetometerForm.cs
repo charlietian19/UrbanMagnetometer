@@ -146,7 +146,6 @@ namespace SampleGrabber
                     sensorList.Enabled = true;
                     averagingPeriodMs.Enabled = true;
                     powerLineFilter.Enabled = false;
-                    discardButton.Enabled = true;
                     plotUpdateTimer.Enabled = false;
                     displayPoints.Enabled = true;
                     refreshButton.Enabled = true;
@@ -160,7 +159,6 @@ namespace SampleGrabber
                     sensorList.Enabled = false;
                     averagingPeriodMs.Enabled = false;
                     powerLineFilter.Enabled = false;
-                    discardButton.Enabled = false;
                     plotUpdateTimer.Enabled = true;
                     displayPoints.Enabled = false;
                     refreshButton.Enabled = false;
@@ -174,7 +172,6 @@ namespace SampleGrabber
                     sensorList.Enabled = true;
                     averagingPeriodMs.Enabled = true;
                     powerLineFilter.Enabled = false;
-                    discardButton.Enabled = true;
                     plotUpdateTimer.Enabled = false;
                     displayPoints.Enabled = true;
                     refreshButton.Enabled = true;
@@ -343,11 +340,6 @@ namespace SampleGrabber
             UpdateFilters();
         }
 
-        protected void discardButton_Click(object sender, EventArgs e)
-        {
-            storage.Discard();
-        }
-
         protected void gpsRefreshButton_Click(object sender, EventArgs e)
         {
             RefreshGpsList();
@@ -448,7 +440,7 @@ namespace SampleGrabber
             NoSensor
         }
 
-        protected void SetUiGps(UiStateGps state)
+        protected virtual void SetUiGps(UiStateGps state)
         {
             switch (state)
             {
@@ -459,6 +451,7 @@ namespace SampleGrabber
                     gpsRefreshButton.Enabled = false;
                     gpsStatusLabel.Text = "Connected";
                     break;
+
                 case UiStateGps.Closed:
                     gpsList.Enabled = true;
                     gpsOpenButton.Enabled = true;
@@ -467,6 +460,7 @@ namespace SampleGrabber
                     gpsStatusLabel.Text = "Disconnected";
                     gpsStatusLabel.BackColor = System.Drawing.Color.LightGray;
                     break;
+
                 case UiStateGps.NoSensor:
                     gpsList.Enabled = true;
                     gpsOpenButton.Enabled = true;
@@ -474,8 +468,6 @@ namespace SampleGrabber
                     gpsRefreshButton.Enabled = true;
                     gpsStatusLabel.Text = "Disconnected";
                     break;
-                default:
-                    throw new InvalidOperationException("Unknown UI state");
             }
         }
 

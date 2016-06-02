@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DogeStation2;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace SampleGrabber
             process.PriorityClass = ProcessPriorityClass.High;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MagnetometerForm());
+            Application.Run(new SampleGrabberForm());
         }
     }
 }

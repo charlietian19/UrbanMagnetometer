@@ -92,6 +92,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="SampleGrabberForm.resx">
+      <DependentUpon>SampleGrabberForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="nuri-station.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

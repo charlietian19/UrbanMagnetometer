@@ -54,7 +54,6 @@
             this.previewBox = new System.Windows.Forms.GroupBox();
             this.powerLineFilter = new System.Windows.Forms.CheckBox();
             this.plotUpdateTimer = new System.Windows.Forms.Timer(this.components);
-            this.discardButton = new System.Windows.Forms.Button();
             this.gpsCloseButton = new System.Windows.Forms.Button();
             this.gpsStatusLabel = new System.Windows.Forms.Label();
             this.gpsOpenButton = new System.Windows.Forms.Button();
@@ -198,14 +197,13 @@
             // 
             // uploadButton
             // 
-            this.uploadButton.Location = new System.Drawing.Point(1281, 12);
+            this.uploadButton.Location = new System.Drawing.Point(1135, 12);
             this.uploadButton.Name = "uploadButton";
             this.uploadButton.Size = new System.Drawing.Size(140, 53);
             this.uploadButton.TabIndex = 9;
             this.uploadButton.Text = "Upload";
             this.uploadButton.UseVisualStyleBackColor = true;
             this.uploadButton.Click += new System.EventHandler(this.uploadButton_Click);
-
             // 
             // averagingPeriodLabel
             // 
@@ -314,16 +312,6 @@
             // 
             this.plotUpdateTimer.Tick += new System.EventHandler(this.plotUpdateTimer_Tick);
             // 
-            // discardButton
-            // 
-            this.discardButton.Location = new System.Drawing.Point(1135, 12);
-            this.discardButton.Name = "discardButton";
-            this.discardButton.Size = new System.Drawing.Size(140, 53);
-            this.discardButton.TabIndex = 17;
-            this.discardButton.Text = "Discard";
-            this.discardButton.UseVisualStyleBackColor = true;
-            this.discardButton.Click += new System.EventHandler(this.discardButton_Click);
-            // 
             // gpsCloseButton
             // 
             this.gpsCloseButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
@@ -395,8 +383,7 @@
             this.Controls.Add(this.gpsRefreshButton);
             this.Controls.Add(this.gpsList);
             this.Controls.Add(this.gpsLabel);
-            this.Controls.Add(this.discardButton);
-            this.Controls.Add(this.previewBox);            
+            this.Controls.Add(this.previewBox);
             this.Controls.Add(this.uploadButton);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.sampleName);
@@ -442,7 +429,6 @@
         protected System.Windows.Forms.GroupBox previewBox;
         protected System.Windows.Forms.CheckBox powerLineFilter;
         protected System.Windows.Forms.Timer plotUpdateTimer;
-        protected System.Windows.Forms.Button discardButton;
         protected System.Windows.Forms.Button gpsCloseButton;
         protected System.Windows.Forms.Label gpsStatusLabel;
         protected System.Windows.Forms.Button gpsOpenButton;
