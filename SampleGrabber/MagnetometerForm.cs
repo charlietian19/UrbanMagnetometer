@@ -401,19 +401,19 @@ namespace SampleGrabber
             }
             else
             {
-                string valid;
+                string active;
                 if (data.valid)
                 {
-                    valid = "valid";
+                    active = "ACTIVE";
                     gpsStatusLabel.BackColor = System.Drawing.Color.LightGreen;
                 }
                 else
                 {
-                    valid = "invalid";
+                    active = "No PPS or VOID";
                     gpsStatusLabel.BackColor = System.Drawing.Color.Red;
                 }
                 var msg = string.Format("UTC: {0} ({1})",
-                    data.timestamp, valid);
+                    data.timestamp, active);
                 gpsStatusLabel.Text = msg;
             }
         }

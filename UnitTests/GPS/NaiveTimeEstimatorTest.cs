@@ -153,6 +153,96 @@ namespace UnitTests.GPS
             estimator.Update();
             Assert.AreEqual(10, estimator.GetTimeStamp(0).timestamp.Ticks);
             Assert.AreEqual(160, estimator.GetTimeStamp(300).timestamp.Ticks);
-        }        
+        }   
+        
+        [TestMethod]
+        public void GpsAuxilaryDataDefaultValue()
+        {
+            var validPoints = new GpsData[] { };
+            var storage = new Mock<ITimeStorage>();
+            storage.Setup(o => o.ValidPointsCount).Returns(0);
+            storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
+            var estimator = new NaiveTimeEstimator(storage.Object);
+            var timestamp = estimator.GetTimeStamp(21364836);
+
+            Assert.IsFalse(timestamp.valid);
+            Assert.AreEqual(0.0, timestamp.longitude);
+            Assert.AreEqual(0.0, timestamp.latitude);
+            Assert.AreEqual(0.0, timestamp.speedKnots);
+            Assert.AreEqual(0.0, timestamp.angleDegrees);
+            Assert.AreEqual("V", timestamp.active);
+            Assert.AreEqual("-", timestamp.ns);
+            Assert.AreEqual("-", timestamp.ew);
+        }
+        
+        [TestMethod]
+        public void GpsAuxilaryDataChangesOnActivePointStore()
+        {
+            var validPoints = new GpsData[] { };
+            var storage = new Mock<ITimeStorage>();
+            storage.Setup(o => o.ValidPointsCount).Returns(0);
+            storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
+            var estimator = new NaiveTimeEstimator(storage.Object);
+            var data = new GpsData()
+            {
+                ticks = 0,
+                timestamp = DateTime.Now,
+                valid = false,
+                longitude = 123.56,
+                latitude = 222.66,
+                speedKnots = 52.1,
+                angleDegrees = 783.4,
+                ew = "E",
+                ns = "S",
+                active = "A"
+            };
+
+            estimator.PutTimestamp(data);
+            var timestamp = estimator.GetTimeStamp(21364836);
+
+            Assert.IsFalse(timestamp.valid);
+            Assert.AreEqual(123.56, timestamp.longitude);
+            Assert.AreEqual(222.66, timestamp.latitude);
+            Assert.AreEqual(52.1, timestamp.speedKnots);
+            Assert.AreEqual(783.4, timestamp.angleDegrees);
+            Assert.AreEqual("A", timestamp.active);
+            Assert.AreEqual("S", timestamp.ns);
+            Assert.AreEqual("E", timestamp.ew);
+        }
+
+        [TestMethod]
+        public void GpsAuxilaryDataUnchangedOnVoidPointStore()
+        {
+            var validPoints = new GpsData[] { };
+            var storage = new Mock<ITimeStorage>();
+            storage.Setup(o => o.ValidPointsCount).Returns(0);
+            storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
+            var estimator = new NaiveTimeEstimator(storage.Object);
+            var data = new GpsData()
+            {
+                ticks = 0,
+                timestamp = DateTime.Now,
+                valid = false,
+                longitude = 123.56,
+                latitude = 222.66,
+                speedKnots = 52.1,
+                angleDegrees = 783.4,
+                ew = "E",
+                ns = "S",
+                active = "V"
+            };
+
+            estimator.PutTimestamp(data);
+            var timestamp = estimator.GetTimeStamp(21364836);
+
+            Assert.IsFalse(timestamp.valid);
+            Assert.AreEqual(0.0, timestamp.longitude);
+            Assert.AreEqual(0.0, timestamp.latitude);
+            Assert.AreEqual(0.0, timestamp.speedKnots);
+            Assert.AreEqual(0.0, timestamp.angleDegrees);
+            Assert.AreEqual("V", timestamp.active);
+            Assert.AreEqual("-", timestamp.ns);
+            Assert.AreEqual("-", timestamp.ew);
+        }
     }
 }

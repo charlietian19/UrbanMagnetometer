@@ -8,15 +8,29 @@ using Accord.Statistics.Models.Regression.Linear;
     a better model is ready and for testing. Not intended to go into 
     production.
     
-    The accuracy is within the spec, although it's unclear how robust it is.
+    The accuracy is within the spec, but it's unclear how robust it is.
 
-    TODO: invalidate the model if no new data arrives for a long time
 */
 
 namespace Utils.GPS
 {
     public class NaiveTimeEstimator : ITimeEstimator
     {
+        /* Most recent GPS data */
+        private GpsData recentGpsData = new GpsData()
+        {
+            ticks = 0,
+            timestamp = DateTime.Now,
+            valid = false,
+            longitude = 0,
+            latitude = 0,
+            speedKnots = 0,
+            angleDegrees = 0,
+            ew = "-",
+            ns = "-",
+            active = "V"
+        };
+
         /* Minimum points needed to get a valid linear fit */
         private int minPoints = 2;
         public int MinPointsToFit
@@ -37,7 +51,10 @@ namespace Utils.GPS
         private SimpleLinearRegression regression = null;
 
         /* Mutex that ensures the regression model updates are thread safe */
-        private Mutex mutex = new Mutex();
+        private Mutex modelMutex = new Mutex();
+
+        /* Mutex that ensures the recent GPS data is thread safe */
+        private Mutex gpsDataMutex = new Mutex();
 
         /* Some initial date and tick that the data will be counted from so 
         the rounding errors are less of a problem */
@@ -69,7 +86,7 @@ namespace Utils.GPS
                 return;
             }
 
-            mutex.WaitOne();
+            modelMutex.WaitOne();
             double[] x = new double[validCount];
             double[] y = new double[validCount];
 
@@ -87,7 +104,7 @@ namespace Utils.GPS
 
             regression = new SimpleLinearRegression();
             regression.Regress(x, y);            
-            mutex.ReleaseMutex();
+            modelMutex.ReleaseMutex();
         }
 
         /* Returns absolute timing data based on the previous timestamps. */
@@ -96,16 +113,26 @@ namespace Utils.GPS
             if (regression == null)
             {
                 /* There is no model, can't return a valid timestamp */
-                return new GpsData()
+                gpsDataMutex.WaitOne();
+                var data = new GpsData()
                 {
                     ticks = counter,
                     timestamp = DateTime.Now,
-                    valid = false
+                    valid = false,
+                    longitude = recentGpsData.longitude,
+                    latitude = recentGpsData.latitude,
+                    speedKnots = recentGpsData.speedKnots,
+                    angleDegrees = recentGpsData.angleDegrees,
+                    ew = recentGpsData.ew,
+                    ns = recentGpsData.ns,
+                    active = recentGpsData.active
                 };
+                gpsDataMutex.ReleaseMutex();
+                return data;
             }
 
             /* Return the best guess based on the model at hand */
-            mutex.WaitOne();
+            modelMutex.WaitOne();
             var ticks = Convert.ToInt64(regression.Compute(counter - 
                 startTick));
             var date = new DateTime(ticks + startTimestamp.Ticks);
@@ -113,20 +140,45 @@ namespace Utils.GPS
             {
                 ticks = counter,
                 timestamp = date,
-                valid = true
+                valid = true,                
             };
-            mutex.ReleaseMutex();
+            modelMutex.ReleaseMutex();
+
+            gpsDataMutex.WaitOne();
+            result.longitude = recentGpsData.longitude;
+            result.latitude = recentGpsData.latitude;
+            result.speedKnots = recentGpsData.speedKnots;
+            result.angleDegrees = recentGpsData.angleDegrees;
+            result.ew = recentGpsData.ew;
+            result.ns = recentGpsData.ns;
+            result.active = recentGpsData.active;
+            gpsDataMutex.ReleaseMutex();
+
             return result;
         }
 
         /* Add the GPS point to the data set. */
         public bool PutTimestamp(GpsData data)
         {
+            if (data.active == "A")
+            {
+                gpsDataMutex.WaitOne();
+                recentGpsData.longitude = data.longitude;
+                recentGpsData.latitude = data.latitude;
+                recentGpsData.speedKnots = data.speedKnots;
+                recentGpsData.angleDegrees = data.angleDegrees;
+                recentGpsData.ew = data.ew;
+                recentGpsData.ns = data.ns;
+                recentGpsData.active = data.active;
+                gpsDataMutex.ReleaseMutex();
+            }
+
             bool valid = storage.Store(data);
             if (valid)
             {
                 Update();
             }
+
             return valid;
         }        
     }
