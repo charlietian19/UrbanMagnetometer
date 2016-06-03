@@ -1,4 +1,4 @@
-﻿namespace Utils.GPS.SerialGPS
+﻿namespace Utils.GPS
 {
     public interface IStopwatch
     {

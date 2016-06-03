@@ -147,20 +147,26 @@
     <Compile Include="GDrive\IUploader.cs" />
     <Compile Include="GPS\Helpers.cs" />
     <Compile Include="GPS\GpsData.cs" />
-    <Compile Include="GPS\ITimeSource.cs" />
-    <Compile Include="GPS\ITimeStorage.cs" />
-    <Compile Include="GPS\ITimeEstimator.cs" />
-    <Compile Include="GPS\NaiveTimeStorage.cs" />
+    <Compile Include="GPS\Wrappers\ITImer.cs" />
+    <Compile Include="GPS\Time\ITimeSource.cs" />
+    <Compile Include="GPS\Time\ITimeStorage.cs" />
+    <Compile Include="GPS\Time\ITimeEstimator.cs" />
+    <Compile Include="GPS\Time\NaiveTimeStorage.cs" />
     <Compile Include="GPS\SerialGPS\ISerial.cs" />
-    <Compile Include="GPS\SerialGPS\IStopwatch.cs" />
+    <Compile Include="GPS\Wrappers\IStopwatch.cs" />
     <Compile Include="GPS\SerialGPS\SerialGps.cs" />
-    <Compile Include="GPS\NaiveTimeEstimator.cs" />
+    <Compile Include="GPS\Time\NaiveTimeEstimator.cs" />
     <Compile Include="GPS\SerialGPS\SerialPortWrapper.cs" />
-    <Compile Include="GPS\SerialGPS\StopwatchWrapper.cs" />
+    <Compile Include="GPS\Wrappers\StopwatchWrapper.cs" />
+    <Compile Include="GPS\Wrappers\TimerWrapper.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

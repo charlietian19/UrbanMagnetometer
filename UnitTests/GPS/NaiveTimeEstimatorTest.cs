@@ -8,6 +8,8 @@ namespace UnitTests.GPS
     [TestClass]
     public class NaiveTimeEstimatorTest
     {
+        
+
         public NaiveTimeEstimatorTest()
         {
             //
@@ -31,9 +33,8 @@ namespace UnitTests.GPS
             {
                 testContextInstance = value;
             }
-        }        
+        }
         
-
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void MinPointsToFitSetError()
@@ -55,7 +56,7 @@ namespace UnitTests.GPS
         [TestMethod]
         public void DataPointsArePassedToStorage()
         {            
-            var storage = new Mock<ITimeStorage>();
+            var storage = new Mock<ITimeStorage>();            
             storage.Setup(o => o.Store(It.IsAny<GpsData>()));
             var estimator = new NaiveTimeEstimator(storage.Object);
             var data1 = new GpsData()
@@ -152,6 +153,6 @@ namespace UnitTests.GPS
             estimator.Update();
             Assert.AreEqual(10, estimator.GetTimeStamp(0).timestamp.Ticks);
             Assert.AreEqual(160, estimator.GetTimeStamp(300).timestamp.Ticks);
-        }
+        }        
     }
 }
