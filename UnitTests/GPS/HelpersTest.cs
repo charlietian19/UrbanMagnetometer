@@ -139,5 +139,19 @@ namespace UnitTests.GPS
         {
             var data = Helpers.ParseGpsrmc("Hello World!");
         }
+
+        [TestMethod]
+        public void IsGpsRmcReturnsTrue()
+        {
+            var msg = "$GPRMC,152926,V,6027.8259,N,02225.6713,E,10.8,0.0,190803,5.9,E,S*22";
+            Assert.AreEqual(true, Helpers.IsGpsrmc(msg));
+        }
+
+        [TestMethod]
+        public void IsGpsRmcReturnsFalse()
+        {
+            var msg = "Hello World!!";
+            Assert.AreEqual(false, Helpers.IsGpsrmc(msg));
+        }
     }
 }

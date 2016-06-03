@@ -29,7 +29,7 @@ namespace Utils.GPS
             @"(?<Day>\d{2})(?<Month>\d{2})(?<Year>\d{2}),.*";
 
         /* Checks if the message is a GPSRMC message */
-        public static bool isGpsrmc(string msg)
+        public static bool IsGpsrmc(string msg)
         {
             Regex rgx = new Regex(gprmc);
             Match match = rgx.Match(msg);

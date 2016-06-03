@@ -137,7 +137,7 @@ namespace Utils.GPS.SerialGPS
         private void ParseNMEA(string msg)
         {
             GpsData data;
-            if (Helpers.isGpsrmc(msg))
+            if (Helpers.IsGpsrmc(msg))
             {
                 data = Helpers.ParseGpsrmc(msg);
             }
