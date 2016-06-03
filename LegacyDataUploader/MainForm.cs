@@ -12,7 +12,8 @@ using Utils.GDrive;
 using Utils.DataManager;
 using Utils.Configuration;
 using System.IO;
-
+using Utils.GPS;
+using System.Diagnostics;
 
 namespace LegacyDataUploader
 {
@@ -158,7 +159,15 @@ namespace LegacyDataUploader
                     z[i] = kz * z[i] + bz;
                 }
 
-                storage.Store(x, y, z, chunk.PerformanceCounter, chunk.Time);
+                var time = new GpsData()
+                {
+                    ticks = Convert.ToInt64(
+                        chunk.PerformanceCounter * Stopwatch.Frequency),
+                    timestamp = chunk.Time,
+                    valid = false
+                };
+
+                storage.Store(x, y, z, time);
                 newprogress = 100 * reader.ChunkIndex / reader.ChunksTotal;
                 if (newprogress != progress)
                 {

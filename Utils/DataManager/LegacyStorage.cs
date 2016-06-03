@@ -179,10 +179,9 @@ namespace Utils.DataManager
             var timestamp = Helpers.DateTimeToUnixTimestamp(gps.timestamp);
             writer.Write(index);
             writer.Write(length);
-            writer.Write(gps.valid);
+            writer.Write(Convert.ToByte(gps.valid));
             writer.Write(gps.ticks);
             writer.Write(timestamp);
-            writer.Write(gps.longitude);
             writer.Write(gps.latitude);
             writer.Write(gps.ew);
             writer.Write(gps.longitude);

@@ -6,7 +6,7 @@ using SystemWrapper.IO;
 using System.IO;
 using SystemWrapper.Configuration;
 using System.Collections.Specialized;
-
+using Utils.GPS;
 
 namespace UnitTests.DataManager
 {
@@ -110,17 +110,41 @@ namespace UnitTests.DataManager
         {
             var storage = new LegacyStorage(scheduler, file, dir, factory, config);
             double[] x = { 0.0 }, y = { 2.0 }, z = { 3.0 };
-            DateTime time = DateTime.Now;
-            double seconds = 1245.0;
+            var timeData = new GpsData()
+            {
+                valid = true,
+                ticks = 6217864,
+                timestamp = DateTime.Now,
+                longitude = 56741.723,
+                latitude = 3213.213,
+                ew = "E",
+                ns = "S",
+                speedKnots = 2.3,
+                angleDegrees = 36
+            };
 
-            storage.Store(x, y, z, seconds, time);
+            storage.Store(x, y, z, timeData);
             factory.x.Verify(o => o.Write(0.0), Times.Once());
             factory.y.Verify(o => o.Write(2.0), Times.Once());
             factory.z.Verify(o => o.Write(3.0), Times.Once());
-            factory.t.Verify(o => o.Write((long)0), Times.Once());
-            factory.t.Verify(o => o.Write(1), Times.Once());
-            factory.t.Verify(o => o.Write(time.ToBinary()), Times.Once());
-            factory.t.Verify(o => o.Write(seconds), Times.Once());
+            VerifyTimeWrite(factory.t, 0, 1, timeData);
+        }
+
+        private void VerifyTimeWrite(Mock<IBinaryWriterWrap> mock,
+            long start, int length, GpsData data)
+        {
+            var timestamp = Helpers.DateTimeToUnixTimestamp(data.timestamp);
+            mock.Verify(o => o.Write(start), Times.Once());
+            mock.Verify(o => o.Write(length), Times.Once());
+            mock.Verify(o => o.Write(Convert.ToByte(data.valid)), Times.Once());
+            mock.Verify(o => o.Write(data.ticks), Times.Once());
+            mock.Verify(o => o.Write(timestamp), Times.Once());
+            mock.Verify(o => o.Write(data.longitude), Times.Once());
+            mock.Verify(o => o.Write(data.ew), Times.Once());
+            mock.Verify(o => o.Write(data.latitude), Times.Once());
+            mock.Verify(o => o.Write(data.ns), Times.Once());
+            mock.Verify(o => o.Write(data.speedKnots), Times.Once());
+            mock.Verify(o => o.Write(data.angleDegrees), Times.Once());
         }
 
         [TestMethod]
@@ -130,10 +154,20 @@ namespace UnitTests.DataManager
             double[] x = { 0.0, 1.42, 213, 23, 12, 234.12, 56 },
                 y = { 2.0, 21, 543.1, 23, 54, 22, 2.6 },
                 z = { 3.0, 1.2324, 2.3, 21.2, 21.3, 4.0, 5.44 };
-            DateTime time = DateTime.Now;
-            double seconds = 23324.345;
+            var timeData = new GpsData()
+            {
+                valid = true,
+                ticks = 127864,
+                timestamp = DateTime.Now,
+                longitude = 623.77,
+                latitude = 892.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 1.0,
+                angleDegrees = 12.6
+            };
 
-            storage.Store(x, y, z, seconds, time);
+            storage.Store(x, y, z, timeData);
             for (int i = 0; i < x.Length; i++)
             {
                 var xval = x[i];
@@ -144,10 +178,7 @@ namespace UnitTests.DataManager
                 factory.z.Verify(o => o.Write(zval), Times.Once());
             }
 
-            factory.t.Verify(o => o.Write((long)0), Times.Once());
-            factory.t.Verify(o => o.Write((int)x.Length), Times.Once());
-            factory.t.Verify(o => o.Write(time.ToBinary()), Times.Once());
-            factory.t.Verify(o => o.Write(seconds), Times.Once());
+            VerifyTimeWrite(factory.t, 0, x.Length, timeData);
         }
 
         [TestMethod]
@@ -158,18 +189,28 @@ namespace UnitTests.DataManager
             double[] x2 = { 0, 0 }, y2 = { 0, 0 }, z2 = { 0, 0 };
             double[] x3 = { 0, 0, 0, 0 }, y3 = { 0, 0, 0, 0 }, 
                 z3 = { 0, 0, 0, 0 };
-            DateTime time = DateTime.Now;
-            double seconds = 43;
+            var timeData = new GpsData()
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = DateTime.Now,
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
 
-            storage.Store(x1, y1, z1, seconds, time);
+            storage.Store(x1, y1, z1, timeData);
             factory.t.Verify(o => o.Write((long)0), Times.Once());
             factory.t.Verify(o => o.Write(x1.Length), Times.Once());
 
-            storage.Store(x2, y2, z2, seconds, time);
+            storage.Store(x2, y2, z2, timeData);
             factory.t.Verify(o => o.Write((long)(x1.Length)), Times.Once());
             factory.t.Verify(o => o.Write(x2.Length), Times.Once());
 
-            storage.Store(x3, y3, z3, seconds, time);
+            storage.Store(x3, y3, z3, timeData);
             factory.t.Verify(o => o.Write((long)(x1.Length + x2.Length)), 
                 Times.Once());
             factory.t.Verify(o => o.Write(x3.Length), Times.Once());
@@ -180,18 +221,52 @@ namespace UnitTests.DataManager
         {
             var storage = new LegacyStorage(scheduler, file, dir, factory, config);
             double[] x = { 123.532 }, y = { 21.2 }, z = { 2.0 };
-            DateTime time1, time2, time3;
-            time1 = new DateTime(2016, 1, 1, 0, 0, 0);
-            time2 = new DateTime(2016, 1, 1, 0, 15, 0); // same hour
-            time3 = new DateTime(2016, 1, 1, 1, 0, 0);  // different hour
-            double seconds = 125.54323;
 
-            storage.Store(x, y, z, seconds, time1);
+            var time1 = new GpsData()
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 0, 0, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
+
+            var time2 = new GpsData() // same hour
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 0, 15, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
+
+            var time3 = new GpsData() // different hour
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 1, 0, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
+
+            storage.Store(x, y, z, time1);
             var xWriter = factory.x;
             var yWriter = factory.y;
             var zWriter = factory.z;
             var tWriter = factory.z;
-            storage.Store(x, y, z, seconds, time2);
+            storage.Store(x, y, z, time2);
             schedulerMock.Verify(o => o.UploadMagneticData(
                 It.IsAny<IDatasetInfo>()), Times.Never());
             xWriter.Verify(o => o.Close(), Times.Never());
@@ -199,7 +274,7 @@ namespace UnitTests.DataManager
             zWriter.Verify(o => o.Close(), Times.Never());
             tWriter.Verify(o => o.Close(), Times.Never());
 
-            storage.Store(x, y, z, seconds, time3);
+            storage.Store(x, y, z, time3);
             schedulerMock.Verify(o => o.UploadMagneticData(
                 It.IsAny<IDatasetInfo>()), Times.Once());
             xWriter.Verify(o => o.Close(), Times.Once());
@@ -215,18 +290,52 @@ namespace UnitTests.DataManager
                 (start, now) => start.Minute != now.Minute, 
                 file, dir, factory, config);
             double[] x = { 123.532 }, y = { 21.2 }, z = { 2.0 };
-            DateTime time1, time2, time3;
-            time1 = new DateTime(2016, 1, 1, 0, 0, 0);
-            time2 = new DateTime(2016, 1, 1, 0, 0, 0); // same minute
-            time3 = new DateTime(2016, 1, 1, 0, 2, 0);  // different minute
-            double seconds = 125.54323;
 
-            storage.Store(x, y, z, seconds, time1);
+            var time1 = new GpsData()
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 0, 0, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
+
+            var time2 = new GpsData() // same time
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 0, 0, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
+
+            var time3 = new GpsData()  // different minute
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 0, 2, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
+
+            storage.Store(x, y, z, time1);
             var xWriter = factory.x;
             var yWriter = factory.y;
             var zWriter = factory.z;
             var tWriter = factory.z;
-            storage.Store(x, y, z, seconds, time2);
+            storage.Store(x, y, z, time2);
             schedulerMock.Verify(o => o.UploadMagneticData(
                 It.IsAny<IDatasetInfo>()), Times.Never());
             xWriter.Verify(o => o.Close(), Times.Never());
@@ -234,7 +343,7 @@ namespace UnitTests.DataManager
             zWriter.Verify(o => o.Close(), Times.Never());
             tWriter.Verify(o => o.Close(), Times.Never());
 
-            storage.Store(x, y, z, seconds, time3);
+            storage.Store(x, y, z, time3);
             schedulerMock.Verify(o => o.UploadMagneticData(
                 It.IsAny<IDatasetInfo>()), Times.Once());
             xWriter.Verify(o => o.Close(), Times.Once());
@@ -251,18 +360,40 @@ namespace UnitTests.DataManager
                 file, dir, factory, config);
             storage.UploadOnClose = false;
             double[] x = { 123.532 }, y = { 21.2 }, z = { 2.0 };
-            DateTime time1, time2;
-            time1 = new DateTime(2016, 1, 1, 0, 0, 0);
-            time2 = new DateTime(2016, 1, 1, 0, 2, 0);  // different minute
-            double seconds = 125.54323;
 
-            storage.Store(x, y, z, seconds, time1);
+            var time1 = new GpsData()
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 0, 0, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
+
+            var time2 = new GpsData()  // different minute
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 0, 2, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
+
+            storage.Store(x, y, z, time1);
             var xWriter = factory.x;
             var yWriter = factory.y;
             var zWriter = factory.z;
             var tWriter = factory.z;
 
-            storage.Store(x, y, z, seconds, time2);
+            storage.Store(x, y, z, time2);
             schedulerMock.Verify(o => o.UploadMagneticData(
                 It.IsAny<IDatasetInfo>()), Times.Never());
             xWriter.Verify(o => o.Close(), Times.Once());
@@ -276,20 +407,39 @@ namespace UnitTests.DataManager
         {
             var storage = new LegacyStorage(scheduler, file, dir, factory, config);
             double[] x = { 123.532 }, y = { 21.2 }, z = { 2.0 };
-            DateTime time1, time2;
-            time1 = new DateTime(2016, 1, 1, 0, 0, 0);
-            time2 = new DateTime(2016, 1, 1, 1, 0, 0);  // different hour
-            double seconds = 125.54323;
 
-            storage.Store(x, y, z, seconds, time1);
-            storage.Store(x, y, z, seconds, time2);
+            var time1 = new GpsData()
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 0, 0, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
+
+            var time2 = new GpsData() // different hour
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 1, 0, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
+
+            storage.Store(x, y, z, time1);
+            storage.Store(x, y, z, time2);
             factory.x.Verify(o => o.Write(123.532), Times.Once());
             factory.y.Verify(o => o.Write(21.2), Times.Once());
             factory.z.Verify(o => o.Write(2.0), Times.Once());
-            factory.t.Verify(o => o.Write((long)0), Times.Once());
-            factory.t.Verify(o => o.Write(1), Times.Once());
-            factory.t.Verify(o => o.Write(time2.ToBinary()), Times.Once());
-            factory.t.Verify(o => o.Write(seconds), Times.Once());
+            VerifyTimeWrite(factory.t, 0, 1, time2);
         }
 
         [TestMethod]
@@ -298,20 +448,27 @@ namespace UnitTests.DataManager
             var storage = new LegacyStorage(scheduler, file, dir, factory, config);
             double[] x1 = { 123.532 }, y1 = { 21.2 }, z1 = { 2.0 };
             double[] x2 = { 52.2 }, y2 = { 54.2 }, z2 = { 213.6 };
-            DateTime time = new DateTime(2016, 1, 1, 0, 0, 0);
-            double seconds = 125.54323;
+            var time = new GpsData() 
+            {
+                valid = true,
+                ticks = 511274,
+                timestamp = new DateTime(2016, 1, 1, 1, 0, 0),
+                longitude = 863.77,
+                latitude = 192.44,
+                ew = "W",
+                ns = "N",
+                speedKnots = 8.4,
+                angleDegrees = 87
+            };
 
-            storage.Store(x1, y1, z1, seconds, time);
+            storage.Store(x1, y1, z1, time);
             storage.Close();
-            storage.Store(x2, y2, z2, seconds, time);
+            storage.Store(x2, y2, z2, time);
 
             factory.x.Verify(o => o.Write(52.2), Times.Once());
             factory.y.Verify(o => o.Write(54.2), Times.Once());
             factory.z.Verify(o => o.Write(213.6), Times.Once());
-            factory.t.Verify(o => o.Write((long)0), Times.Once());
-            factory.t.Verify(o => o.Write(1), Times.Once());
-            factory.t.Verify(o => o.Write(time.ToBinary()), Times.Once());
-            factory.t.Verify(o => o.Write(seconds), Times.Once());
+            VerifyTimeWrite(factory.t, 0, 1, time);
         }
     }
 }
