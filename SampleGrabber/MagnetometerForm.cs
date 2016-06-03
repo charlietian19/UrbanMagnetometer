@@ -28,6 +28,9 @@ namespace SampleGrabber
         protected ITimeSource gps;
         protected ITimeEstimator interpolator = new NaiveTimeEstimator();
 
+        protected IUploader google;
+        protected IUploadScheduler scheduler;
+
         protected enum UiStateMagnetometer
         {
             NoSensorFound,
@@ -48,9 +51,9 @@ namespace SampleGrabber
                 samplingRate = Convert.ToDouble(Settings.SamplingRate);
                 var units = Settings.DataUnits;
                 convertToMicroTesla = (units == "uT");
-                var google = new GDrive("nuri-station.json");
+                google = new GDrive("nuri-station.json");
                 google.ProgressEvent += Google_ProgressEvent;
-                var scheduler = new UploadScheduler(google);
+                scheduler = new UploadScheduler(google);
                 scheduler.StartedEvent += Scheduler_StartedEvent;
                 scheduler.FinishedEvent += Scheduler_FinishedEvent;
                 storage = new LegacySampleStorage(scheduler,

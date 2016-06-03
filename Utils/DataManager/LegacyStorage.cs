@@ -183,9 +183,9 @@ namespace Utils.DataManager
             writer.Write(gps.ticks);
             writer.Write(timestamp);
             writer.Write(gps.latitude);
-            writer.Write(gps.ew);
+            writer.Write(Convert.ToByte(gps.ew[0]));
             writer.Write(gps.longitude);
-            writer.Write(gps.ns);
+            writer.Write(Convert.ToByte(gps.ns[0]));
             writer.Write(gps.speedKnots);
             writer.Write(gps.angleDegrees);
         }

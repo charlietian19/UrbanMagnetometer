@@ -136,13 +136,14 @@ namespace UnitTests.DataManager
             var timestamp = Helpers.DateTimeToUnixTimestamp(data.timestamp);
             mock.Verify(o => o.Write(start), Times.Once());
             mock.Verify(o => o.Write(length), Times.Once());
-            mock.Verify(o => o.Write(Convert.ToByte(data.valid)), Times.Once());
+            mock.Verify(o => o.Write(Convert.ToByte(data.valid)), 
+                Times.Once());
             mock.Verify(o => o.Write(data.ticks), Times.Once());
             mock.Verify(o => o.Write(timestamp), Times.Once());
             mock.Verify(o => o.Write(data.longitude), Times.Once());
-            mock.Verify(o => o.Write(data.ew), Times.Once());
+            mock.Verify(o => o.Write(Convert.ToByte(data.ew[0])), Times.Once());
             mock.Verify(o => o.Write(data.latitude), Times.Once());
-            mock.Verify(o => o.Write(data.ns), Times.Once());
+            mock.Verify(o => o.Write(Convert.ToByte(data.ns[0])), Times.Once());
             mock.Verify(o => o.Write(data.speedKnots), Times.Once());
             mock.Verify(o => o.Write(data.angleDegrees), Times.Once());
         }
