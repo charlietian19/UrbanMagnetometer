@@ -56,5 +56,11 @@ namespace DogeStation2
         {
             storage.Discard();
         }
+
+        /* Called when user changes the sample name changes */
+        protected void name_TextChanged(object sender, EventArgs e)
+        {
+            Settings.SampleName = name.Text;
+        }
     }
 }

@@ -45,6 +45,10 @@
             // 
             this.recordButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
             // 
+            // name
+            // 
+            this.name.TextChanged += new System.EventHandler(this.name_TextChanged);
+            // 
             // gpsCloseButton
             // 
             this.gpsCloseButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;

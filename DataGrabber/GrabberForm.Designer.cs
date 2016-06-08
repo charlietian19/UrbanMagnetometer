@@ -42,6 +42,10 @@
             // 
             this.recordButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
             // 
+            // name
+            // 
+            this.name.TextChanged += new System.EventHandler(this.name_TextChanged);
+            // 
             // previewBox
             // 
             this.previewBox.Location = new System.Drawing.Point(29, 134);

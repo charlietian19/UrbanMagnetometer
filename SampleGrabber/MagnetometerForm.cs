@@ -31,6 +31,7 @@ namespace SampleGrabber
         protected IUploader google;
         protected IUploadScheduler scheduler;
 
+        /* Magnetometer UI status list */
         protected enum UiStateMagnetometer
         {
             NoSensorFound,
@@ -38,11 +39,13 @@ namespace SampleGrabber
             Recording
         }
 
+        /* Initialize form components */
         public MagnetometerForm()
         {
             InitializeComponent();
         }
 
+        /* Initializes the objects that produce and handle the signals */
         protected virtual void InitializeResources()
         {
             try
@@ -67,7 +70,7 @@ namespace SampleGrabber
             }
         }
 
-        /* Resets the data filters */
+        /* Resets the data display filters */
         protected void UpdateFilters()
         {
             int avgPoints = Convert.ToInt32(Convert.ToInt32(samplingRate)
@@ -96,6 +99,7 @@ namespace SampleGrabber
             subsamples[i].output += new FilterEvent(buffers[i].InputData);
         }
 
+        /* Called when a Google upload progress is updated */
         protected void Google_ProgressEvent(string fullPath, long bytesSent,
             long bytesTotal)
         {
@@ -106,6 +110,7 @@ namespace SampleGrabber
             SetTextThreadSafe(msg);
         }
 
+        /* Thread-safe method to set the status label text */
         delegate void SetTextCallback(string text);
         protected void SetTextThreadSafe(string text)
         {
@@ -120,12 +125,14 @@ namespace SampleGrabber
             }
         }
 
+        /* Called when a Google upload has finished */
         protected void Scheduler_FinishedEvent(IDatasetInfo info, bool success,
             string message)
         {
             SetTextThreadSafe(message);
         }
 
+        /* Called when a Google upload has started */
         protected void Scheduler_StartedEvent(IDatasetInfo info)
         {
             var msg = string.Format("Uploading dataset from {0}", 
@@ -133,11 +140,7 @@ namespace SampleGrabber
             SetTextThreadSafe(msg);
         }
 
-        protected void stationName_TextChanged(object sender, EventArgs e)
-        {
-            Settings.SampleName = name.Text;
-        }
-
+        /* Updates the magnetometer UI */
         protected virtual void SetUI(UiStateMagnetometer state)
         {
             switch (state)
@@ -183,11 +186,13 @@ namespace SampleGrabber
             }
         }
 
+        /* Called when refresh magnetometer list button is clicked */
         protected void refreshButton_Click(object sender, EventArgs e)
         {
             RefreshSensorList();
         }
 
+        /* Updates the list of magnetometer sensors */
         void RefreshSensorList()
         {
             try
@@ -213,6 +218,7 @@ namespace SampleGrabber
             }
         }
 
+        /* Selects a magnetometer sensor given device ID */
         protected void SelectSensor(int serial)
         {
             try
@@ -227,6 +233,7 @@ namespace SampleGrabber
             }
         }
 
+        /* Called when a user selects a magnetometer from the list */
         protected void sensorList_SelectedIndexChanged(object sender, 
             EventArgs e)
         {
@@ -234,6 +241,7 @@ namespace SampleGrabber
             SelectSensor(serial);
         }
 
+        /* Called when record button is clicked */
         protected void recordButton_Click(object sender, EventArgs e)
         {
             if (sensor == null)
@@ -284,6 +292,7 @@ namespace SampleGrabber
             }
         }
 
+        /* Called when new magnetic data arrives */
         protected void Sensor_NewDataHandler(double[] dataX, double[] dataY,
             double[] dataZ, double systemSeconds, DateTime time)
         {
@@ -295,6 +304,7 @@ namespace SampleGrabber
             averages[2].InputData(dataZ);
         }        
 
+        /* Called when user clicks cancel recording button */
         protected void cancelButton_Click(object sender, EventArgs e)
         {
             if (sensor == null)
@@ -317,11 +327,13 @@ namespace SampleGrabber
             }
         }
 
+        /* Called when user clicks upload button */
         protected void uploadButton_Click(object sender, EventArgs e)
         {
             storage.Upload();
         }
 
+        /* Called when the form is being closed */
         protected void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (sensor != null)
@@ -331,21 +343,26 @@ namespace SampleGrabber
             }
         }
 
+        /* Called when user selects a new time constant for the display 
+        average filter */
         protected void averagingPeriodMs_ValueChanged(object sender, EventArgs e)
         {
             UpdateFilters();
         }
 
+        /* Called when user selects a new maximum number of points to display */
         protected void displayPoints_ValueChanged(object sender, EventArgs e)
         {
             UpdateFilters();
         }
 
+        /* Called when user clicks refresh GPS list button */
         protected void gpsRefreshButton_Click(object sender, EventArgs e)
         {
             RefreshGpsList();
         }
 
+        /* Updates the list of serial ports present in the system */
         protected void RefreshGpsList()
         {
             try
@@ -373,6 +390,7 @@ namespace SampleGrabber
             }
         }
 
+        /* Called when user clicks open GPS button */
         protected void gpsOpenButton_Click(object sender, EventArgs e)
         {
             try
@@ -390,6 +408,7 @@ namespace SampleGrabber
             }
         }
 
+        /* Called when new GPS data is received */
         private void Gps_TimestampReceived(GpsData data)
         {
             gpsTimeoutTimer.Stop();
@@ -398,6 +417,14 @@ namespace SampleGrabber
             UpdateGpsStatusThreadSafe(data);
         }
 
+        /* Called when the GPS data hasn't been received for too long */
+        private void gpsTimeoutTimer_Tick(object sender, EventArgs e)
+        {
+            gpsStatusLabel.Text = "No data";
+            gpsStatusLabel.BackColor = System.Drawing.Color.Red;
+        }
+
+        /* Thread-safe function to update GPS status */
         delegate void UpdateGpsStatusCallback(GpsData data);
         protected void UpdateGpsStatusThreadSafe(GpsData data)
         {           
@@ -426,6 +453,7 @@ namespace SampleGrabber
             }
         }
 
+        /* Called when user clicks close GPS button */
         protected void gpsCloseButton_Click(object sender, EventArgs e)
         {
             try
@@ -440,6 +468,7 @@ namespace SampleGrabber
             }
         }
 
+        /* GPS UI status list */
         protected enum UiStateGps
         {
             Opened,
@@ -447,6 +476,7 @@ namespace SampleGrabber
             NoSensor
         }
 
+        /* Update GPS UI part */
         protected virtual void SetUiGps(UiStateGps state)
         {
             switch (state)
@@ -457,6 +487,7 @@ namespace SampleGrabber
                     gpsCloseButton.Enabled = true;
                     gpsRefreshButton.Enabled = false;
                     gpsStatusLabel.Text = "Connected";
+                    gpsStatusLabel.BackColor = System.Drawing.Color.LightGray;
                     break;
 
                 case UiStateGps.Closed:
@@ -465,7 +496,7 @@ namespace SampleGrabber
                     gpsCloseButton.Enabled = false;
                     gpsRefreshButton.Enabled = true;
                     gpsStatusLabel.Text = "Disconnected";
-                    gpsStatusLabel.BackColor = System.Drawing.Color.LightGray;
+                    gpsStatusLabel.BackColor = System.Drawing.Color.Red;
                     break;
 
                 case UiStateGps.NoSensor:
@@ -474,25 +505,22 @@ namespace SampleGrabber
                     gpsCloseButton.Enabled = false;
                     gpsRefreshButton.Enabled = true;
                     gpsStatusLabel.Text = "Disconnected";
+                    gpsStatusLabel.BackColor = System.Drawing.Color.Red;
                     break;
             }
         }
 
+        /* Called when the form is loaded */
         protected void MagnetometerForm_Load(object sender, EventArgs e)
-        {
-            if (DesignMode)
+        {            
+            if (DesignMode) 
             {
+                /* Needed for the Visual Studio form designer to work */
                 return;
             }
             
             InitializeResources();
             RefreshSensorList();
-        }
-
-        private void gpsTimeoutTimer_Tick(object sender, EventArgs e)
-        {
-            gpsStatusLabel.Text = "No data";
-            gpsStatusLabel.BackColor = System.Drawing.Color.Red;
         }
     }
 }
