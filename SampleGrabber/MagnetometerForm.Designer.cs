@@ -174,7 +174,7 @@
             this.dataGraph.Series.Add(series1);
             this.dataGraph.Series.Add(series2);
             this.dataGraph.Series.Add(series3);
-            this.dataGraph.Size = new System.Drawing.Size(1369, 658);
+            this.dataGraph.Size = new System.Drawing.Size(1369, 423);
             this.dataGraph.TabIndex = 7;
             this.dataGraph.Text = "Magnetic Data Sample";
             // 
@@ -183,7 +183,7 @@
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(40, 40);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel});
-            this.statusStrip.Location = new System.Drawing.Point(0, 982);
+            this.statusStrip.Location = new System.Drawing.Point(0, 747);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1436, 46);
             this.statusStrip.TabIndex = 8;
@@ -292,7 +292,7 @@
             this.previewBox.Controls.Add(this.averagingPeriodMs);
             this.previewBox.Location = new System.Drawing.Point(29, 186);
             this.previewBox.Name = "previewBox";
-            this.previewBox.Size = new System.Drawing.Size(1392, 780);
+            this.previewBox.Size = new System.Drawing.Size(1392, 545);
             this.previewBox.TabIndex = 16;
             this.previewBox.TabStop = false;
             this.previewBox.Text = "Sample preview";
@@ -376,7 +376,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1436, 1028);
+            this.ClientSize = new System.Drawing.Size(1436, 793);
             this.Controls.Add(this.gpsCloseButton);
             this.Controls.Add(this.gpsStatusLabel);
             this.Controls.Add(this.gpsOpenButton);
