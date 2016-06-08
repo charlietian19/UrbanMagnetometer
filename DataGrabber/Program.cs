@@ -17,7 +17,7 @@ namespace DataGrabber
             process.PriorityClass = ProcessPriorityClass.High;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new GrabberForm());
+            Application.Run(new DataGrabberForm());
         }
     }
 }

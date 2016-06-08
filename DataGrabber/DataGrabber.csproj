@@ -82,16 +82,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GrabberForm.cs">
+    <Compile Include="DataGrabberForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GrabberForm.Designer.cs">
-      <DependentUpon>GrabberForm.cs</DependentUpon>
+    <Compile Include="DataGrabberForm.Designer.cs">
+      <DependentUpon>DataGrabberForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="GrabberForm.resx">
-      <DependentUpon>GrabberForm.cs</DependentUpon>
+    <EmbeddedResource Include="DataGrabberForm.resx">
+      <DependentUpon>DataGrabberForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

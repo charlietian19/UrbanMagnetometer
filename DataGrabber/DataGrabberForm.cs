@@ -4,9 +4,9 @@ using Utils.DataManager;
 
 namespace DataGrabber
 {
-    public partial class GrabberForm : SampleGrabber.MagnetometerForm
+    public partial class DataGrabberForm : SampleGrabber.MagnetometerForm
     {
-        public GrabberForm()
+        public DataGrabberForm()
         {
             InitializeComponent();
         }

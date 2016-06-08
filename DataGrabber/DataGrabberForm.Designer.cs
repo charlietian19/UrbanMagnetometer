@@ -1,6 +1,6 @@
 ﻿namespace DataGrabber
 {
-    partial class GrabberForm
+    partial class DataGrabberForm
     {
         /// <summary>
         /// Required designer variable.
