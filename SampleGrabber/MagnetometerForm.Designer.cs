@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.sampleNameLabel = new System.Windows.Forms.Label();
             this.sensorList = new System.Windows.Forms.ComboBox();
             this.recordButton = new System.Windows.Forms.Button();
@@ -60,6 +60,7 @@
             this.gpsRefreshButton = new System.Windows.Forms.Button();
             this.gpsList = new System.Windows.Forms.ComboBox();
             this.gpsLabel = new System.Windows.Forms.Label();
+            this.gpsTimeoutTimer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dataGraph)).BeginInit();
             this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.averagingPeriodMs)).BeginInit();
@@ -140,40 +141,40 @@
             this.dataGraph.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea1.AxisX.Minimum = 0D;
-            chartArea1.AxisX.Title = "s";
-            chartArea1.AxisY.IsStartedFromZero = false;
-            chartArea1.Name = "X";
-            chartArea2.AxisX.Minimum = 0D;
-            chartArea2.AxisX.Title = "s";
-            chartArea2.AxisY.IsStartedFromZero = false;
-            chartArea2.Name = "Y";
-            chartArea3.AxisX.Minimum = 0D;
-            chartArea3.AxisX.Title = "s";
-            chartArea3.AxisY.IsStartedFromZero = false;
-            chartArea3.Name = "Z";
-            this.dataGraph.ChartAreas.Add(chartArea1);
-            this.dataGraph.ChartAreas.Add(chartArea2);
-            this.dataGraph.ChartAreas.Add(chartArea3);
-            legend1.Name = "Legend1";
-            this.dataGraph.Legends.Add(legend1);
+            chartArea4.AxisX.Minimum = 0D;
+            chartArea4.AxisX.Title = "s";
+            chartArea4.AxisY.IsStartedFromZero = false;
+            chartArea4.Name = "X";
+            chartArea5.AxisX.Minimum = 0D;
+            chartArea5.AxisX.Title = "s";
+            chartArea5.AxisY.IsStartedFromZero = false;
+            chartArea5.Name = "Y";
+            chartArea6.AxisX.Minimum = 0D;
+            chartArea6.AxisX.Title = "s";
+            chartArea6.AxisY.IsStartedFromZero = false;
+            chartArea6.Name = "Z";
+            this.dataGraph.ChartAreas.Add(chartArea4);
+            this.dataGraph.ChartAreas.Add(chartArea5);
+            this.dataGraph.ChartAreas.Add(chartArea6);
+            legend2.Name = "Legend1";
+            this.dataGraph.Legends.Add(legend2);
             this.dataGraph.Location = new System.Drawing.Point(8, 105);
             this.dataGraph.Name = "dataGraph";
-            series1.ChartArea = "X";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series1.Legend = "Legend1";
-            series1.Name = "X";
-            series2.ChartArea = "Y";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series2.Legend = "Legend1";
-            series2.Name = "Y";
-            series3.ChartArea = "Z";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series3.Legend = "Legend1";
-            series3.Name = "Z";
-            this.dataGraph.Series.Add(series1);
-            this.dataGraph.Series.Add(series2);
-            this.dataGraph.Series.Add(series3);
+            series4.ChartArea = "X";
+            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series4.Legend = "Legend1";
+            series4.Name = "X";
+            series5.ChartArea = "Y";
+            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series5.Legend = "Legend1";
+            series5.Name = "Y";
+            series6.ChartArea = "Z";
+            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series6.Legend = "Legend1";
+            series6.Name = "Z";
+            this.dataGraph.Series.Add(series4);
+            this.dataGraph.Series.Add(series5);
+            this.dataGraph.Series.Add(series6);
             this.dataGraph.Size = new System.Drawing.Size(1369, 423);
             this.dataGraph.TabIndex = 7;
             this.dataGraph.Text = "Magnetic Data Sample";
@@ -372,6 +373,11 @@
             this.gpsLabel.TabIndex = 18;
             this.gpsLabel.Text = "GPS";
             // 
+            // gpsTimeoutTimer
+            // 
+            this.gpsTimeoutTimer.Interval = 5000;
+            this.gpsTimeoutTimer.Tick += new System.EventHandler(this.gpsTimeoutTimer_Tick);
+            // 
             // MagnetometerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
@@ -435,6 +441,7 @@
         protected System.Windows.Forms.Button gpsRefreshButton;
         protected System.Windows.Forms.ComboBox gpsList;
         protected System.Windows.Forms.Label gpsLabel;
+        protected System.Windows.Forms.Timer gpsTimeoutTimer;
     }
 }
 

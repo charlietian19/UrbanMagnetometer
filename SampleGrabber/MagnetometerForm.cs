@@ -378,19 +378,24 @@ namespace SampleGrabber
             try
             {
                 gps = new SerialGps(gpsList.Text, 4800);
-                gps.TimestampReceived += data =>
-                {
-                    interpolator.PutTimestamp(data);
-                    UpdateGpsStatusThreadSafe(data);
-                };
+                gps.TimestampReceived += Gps_TimestampReceived;
 
                 gps.Open();
+                gpsTimeoutTimer.Start();
                 SetUiGps(UiStateGps.Opened);
             }
             catch (Exception exception)
             {
                 toolStripStatusLabel.Text = exception.Message;
             }
+        }
+
+        private void Gps_TimestampReceived(GpsData data)
+        {
+            gpsTimeoutTimer.Stop();
+            gpsTimeoutTimer.Start();
+            interpolator.PutTimestamp(data);
+            UpdateGpsStatusThreadSafe(data);
         }
 
         delegate void UpdateGpsStatusCallback(GpsData data);
@@ -424,9 +429,10 @@ namespace SampleGrabber
         protected void gpsCloseButton_Click(object sender, EventArgs e)
         {
             try
-            {
-                gps.Close();
+            {                
+                gpsTimeoutTimer.Stop();
                 SetUiGps(UiStateGps.Closed);
+                gps.Close();
             }
             catch (Exception exception)
             {
@@ -481,6 +487,12 @@ namespace SampleGrabber
             
             InitializeResources();
             RefreshSensorList();
+        }
+
+        private void gpsTimeoutTimer_Tick(object sender, EventArgs e)
+        {
+            gpsStatusLabel.Text = "No data";
+            gpsStatusLabel.BackColor = System.Drawing.Color.Red;
         }
     }
 }
