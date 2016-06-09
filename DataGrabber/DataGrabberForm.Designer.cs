@@ -46,9 +46,14 @@
             // 
             this.name.TextChanged += new System.EventHandler(this.name_TextChanged);
             // 
+            // dataGraph
+            // 
+            this.dataGraph.Size = new System.Drawing.Size(1369, 393);
+            // 
             // previewBox
             // 
             this.previewBox.Location = new System.Drawing.Point(29, 134);
+            this.previewBox.Size = new System.Drawing.Size(1392, 520);
             // 
             // gpsCloseButton
             // 
@@ -77,12 +82,12 @@
             // 
             this.gpsLabel.Location = new System.Drawing.Point(31, 84);
             // 
-            // GrabberForm
+            // DataGrabberForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1436, 963);
-            this.Name = "GrabberForm";
+            this.ClientSize = new System.Drawing.Size(1436, 703);
+            this.Name = "DataGrabberForm";
             this.Text = "Magnetic Data Logger";
             ((System.ComponentModel.ISupportInitialize)(this.dataGraph)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.averagingPeriodMs)).EndInit();

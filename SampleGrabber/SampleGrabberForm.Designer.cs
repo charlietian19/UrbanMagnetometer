@@ -51,11 +51,11 @@
             // 
             // dataGraph
             // 
-            this.dataGraph.Size = new System.Drawing.Size(1369, 411);
+            this.dataGraph.Size = new System.Drawing.Size(1369, 391);
             // 
             // previewBox
             // 
-            this.previewBox.Size = new System.Drawing.Size(1392, 533);
+            this.previewBox.Size = new System.Drawing.Size(1392, 518);
             // 
             // gpsCloseButton
             // 
