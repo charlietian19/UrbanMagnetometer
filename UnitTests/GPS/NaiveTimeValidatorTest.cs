@@ -13,7 +13,7 @@ namespace UnitTests.GPS
     /// Summary description for Thresholdstorageriminator
     /// </summary>
     [TestClass]
-    public class NaiveTimeStorageTest
+    public class NaiveTimeValidatorTest
     {
         private long delta = Stopwatch.Frequency;
         private readonly DateTime baseData = DateTime.Now;
@@ -21,7 +21,7 @@ namespace UnitTests.GPS
         Mock<ITimer> timer;
         Mock<IStopwatch> stopwatch;
 
-        public NaiveTimeStorageTest()
+        public NaiveTimeValidatorTest()
         {
             //
             // TODO: Add constructor logic here
@@ -83,7 +83,7 @@ namespace UnitTests.GPS
         [TestMethod]
         public void Constructor()
         {
-            var storage = new NaiveTimeStorage(1e-6, 40, 5, 60);
+            var storage = new NaiveTimeValidator(1e-6, 40, 5, 60);
             Assert.AreEqual(40, storage.maxHistory);
             Assert.AreEqual(delta, storage.frequency);
             Assert.AreEqual(0, storage.pointsReceived);
@@ -99,7 +99,7 @@ namespace UnitTests.GPS
             GpsData data1 = buildData(61293), data2 = buildData(2621378),
                 data3 = buildData(412365), data4 = buildData(51928137),
                 data5 = buildData(316563812), data6 = buildData(175283);
-            var storage = new NaiveTimeStorage(1e-6, 3, 3, 5);
+            var storage = new NaiveTimeValidator(1e-6, 3, 3, 5);
             storage.Store(data1);
             assertHistory(data1, storage.history[0]);
             storage.Store(data2);
@@ -143,7 +143,7 @@ namespace UnitTests.GPS
         public void SamplesBeforeLookbackAreInvalid()
         {
             GpsData data = buildData(7129835162);
-            var storage = new NaiveTimeStorage(1e-6, 4, 2, 4);
+            var storage = new NaiveTimeValidator(1e-6, 4, 2, 4);
             storage.Store(data);
             storage.Store(data);
             Assert.IsFalse(storage.history[0].valid);
@@ -154,7 +154,7 @@ namespace UnitTests.GPS
         public void SamplesPastLookbackAreValid()
         {
             GpsData data = buildData(7129835162);
-            var storage = new NaiveTimeStorage(1e-6, 4, 2, 4);
+            var storage = new NaiveTimeValidator(1e-6, 4, 2, 4);
             storage.Store(data);
             storage.Store(data);
             storage.Store(data);
@@ -164,24 +164,22 @@ namespace UnitTests.GPS
         }
 
         [TestMethod]
-        public void DataMarkedInvalidByGpsRemainsInvalid()
+        public void DataMarkedInvalidByGpsIsDiscarded()
         {
             GpsData data = buildData(7129835162);
             data.valid = false;
-            var storage = new NaiveTimeStorage(1e-6, 3, 1, 3);
+            var storage = new NaiveTimeValidator(1e-6, 3, 1, 3);
             storage.Store(data);
             storage.Store(data);
             storage.Store(data);
-            Assert.IsFalse(storage.history[0].valid);
-            Assert.IsFalse(storage.history[1].valid);
-            Assert.IsFalse(storage.history[2].valid);
+            Assert.AreEqual(0, storage.history.Length);
         }
 
         [TestMethod]
         public void SampleWithingThreshold1()
         {
             GpsData data = buildData(174234);
-            var storage = new NaiveTimeStorage(1e-6, 2, 2, 3);
+            var storage = new NaiveTimeValidator(1e-6, 2, 2, 3);
             storage.Store(data);
             Assert.IsFalse(storage.history[0].valid);
             storage.Store(data);
@@ -199,7 +197,7 @@ namespace UnitTests.GPS
             GpsData data2 = buildData(ticks + 2 * delta);
             GpsData data3 = buildData(ticks + delta * 3 - 
                 Convert.ToInt64(threshold * 4 * delta));
-            var storage = new NaiveTimeStorage(threshold, 2, 2, 3);
+            var storage = new NaiveTimeValidator(threshold, 2, 2, 3);
             storage.Store(data1);
             Assert.IsFalse(storage.history[0].valid);
             storage.Store(data2);
@@ -217,7 +215,7 @@ namespace UnitTests.GPS
             GpsData data2 = buildData(ticks + delta);
             GpsData data3 = buildData(ticks + delta * 2 +
                 Convert.ToInt64(threshold * 4 * delta));
-            var storage = new NaiveTimeStorage(threshold, 2, 2, 3);
+            var storage = new NaiveTimeValidator(threshold, 2, 2, 3);
             storage.Store(data1);
             Assert.IsFalse(storage.history[0].valid);
             storage.Store(data2);
@@ -237,7 +235,7 @@ namespace UnitTests.GPS
                 Convert.ToInt64(threshold * 2 / 3 * delta));
             GpsData data4 = buildData(ticks + delta * 3 +
                 Convert.ToInt64(threshold * 4 / 3 * delta));
-            var storage = new NaiveTimeStorage(threshold, 2, 2, 2);
+            var storage = new NaiveTimeValidator(threshold, 2, 2, 2);
             storage.Store(data1);
             Assert.IsFalse(storage.history[0].valid);
             storage.Store(data2);
@@ -252,35 +250,35 @@ namespace UnitTests.GPS
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ThresholdCantBeNegative()
         {
-            var store = new NaiveTimeStorage(-5, 23, 5, 23);
+            var store = new NaiveTimeValidator(-5, 23, 5, 23);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void HistoryHasToBeAtLeastTwo()
         {
-            var store = new NaiveTimeStorage(1, 1, 1, 1);
+            var store = new NaiveTimeValidator(1, 1, 1, 1);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void LookbackHasToBeAtLeastOne()
         {
-            var store = new NaiveTimeStorage(1, 4, 0, 4);
+            var store = new NaiveTimeValidator(1, 4, 0, 4);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void HistoryCantBeLessThanLookback()
         {
-            var store = new NaiveTimeStorage(1, 10, 15, 10);
+            var store = new NaiveTimeValidator(1, 10, 15, 10);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void InvalidateAfterCantBeNegative()
         {
-            var store = new NaiveTimeStorage(1, 10, 15, -1);
+            var store = new NaiveTimeValidator(1, 10, 15, -1);
         }
 
         [TestMethod]
@@ -294,7 +292,7 @@ namespace UnitTests.GPS
             var data3 = buildData(3000);
 
             /* Invalidate stored points after 3 seconds */
-            var storage = new NaiveTimeStorage(100e-6, 3, 1, 3,
+            var storage = new NaiveTimeValidator(100e-6, 3, 1, 3,
                 stopwatch.Object, timer.Object);
             storage.Store(data1);
             storage.Store(data2);

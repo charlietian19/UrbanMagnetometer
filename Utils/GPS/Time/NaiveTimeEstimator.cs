@@ -63,16 +63,16 @@ namespace Utils.GPS
 
         /* Where the GPS data is stored and discriminated on valid/invalid 
         points */
-        ITimeStorage storage;
+        ITimeValidator storage;
 
         /* Creates a NaiveTimeSource using a default NaiveTimeStorage. */
         public NaiveTimeEstimator()
         {
-            storage = new NaiveTimeStorage();
+            storage = new NaiveTimeValidator();
         }
 
         /* Create a NaiveTimeSource provided a TimeStorage */
-        public NaiveTimeEstimator(ITimeStorage storage)
+        public NaiveTimeEstimator(ITimeValidator storage)
         {
             this.storage = storage;
         }

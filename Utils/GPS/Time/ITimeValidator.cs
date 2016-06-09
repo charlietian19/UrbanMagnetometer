@@ -3,7 +3,7 @@
 
 namespace Utils.GPS
 {
-    public interface ITimeStorage
+    public interface ITimeValidator
     {
         /* Add the time data point to the storage. Returns true if the point
         is valid, and false otherwise. */

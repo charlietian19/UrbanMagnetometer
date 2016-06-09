@@ -1,8 +1,6 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Utils.GPS.Time;
+using Utils.GPS;
 
 namespace UnitTests.GPS
 {
@@ -10,9 +8,9 @@ namespace UnitTests.GPS
     /// Summary description for FifoStorage
     /// </summary>
     [TestClass]
-    public class FifoStorage
+    public class FifoStorageTest
     {
-        public FifoStorage()
+        public FifoStorageTest()
         {
             //
             // TODO: Add constructor logic here
@@ -66,30 +64,37 @@ namespace UnitTests.GPS
             storage.Add(1);
             storage.Add(2);
             storage.Add(3);
-            CollectionAssert.AreEqual(new int[] { 1, 2, 3 },
-                storage.ToArray());
+            var res = storage.ToArray();
+            CollectionAssert.AreEqual(new int[] { 1, 2, 3 }, res);
         }
 
         [TestMethod]
         public void FifoBehaviour()
         {
             var storage = new FifoStorage<int>(3);
+            Assert.AreEqual(0, storage.Count);
             storage.Add(1);
+            Assert.AreEqual(1, storage.Count);
             CollectionAssert.AreEqual(new int[] { 1 },
                 storage.ToArray());
             storage.Add(2);
+            Assert.AreEqual(2, storage.Count);
             CollectionAssert.AreEqual(new int[] { 1, 2 },
                 storage.ToArray());
             storage.Add(3);
+            Assert.AreEqual(3, storage.Count);
             CollectionAssert.AreEqual(new int[] { 1, 2, 3 },
                 storage.ToArray());
             storage.Add(4);
+            Assert.AreEqual(3, storage.Count);
             CollectionAssert.AreEqual(new int[] { 2, 3, 4 },
                 storage.ToArray());
             storage.Add(5);
+            Assert.AreEqual(3, storage.Count);
             CollectionAssert.AreEqual(new int[] { 3, 4, 5 },
                 storage.ToArray());
             storage.Add(6);
+            Assert.AreEqual(3, storage.Count);
             CollectionAssert.AreEqual(new int[] { 4, 5, 6 },
                 storage.ToArray());
         }
@@ -122,6 +127,53 @@ namespace UnitTests.GPS
                 storage.Add(value);
             }
             Assert.IsTrue(valuesToAdd.SetEquals(storage.ToArray()));
+        }
+
+        [TestMethod]
+        public void ReadByIndex()
+        {
+            var storage = new FifoStorage<int>(3);
+            storage.Add(5);
+            storage.Add(265);
+            storage.Add(321);
+            Assert.AreEqual(5, storage[0]);
+            Assert.AreEqual(265, storage[1]);
+            Assert.AreEqual(321, storage[2]);
+        }
+
+        [TestMethod]
+        public void ModifyByIndex()
+        {
+            var storage = new FifoStorage<int>(3);
+            storage.Add(0);
+            storage.Add(0);
+            storage.Add(0);
+            storage[0] = 543;
+            storage[1] = 62;
+            storage[2] = 9;
+            Assert.AreEqual(543, storage[0]);
+            Assert.AreEqual(62, storage[1]);
+            Assert.AreEqual(9, storage[2]);
+        }
+
+        [TestMethod]
+        public void FifoAfterModifyByIndex()
+        {
+            var storage = new FifoStorage<int>(3);
+            storage.Add(0);
+            storage.Add(0);
+            storage.Add(0);
+            storage[0] = 543;
+            storage[1] = 62;
+            storage[2] = 9;
+            CollectionAssert.AreEqual(new int[] { 543, 62, 9 },
+                storage.ToArray());
+            storage.Add(11);
+            CollectionAssert.AreEqual(new int[] { 62, 9, 11 },
+                storage.ToArray());
+            storage.Add(16);
+            CollectionAssert.AreEqual(new int[] { 9, 11, 16 },
+                storage.ToArray());
         }
     }
 }

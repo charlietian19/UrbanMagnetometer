@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Utils.Fixtures;
 
 /*
@@ -10,7 +11,7 @@ using Utils.Fixtures;
 
 namespace Utils.GPS
 {    
-    public class NaiveTimeStorage : ITimeStorage
+    public class NaiveTimeValidator : ITimeValidator
     {
         /* Default time source parameters */
         /* Use the GPS data from up to 2 minutes ago */
@@ -32,10 +33,17 @@ namespace Utils.GPS
             get; private set;
         }
 
+        protected FifoStorage<GpsData> data;
+
         /* Stores the GPS data history */
         public GpsData[] history
         {
-            get; private set;
+            get
+            {
+                var res = new List<GpsData>(data.ToArray());
+                res.Reverse();
+                return res.ToArray();
+            }
         }
 
         /* After how many seconds the point is considered to be
@@ -77,7 +85,7 @@ namespace Utils.GPS
         IStopwatch stopwatch;
 
         /* Create a new threshold TimeSource given every parameter. */
-        public NaiveTimeStorage(double threshold, int maxHistory, int lookback,
+        public NaiveTimeValidator(double threshold, int maxHistory, int lookback,
             int invalidateAfter)
         {
             Validate(threshold, maxHistory, lookback, invalidateAfter);
@@ -88,7 +96,7 @@ namespace Utils.GPS
         
         /* Create a new threshold TimeSource with default parameters and
         custom Stopwatch and Timer. */
-        public NaiveTimeStorage(IStopwatch stopwatch, ITimer timer)
+        public NaiveTimeValidator(IStopwatch stopwatch, ITimer timer)
         {
             Validate(thresholdDefault, maxHistoryDefault, lookbackDefault,
                 invalidateAfterDefault);
@@ -100,7 +108,7 @@ namespace Utils.GPS
 
         /* Creates a TimeSource with default parameters and default
         Stopwatch and Timer */
-        public NaiveTimeStorage()
+        public NaiveTimeValidator()
         {
             Validate(thresholdDefault, maxHistoryDefault, lookbackDefault,
                 invalidateAfterDefault);
@@ -112,7 +120,7 @@ namespace Utils.GPS
 
         /* Create a new threshold TimeSource with custom parameters and
         custom Stopwatch and Timer. */
-        public NaiveTimeStorage(double threshold, int maxHistory, int lookback,
+        public NaiveTimeValidator(double threshold, int maxHistory, int lookback,
             int invalidateAfter, IStopwatch stopwatch, ITimer timer)
         {
             Validate(threshold, maxHistory, lookback, invalidateAfter);            
@@ -166,15 +174,7 @@ namespace Utils.GPS
             this.lookback = lookback;
             this.invalidateAfter = invalidateAfter;            
             this.threshold = Convert.ToInt64(threshold * frequency);
-            history = new GpsData[maxHistory];
-
-            lock (history)
-            {                
-                for (int i = 0; i < maxHistory; i++)
-                {
-                    history[i].valid = false;
-                }
-            }
+            data = new FifoStorage<GpsData>(maxHistory);
             ScheduleOldPointInvalidation();
         }
 
@@ -193,15 +193,17 @@ namespace Utils.GPS
             System.Timers.ElapsedEventArgs e)
         {
             var now = stopwatch.GetTimestamp();
-            lock (history)
+            lock (data)
             {
-                for (int i = 0; i < history.Length; i++)
+                for (int i = 0; i < data.Count; i++)
                 {
-                    var delta = Convert.ToDouble(now - history[i].ticks) 
+                    var delta = Convert.ToDouble(now - data[i].ticks) 
                         / Convert.ToDouble(frequency);
                     if (delta > invalidateAfter)
                     {
-                        history[i].valid = false;
+                        var point = data[i];
+                        point.valid = false;
+                        data[i] = point;
                     }
                 }
             }
@@ -232,7 +234,7 @@ namespace Utils.GPS
         }
 
         /* Checks the point against other points in history */
-        private bool IsPointValid(GpsData data)
+        private bool IsPointValid(GpsData point)
         {
             bool valid;
             if (pointsReceived < lookback)
@@ -241,22 +243,23 @@ namespace Utils.GPS
             }
             else
             {
-                valid = IsWithinThresholdAllPoints(data);
+                valid = IsWithinThresholdAllPoints(point);
             }
             return valid;
         }
 
         /* Checks the data point against the history within lookback */
-        private bool IsWithinThresholdAllPoints(GpsData data)
+        private bool IsWithinThresholdAllPoints(GpsData point)
         {
-            lock (history)
+            lock (data)
             {
+                var data = history;
                 for (int i = 0; i < lookback; i++)
                 {
                     int secondsDifference = Convert.ToInt32(Math.Round(
-                        (data.timestamp - history[i].timestamp)
+                        (point.timestamp - data[i].timestamp)
                         .TotalSeconds));
-                    if (!IsWithinThresholdThisPoint(data, history[i], 
+                    if (!IsWithinThresholdThisPoint(point, data[i], 
                         secondsDifference))
                     {
                         return false;
@@ -276,16 +279,12 @@ namespace Utils.GPS
         }
 
         /* Stores the given GPS data into the buffer. */
-        private void SavePoint(GpsData data, bool valid)
+        private void SavePoint(GpsData point, bool valid)
         {
-            lock (history)
+            lock (data)
             {
-                for (int i = history.Length - 1; i > 0; i--)
-                {
-                    history[i] = history[i - 1];
-                }
-                history[0] = data;
-                history[0].valid = valid;
+                point.valid = valid;
+                data.Add(point);
             }
         }        
 
@@ -293,9 +292,9 @@ namespace Utils.GPS
         private int GetValidPointsCount()
         {
             int num = 0;
-            lock (history)
+            lock (data)
             {
-                foreach (var point in history)
+                foreach (var point in data)
                 {
                     if (point.valid)
                     {
@@ -311,9 +310,9 @@ namespace Utils.GPS
         {
             var result = new GpsData[GetValidPointsCount()];
             int i = 0;
-            lock (history)
+            lock (data)
             {
-                foreach (var point in history)
+                foreach (var point in data)
                 {
                     if (point.valid)
                     {

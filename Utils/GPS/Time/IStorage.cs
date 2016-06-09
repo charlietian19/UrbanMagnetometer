@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Utils.GPS.Time
+namespace Utils.GPS
 {
     public interface IStorage<T> : IEnumerable<T>
     {
@@ -24,5 +24,8 @@ namespace Utils.GPS.Time
 
         /* Pushes all points out of the collection */
         void Flush();
+
+        /* Allows to access the storage by index */
+        T this[int index] { get; set; }
     }
 }

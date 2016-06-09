@@ -56,7 +56,7 @@ namespace UnitTests.GPS
         [TestMethod]
         public void DataPointsArePassedToStorage()
         {            
-            var storage = new Mock<ITimeStorage>();            
+            var storage = new Mock<ITimeValidator>();            
             storage.Setup(o => o.Store(It.IsAny<GpsData>()));
             var estimator = new NaiveTimeEstimator(storage.Object);
             var data1 = new GpsData()
@@ -94,7 +94,7 @@ namespace UnitTests.GPS
             };
 
             var validPoints = new GpsData[] { data1, data2 };
-            var storage = new Mock<ITimeStorage>();
+            var storage = new Mock<ITimeValidator>();
             storage.Setup(o => o.ValidPointsCount).Returns(2);
             storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
             var estimator = new NaiveTimeEstimator(storage.Object);
@@ -120,7 +120,7 @@ namespace UnitTests.GPS
             };
 
             var validPoints = new GpsData[] { data1, data2 };
-            var storage = new Mock<ITimeStorage>();
+            var storage = new Mock<ITimeValidator>();
             storage.Setup(o => o.ValidPointsCount).Returns(2);
             storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
             var estimator = new NaiveTimeEstimator(storage.Object);
@@ -146,7 +146,7 @@ namespace UnitTests.GPS
             };
 
             var validPoints = new GpsData[] { data1, data2 };
-            var storage = new Mock<ITimeStorage>();
+            var storage = new Mock<ITimeValidator>();
             storage.Setup(o => o.ValidPointsCount).Returns(2);
             storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
             var estimator = new NaiveTimeEstimator(storage.Object);
@@ -159,7 +159,7 @@ namespace UnitTests.GPS
         public void GpsAuxilaryDataDefaultValue()
         {
             var validPoints = new GpsData[] { };
-            var storage = new Mock<ITimeStorage>();
+            var storage = new Mock<ITimeValidator>();
             storage.Setup(o => o.ValidPointsCount).Returns(0);
             storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
             var estimator = new NaiveTimeEstimator(storage.Object);
@@ -179,7 +179,7 @@ namespace UnitTests.GPS
         public void GpsAuxilaryDataChangesOnActivePointStore()
         {
             var validPoints = new GpsData[] { };
-            var storage = new Mock<ITimeStorage>();
+            var storage = new Mock<ITimeValidator>();
             storage.Setup(o => o.ValidPointsCount).Returns(0);
             storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
             var estimator = new NaiveTimeEstimator(storage.Object);
@@ -214,7 +214,7 @@ namespace UnitTests.GPS
         public void GpsAuxilaryDataUnchangedOnVoidPointStore()
         {
             var validPoints = new GpsData[] { };
-            var storage = new Mock<ITimeStorage>();
+            var storage = new Mock<ITimeValidator>();
             storage.Setup(o => o.ValidPointsCount).Returns(0);
             storage.Setup(o => o.GetValidPoints()).Returns(validPoints);
             var estimator = new NaiveTimeEstimator(storage.Object);

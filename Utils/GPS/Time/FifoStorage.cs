@@ -3,36 +3,49 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Utils.GPS.Time
+namespace Utils.GPS
 {
     /* List of data that stores a given maximum number of elements.
     Old elements are pushed */
     public class FifoStorage<T> : IStorage<T>
     {
         public int MaxCount { get; set; } = 0;
-        protected Queue<T> data;
+        protected List<T> data;
 
         public event Action<T> OnPop;
 
         public FifoStorage(int maxSize)
         {
             MaxCount = maxSize;
-            data = new Queue<T>(maxSize + 1);
+            data = new List<T>(maxSize + 1);
         }        
 
         public void Add(T obj)
         {
-            data.Enqueue(obj);
-            if (data.Count > MaxCount)
+            if (data.Count < MaxCount)
             {
-                Pop();
+                data.Add(obj);
+            }
+            else
+            {
+                Pop(data[0]);
+                Push(obj);
             }
         }
 
-        /* Called to push an object out of the queue */
-        protected virtual void Pop()
+        /* Called to add a new object to the queue */
+        void Push(T obj)
         {
-            var obj = data.Dequeue();
+            for (int i = 0; i < data.Count - 1; i++)
+            {
+                data[i] = data[i + 1];
+            }
+            data[data.Count - 1] = obj;
+        }
+
+        /* Called to push an object out of the queue */
+        protected virtual void Pop(T obj)
+        {
             if (OnPop != null)
             {
                 OnPop(obj);
@@ -42,17 +55,18 @@ namespace Utils.GPS.Time
         /* Called to push all the objects out of the queue */
         public void Flush()
         {
-            while (data.Count > 0)
+            for (int i = 0; i < data.Count; i++)
             {
-                Pop();
+                Pop(data[i]);
             }
+            data.Clear();
         }
 
         public int Count { get { return data.Count; } }
 
         public T[] ToArray()
         {
-            return data.ToArray<T>();
+            return data.ToArray();
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -63,6 +77,12 @@ namespace Utils.GPS.Time
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public T this[int index]
+        {
+            get { return data[index]; }
+            set { data[index] = value; }
         }
     }
 }

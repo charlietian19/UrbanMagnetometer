@@ -162,9 +162,9 @@
     <Compile Include="GPS\Time\FifoStorage.cs" />
     <Compile Include="GPS\Time\IStorage.cs" />
     <Compile Include="GPS\Time\ITimeSource.cs" />
-    <Compile Include="GPS\Time\ITimeStorage.cs" />
+    <Compile Include="GPS\Time\ITimeValidator.cs" />
     <Compile Include="GPS\Time\ITimeEstimator.cs" />
-    <Compile Include="GPS\Time\NaiveTimeStorage.cs" />
+    <Compile Include="GPS\Time\NaiveTimeValidator.cs" />
     <Compile Include="GPS\SerialGPS\ISerial.cs" />
     <Compile Include="Fixtures\IStopwatch.cs" />
     <Compile Include="GPS\SerialGPS\SerialGps.cs" />
