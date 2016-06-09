@@ -159,6 +159,8 @@
     <Compile Include="GPS\Helpers.cs" />
     <Compile Include="GPS\GpsData.cs" />
     <Compile Include="Fixtures\ITImer.cs" />
+    <Compile Include="GPS\Time\FifoStorage.cs" />
+    <Compile Include="GPS\Time\IStorage.cs" />
     <Compile Include="GPS\Time\ITimeSource.cs" />
     <Compile Include="GPS\Time\ITimeStorage.cs" />
     <Compile Include="GPS\Time\ITimeEstimator.cs" />

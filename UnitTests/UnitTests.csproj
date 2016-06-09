@@ -110,6 +110,7 @@
     <Compile Include="GDrive\GDrivePathHelperTest.cs" />
     <Compile Include="GDrive\GDriveTest.cs" />
     <Compile Include="GDrive\GDriveTestHelper.cs" />
+    <Compile Include="GPS\FifoStorage.cs" />
     <Compile Include="GPS\HelpersTest.cs" />
     <Compile Include="GPS\NaiveTimeStorageTest.cs" />
     <Compile Include="GPS\NaiveTimeEstimatorTest.cs" />
