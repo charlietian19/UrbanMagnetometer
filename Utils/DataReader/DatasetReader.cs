@@ -1,41 +1,13 @@
 ﻿using System;
 using SystemWrapper.IO;
 using System.IO;
+using Utils.Fixtures;
 
 namespace Utils.DataReader
-{
-    /* Interface for IBinaryReaderWrap object factory */
-    public interface IBinaryReaderFactory
-    {
-        IBinaryReaderWrap Create(IFileStreamWrap stream);
-    }
-
-    /* Interface for IFileInfoWrap object factory */
-    public interface IFileInfoFactory
-    {
-        IFileInfoWrap Create(string path);
-    }
+{    
 
     public class DatasetReader
     {
-        /* Factory for IBinaryReaderWrap objects */
-        public class BinaryReaderFactory : IBinaryReaderFactory
-        {
-            public IBinaryReaderWrap Create(IFileStreamWrap stream)
-            {
-                return new BinaryReaderWrap(stream);
-            }
-        }
-
-        /* Factory for IFileInfoWrap objects */
-        public class FileInfoFactory : IFileInfoFactory
-        {
-            public IFileInfoWrap Create(string path)
-            {
-                return new FileInfoWrap(path);
-            }
-        }
-
         private IFileWrap File;
         private IFileInfoFactory infoFactory;
         private IBinaryReaderWrap x, y, z, t;

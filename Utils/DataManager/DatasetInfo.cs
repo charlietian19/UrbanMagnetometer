@@ -4,6 +4,7 @@ using SystemWrapper.Configuration;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Threading;
+using Utils.Fixtures;
 
 namespace Utils.DataManager
 {

@@ -128,7 +128,16 @@
   <ItemGroup>
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="DataManager\DatasetInfo.cs" />
+    <Compile Include="Fixtures\AutoResetEventWrapper.cs" />
+    <Compile Include="Fixtures\BinaryReaderFactor.cs" />
+    <Compile Include="Fixtures\FileInfoFactory.cs" />
+    <Compile Include="Fixtures\IAutoResetEvent.cs" />
+    <Compile Include="Fixtures\IBinaryReaderFactory.cs" />
+    <Compile Include="Fixtures\IFileInfoFactory.cs" />
+    <Compile Include="Fixtures\IZipFile.cs" />
+    <Compile Include="Fixtures\ZipFileWrapper.cs" />
     <Compile Include="DataManager\ILegacyStorage.cs" />
+    <Compile Include="DataManager\IUploadScheduler.cs" />
     <Compile Include="DataManager\LegacySampleStorage.cs" />
     <Compile Include="DataManager\SampleDatasetInfo.cs" />
     <Compile Include="DataReader\DatasetChunk.cs" />
@@ -147,26 +156,24 @@
     <Compile Include="GDrive\IUploader.cs" />
     <Compile Include="GPS\Helpers.cs" />
     <Compile Include="GPS\GpsData.cs" />
-    <Compile Include="GPS\Wrappers\ITImer.cs" />
+    <Compile Include="Fixtures\ITImer.cs" />
     <Compile Include="GPS\Time\ITimeSource.cs" />
     <Compile Include="GPS\Time\ITimeStorage.cs" />
     <Compile Include="GPS\Time\ITimeEstimator.cs" />
     <Compile Include="GPS\Time\NaiveTimeStorage.cs" />
     <Compile Include="GPS\SerialGPS\ISerial.cs" />
-    <Compile Include="GPS\Wrappers\IStopwatch.cs" />
+    <Compile Include="Fixtures\IStopwatch.cs" />
     <Compile Include="GPS\SerialGPS\SerialGps.cs" />
     <Compile Include="GPS\Time\NaiveTimeEstimator.cs" />
     <Compile Include="GPS\SerialGPS\SerialPortWrapper.cs" />
-    <Compile Include="GPS\Wrappers\StopwatchWrapper.cs" />
-    <Compile Include="GPS\Wrappers\TimerWrapper.cs">
+    <Compile Include="Fixtures\StopwatchWrapper.cs" />
+    <Compile Include="Fixtures\TimerWrapper.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="ClassDiagram1.cd" />
-    <None Include="ClassDiagram2.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

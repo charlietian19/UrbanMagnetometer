@@ -1,6 +1,6 @@
 ﻿using System.Timers;
 
-namespace Utils.GPS
+namespace Utils.Fixtures
 {
     public interface ITimer
     {

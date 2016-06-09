@@ -6,6 +6,7 @@ using SystemWrapper.Configuration;
 using SystemWrapper.IO;
 using System.IO;
 using Moq;
+using Utils.Fixtures;
 
 namespace UnitTests.DataManager
 {

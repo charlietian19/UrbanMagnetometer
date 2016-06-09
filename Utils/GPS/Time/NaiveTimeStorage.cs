@@ -1,4 +1,5 @@
 ﻿using System;
+using Utils.Fixtures;
 
 /*
     Class that stores a given amount of last GPS data points for a TimeSource

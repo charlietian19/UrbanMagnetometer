@@ -6,6 +6,7 @@ using SystemWrapper.IO;
 using System.IO;
 using SystemWrapper.Configuration;
 using System.Collections.Specialized;
+using Utils.Fixtures;
 
 namespace UnitTests.DataReader
 {

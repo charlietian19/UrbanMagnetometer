@@ -5,9 +5,9 @@ using System.Collections.Concurrent;
 using SystemWrapper.Configuration;
 using SystemWrapper.IO;
 using SystemWrapper.Threading;
-using System.IO.Compression;
 using Utils.GDrive;
 using System.Diagnostics;
+using Utils.Fixtures;
 
 /* Example code taken from
 
@@ -24,28 +24,7 @@ namespace Utils.DataManager
     public delegate void UploadFinishedEventHandler(IDatasetInfo info,
         bool success, string message);
 
-    public interface IUploadScheduler
-    {
-        void UploadMagneticData(IDatasetInfo info);
-        int ActiveUploads { get; }
-        void RetryFailed();
-        event UploadFinishedEventHandler FinishedEvent;
-        event UploadStartedEventHandler StartedEvent;
-    }
-
-    public interface IZipFile
-    {
-        void CreateFromDirectory(string src, string dst);
-    }
-
-    /* Adapter to wrap ZipFile class. */
-    public class ZipFileWrapper : IZipFile
-    {
-        public void CreateFromDirectory(string src, string dst)
-        {
-            ZipFile.CreateFromDirectory(src, dst);
-        }
-    }
+    
 
     public class UploadScheduler : IUploadScheduler
     {
@@ -53,7 +32,8 @@ namespace Utils.DataManager
             maxDelayBeforeUploadSeconds,
             minDelayBetweenFailedRetriesSeconds,
             maxDelayBetweenFailedRetriesSeconds;
-        protected bool enableDelayBeforeUpload, enableFailedRetryWorker;
+        protected bool EnableDelayBeforeUpload { get; set; }
+        protected bool enableFailedRetryWorker;
         private string dataCacheFolder, zipFileNameFormat;
         private string remoteRoot;
         private int ActiveUploadCount = 0;
@@ -70,12 +50,26 @@ namespace Utils.DataManager
         protected AutoResetEvent retryEvent = new AutoResetEvent(false);
         public event UploadFinishedEventHandler FinishedEvent;
         public event UploadStartedEventHandler StartedEvent;
+        protected IAutoResetEvent[] workerSemaphores;
+        private bool flushing = false;
 
         protected string failedPath
         {
             get { return Path.Combine(dataCacheFolder, "failed"); }
         }
 
+        /* Signal all the upload worker threads to proceed the upload
+        Typically called before exiting the application
+        */
+        public void Flush()
+        {
+            flushing = true;
+            retryEvent.Set();
+            foreach (var sema in workerSemaphores)
+            {
+                sema.Set();
+            }
+        }
 
         public int ActiveUploads
         {
@@ -167,7 +161,7 @@ namespace Utils.DataManager
                 settings["WaitBetweenRetriesSeconds"]);
             remoteRoot = settings["RemoteRoot"];
 
-            enableDelayBeforeUpload = Convert.ToBoolean(
+            EnableDelayBeforeUpload = Convert.ToBoolean(
                 settings["EnableDelayBeforeUpload"]);
             maxDelayBeforeUploadSeconds = Convert.ToInt32(
                 settings["MaxDelayBeforeUploadSeconds"]);
@@ -187,9 +181,11 @@ namespace Utils.DataManager
         private void StartWorkerThreads()
         {
             Debug.WriteLine("Launching background upload workers");
+            workerSemaphores = new AutoResetEventWrapper[maxActiveUploads];
             for (int i = 0; i < maxActiveUploads; i++)
             {
-                Task.Run(() => Worker());
+                workerSemaphores[i].Reset();
+                Task.Run(() => Worker(i));
             }
 
             if (enableFailedRetryWorker)
@@ -212,7 +208,7 @@ namespace Utils.DataManager
                 }
                 catch (Exception e)
                 {
-                    if (i + 1 >= maxRetryCount)
+                    if ((i + 1 >= maxRetryCount) || flushing)
                     {
                         ProcessFailedUpload(info);
                         OnFinished(info, false, e.Message);
@@ -254,7 +250,7 @@ namespace Utils.DataManager
         }
 
         /* Retrieves the arriving data in background. */
-        private void Worker()
+        private void Worker(int mySemaphoreId)
         {
             Thread thread = Thread.CurrentThread;
             thread.Priority = ThreadPriority.Lowest;
@@ -276,7 +272,7 @@ namespace Utils.DataManager
                             thread.ManagedThreadId, info.StartDate,
                             info.ArchivePath));
 
-                        if (enableDelayBeforeUpload)
+                        if (EnableDelayBeforeUpload && !flushing)
                         {
                             Random rnd = new Random();
                             var delay = rnd.Next(
@@ -284,7 +280,7 @@ namespace Utils.DataManager
                             Debug.WriteLine(string.Format(
                                 "Sleeping for {0}ms before starting the upload",
                                 delay));
-                            ThreadWrap.Sleep(delay);
+                            workerSemaphores[mySemaphoreId].WaitOne(delay);
                         }
 
                         Interlocked.Increment(ref ActiveUploadCount);

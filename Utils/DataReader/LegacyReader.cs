@@ -2,6 +2,7 @@
 using System.IO;
 using SystemWrapper.Configuration;
 using SystemWrapper.IO;
+using Utils.Fixtures;
 
 namespace Utils.DataReader
 {

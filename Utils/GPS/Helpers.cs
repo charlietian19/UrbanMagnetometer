@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Utils.GPS.SerialGPS;
+using Utils.Fixtures;
 
 /* Collection of methods to deal with GPS data and converstions. */
 

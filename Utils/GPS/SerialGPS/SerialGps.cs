@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Threading;
+using Utils.Fixtures;
 
 namespace Utils.GPS.SerialGPS
 {

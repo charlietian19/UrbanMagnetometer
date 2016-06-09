@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Utils.GPS;
 using System.Diagnostics;
 using Moq;
+using Utils.Fixtures;
 
 namespace UnitTests.GPS
 {

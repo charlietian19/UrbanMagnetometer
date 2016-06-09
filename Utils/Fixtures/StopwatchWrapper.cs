@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Utils.GPS
+namespace Utils.Fixtures
 {
     /* Wraps System.Stopwatch class for testing */
     class StopwatchWrapper : IStopwatch

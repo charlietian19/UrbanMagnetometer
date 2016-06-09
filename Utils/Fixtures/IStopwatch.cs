@@ -1,4 +1,4 @@
-﻿namespace Utils.GPS
+﻿namespace Utils.Fixtures
 {
     public interface IStopwatch
     {

@@ -9,6 +9,7 @@ using System.Collections.Specialized;
 using Utils.DataManager;
 using Utils.GDrive;
 using Moq;
+using Utils.Fixtures;
 
 namespace UnitTests.DataManager
 {

@@ -2,6 +2,7 @@
 using SystemWrapper.Configuration;
 using SystemWrapper.IO;
 using Utils.Configuration;
+using Utils.Fixtures;
 
 namespace Utils.DataManager
 {

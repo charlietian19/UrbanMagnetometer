@@ -3,6 +3,7 @@ using System.IO;
 using SystemWrapper.IO;
 using SystemWrapper.Configuration;
 using Utils.GPS;
+using Utils.Fixtures;
 
 // TODO: proper exception handling
 // Make the written data structure flexible
