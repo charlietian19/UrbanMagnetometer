@@ -1,10 +1,10 @@
-﻿namespace Utils.Filters
-{
-    public delegate void FilterEvent(double[] data);
+﻿using System;
 
+namespace Utils.Filters
+{
     public interface IFilter
     {
-        event FilterEvent output;
+        event Action<double[]> output;
         void InputData(double[] data);
     }
     
@@ -15,7 +15,7 @@
     {
         /* When the input is received and processed this event is called on
         the filter output result. */
-        public event FilterEvent output;
+        public event Action<double[]> output;
 
         /* Implements the filter function for a data chunk. */
         abstract protected double[] Filter(double[] x);

@@ -100,8 +100,8 @@ namespace SampleGrabber
             averages[i] = new MovingAverage(averagePoints);
             subsamples[i] = new Subsample(averagePoints);
             buffers[i] = new RollingBuffer(bufferSize, double.NaN);
-            averages[i].output += new FilterEvent(subsamples[i].InputData);
-            subsamples[i].output += new FilterEvent(buffers[i].InputData);
+            averages[i].output += new Action<double[]>(subsamples[i].InputData);
+            subsamples[i].output += new Action<double[]>(buffers[i].InputData);
         }
 
         /* Called when a Google upload progress is updated */

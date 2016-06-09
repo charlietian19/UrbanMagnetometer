@@ -47,7 +47,7 @@ namespace UnitTests.Filters
         {
             var data = new double[] { 4, 12, 634, 22, 3 };
             var filter = new UnityFilter();
-            filter.output += new FilterEvent(outputHandler);
+            filter.output += new Action<double[]>(outputHandler);
             filter.InputData(data);
             Assert.AreEqual(1, timesCalled);
             CollectionAssert.AreEqual(data, lastOutput);
@@ -58,7 +58,7 @@ namespace UnitTests.Filters
         {
             var data = new double[] { };
             var filter = new UnityFilter();
-            filter.output += new FilterEvent(outputHandler);
+            filter.output += new Action<double[]>(outputHandler);
             filter.InputData(data);
             Assert.AreEqual(0, timesCalled);
         }

@@ -28,7 +28,7 @@ namespace UnitTests.Filters
             var data = new double[] { };
             var output = new double[] { 0, 0, 0, 0 };
             var filter = new RollingBuffer(4);
-            filter.output += new FilterEvent(outputHandler);
+            filter.output += new Action<double[]>(outputHandler);
             filter.InputData(data);
             CollectionAssert.AreEqual(output, lastOutput);
         }
@@ -41,7 +41,7 @@ namespace UnitTests.Filters
             var output1 = new double[] { 0, 1, 2, 3 };
             var output2 = new double[] { 2, 3, 1, 2 };
             var filter = new RollingBuffer(4);
-            filter.output += new FilterEvent(outputHandler);
+            filter.output += new Action<double[]>(outputHandler);
             filter.InputData(data1);
             CollectionAssert.AreEqual(output1, lastOutput);
             filter.InputData(data2);
@@ -56,7 +56,7 @@ namespace UnitTests.Filters
             var output1 = new double[] { 3, 4, 5 };
             var output2 = new double[] { 8, 9, 10 };
             var filter = new RollingBuffer(3);
-            filter.output += new FilterEvent(outputHandler);
+            filter.output += new Action<double[]>(outputHandler);
             filter.InputData(data1);
             CollectionAssert.AreEqual(output1, lastOutput);
             filter.InputData(data2);
