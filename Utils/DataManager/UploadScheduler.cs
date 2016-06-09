@@ -13,6 +13,7 @@ using Utils.Fixtures;
 
     https://msdn.microsoft.com/en-us/library/dd997371(v=vs.110).aspx
     https://msdn.microsoft.com/en-us/library/aa645739(v=vs.71).aspx
+    http://stackoverflow.com/questions/10179691/passing-arguments-with-changing-values-to-task-behaviour
 
 */
 
@@ -22,9 +23,7 @@ namespace Utils.DataManager
 {
     public delegate void UploadStartedEventHandler(IDatasetInfo info);
     public delegate void UploadFinishedEventHandler(IDatasetInfo info,
-        bool success, string message);
-
-    
+        bool success, string message);    
 
     public class UploadScheduler : IUploadScheduler
     {
@@ -47,34 +46,12 @@ namespace Utils.DataManager
         protected IPathWrap Path;
         protected IThreadWrap ThreadWrap;
         protected IZipFile zip;
+        protected IAutoResetEventFactory eventFactory;
         protected AutoResetEvent retryEvent = new AutoResetEvent(false);
         public event UploadFinishedEventHandler FinishedEvent;
         public event UploadStartedEventHandler StartedEvent;
         protected IAutoResetEvent[] workerSemaphores;
         private bool flushing = false;
-
-        protected string failedPath
-        {
-            get { return Path.Combine(dataCacheFolder, "failed"); }
-        }
-
-        /* Signal all the upload worker threads to proceed the upload
-        Typically called before exiting the application
-        */
-        public void Flush()
-        {
-            flushing = true;
-            retryEvent.Set();
-            foreach (var sema in workerSemaphores)
-            {
-                sema.Set();
-            }
-        }
-
-        public int ActiveUploads
-        {
-            get { return ActiveUploadCount; }
-        }
 
         /* Creates an uploader with no queue bound. */
         public UploadScheduler(IUploader uploader)
@@ -93,18 +70,21 @@ namespace Utils.DataManager
         /* Creates an uploader that uses provided wrappers and no queue bound*/
         public UploadScheduler(IUploader uploader,
             IConfigurationManagerWrap config, IFileWrap file, IDirectoryWrap dir,
-            IZipFile zip, IPathWrap path, IThreadWrap thread)
+            IZipFile zip, IPathWrap path, IThreadWrap thread, 
+            IAutoResetEventFactory factory)
         {
-            UseCustomWrapper(config, file, dir, zip, path, thread);
+            UseCustomWrapper(config, file, dir, zip, path, thread, factory);
             InitNoQueueBound(uploader);
         }
 
         /* Creates an uploader that uses provided wrappers and a queue bound*/
         public UploadScheduler(IUploader uploader, int maxQueueLength,
-            IConfigurationManagerWrap config, IFileWrap file, IDirectoryWrap dir,
-            IZipFile zip, IPathWrap path, IThreadWrap thread)
+            IConfigurationManagerWrap config, IFileWrap file, 
+            IDirectoryWrap dir,
+            IZipFile zip, IPathWrap path, IThreadWrap thread, 
+            IAutoResetEventFactory factory)
         {
-            UseCustomWrapper(config, file, dir, zip, path, thread);
+            UseCustomWrapper(config, file, dir, zip, path, thread, factory);
             InitWithQueueBound(uploader, maxQueueLength);
         }
 
@@ -117,12 +97,13 @@ namespace Utils.DataManager
             zip = new ZipFileWrapper();
             Path = new PathWrap();
             ThreadWrap = new ThreadWrap();
+            eventFactory = new AutoResetEventWrapperFactory();
         }
 
         /* Assigns the wrappers to use the provided objects. */
         private void UseCustomWrapper(IConfigurationManagerWrap config,
             IFileWrap file, IDirectoryWrap dir, IZipFile zip, IPathWrap path,
-            IThreadWrap thread)
+            IThreadWrap thread, IAutoResetEventFactory factory)
         {
             ConfigurationManager = config;
             File = file;
@@ -130,6 +111,7 @@ namespace Utils.DataManager
             this.zip = zip;
             Path = path;
             ThreadWrap = thread;
+            eventFactory = factory;
         }
 
         /* Initializes uploader with no queue bound. */
@@ -181,11 +163,13 @@ namespace Utils.DataManager
         private void StartWorkerThreads()
         {
             Debug.WriteLine("Launching background upload workers");
-            workerSemaphores = new AutoResetEventWrapper[maxActiveUploads];
+            workerSemaphores = new IAutoResetEvent[maxActiveUploads];
             for (int i = 0; i < maxActiveUploads; i++)
             {
-                workerSemaphores[i].Reset();
-                Task.Run(() => Worker(i));
+                workerSemaphores[i] = eventFactory.Create(false);
+                Task.Factory.StartNew((object id) => {
+                    Worker((int)id);
+                }, i);
             }
 
             if (enableFailedRetryWorker)
@@ -247,6 +231,31 @@ namespace Utils.DataManager
             }
 
             queueFailed.Enqueue(info);
+        }
+
+        /* The path where the failed uploads are saved */
+        protected string failedPath
+        {
+            get { return Path.Combine(dataCacheFolder, "failed"); }
+        }
+
+        /* Signal all the upload worker threads to proceed the upload
+        Typically called before exiting the application
+        */
+        public void Flush()
+        {
+            flushing = true;
+            retryEvent.Set();
+            foreach (var sema in workerSemaphores)
+            {
+                sema.Set();
+            }
+        }
+
+        /* Returns the number of active uploads */
+        public int ActiveUploads
+        {
+            get { return ActiveUploadCount; }
         }
 
         /* Retrieves the arriving data in background. */

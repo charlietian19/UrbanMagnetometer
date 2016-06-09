@@ -24,6 +24,8 @@ namespace UnitTests.DataManager
         private Mock<IFileWrap> fileMock;
         private Mock<IDirectoryWrap> directoryMock;
         private Mock<IPathWrap> pathMock;
+        private Mock<IAutoResetEvent> eventMock;
+
         private IConfigurationManagerWrap config;
         private IZipFile zip;
         private IFileWrap file;
@@ -32,6 +34,7 @@ namespace UnitTests.DataManager
         private IUploader uploader;
         private IDatasetInfo info;
         private IThreadWrap thread;
+        private MockEventFactory factory;
 
         private Semaphore finished;
         int timeout;        
@@ -43,6 +46,21 @@ namespace UnitTests.DataManager
             bool success, string msg)
         {
             finished.Release();
+        }
+
+        class MockEventFactory : IAutoResetEventFactory
+        {
+            public Mock<IAutoResetEvent> myEvent;
+
+            public IAutoResetEvent Create(bool initialState)
+            {
+                myEvent = new Mock<IAutoResetEvent>();
+                myEvent.Setup(o => o.Set());
+                myEvent.Setup(o => o.Reset());
+                myEvent.Setup(o => o.WaitOne());
+                myEvent.Setup(o => o.WaitOne(It.IsAny<int>()));
+                return myEvent.Object;
+            }
         }
 
         [TestInitialize]
@@ -129,6 +147,9 @@ namespace UnitTests.DataManager
             zipMock.Setup(o => o.CreateFromDirectory(It.IsAny<string>(),
                 It.IsAny<string>()));
 
+            // Autoreset event factory
+            factory = new MockEventFactory();
+
             config = configMock.Object;
             uploader = uploaderMock.Object;
             info = infoMock.Object;
@@ -149,7 +170,7 @@ namespace UnitTests.DataManager
                 .Returns<string, string>(
                 (path, pattern) => new string[] { filePath });
             var scheduler = new UploadScheduler(uploader, config, file,
-                dir, zip, path, thread);
+                dir, zip, path, thread, factory);
             scheduler.FinishedEvent +=
                 new UploadFinishedEventHandler(SignalFinished);
             scheduler.RetryFailed();
@@ -175,7 +196,7 @@ namespace UnitTests.DataManager
                 .Returns<string, string>(
                 (path, pattern) => filePathList);
             var scheduler = new UploadScheduler(uploader, config, file,
-                dir, zip, path, thread);
+                dir, zip, path, thread, factory);
             scheduler.FinishedEvent +=
                 new UploadFinishedEventHandler(SignalFinished);
             scheduler.RetryFailed();
@@ -211,7 +232,7 @@ namespace UnitTests.DataManager
                 (path, pattern) => new string[] { filePath });
             directoryMock.Setup(o => o.Exists("failed")).Returns(true);
             var scheduler = new UploadScheduler(uploader, config, file,
-                dir, zip, path, thread);
+                dir, zip, path, thread, factory);
             scheduler.FinishedEvent +=
                 new UploadFinishedEventHandler(SignalFinished);
             scheduler.RetryFailed();
@@ -231,20 +252,22 @@ namespace UnitTests.DataManager
         public void UploadSingleFileSuccessWithDelay()
         {
             settings["EnableDelayBeforeUpload"] = "true";
+            settings["MaxActiveUploads"] = "1";
             var scheduler = new UploadScheduler(uploader, config, file,
-                dir, zip, path, thread);
+                dir, zip, path, thread, factory);
             scheduler.FinishedEvent +=
                 new UploadFinishedEventHandler(SignalFinished);
             scheduler.UploadMagneticData(info);
             finished.WaitOne(timeout);
-            threadMock.Verify(o => o.Sleep(It.IsAny<int>()), Times.Once());
+            factory.myEvent.Verify(o => o.WaitOne(It.IsAny<int>()), 
+                Times.Once());
         }
 
         [TestMethod]
         public void UploadSingleFileSuccessNoDelay()
         {            
             var scheduler = new UploadScheduler(uploader, config, file,
-                dir, zip, path, thread);            
+                dir, zip, path, thread, factory);            
             scheduler.FinishedEvent += 
                 new UploadFinishedEventHandler(SignalFinished);
             scheduler.UploadMagneticData(info);
@@ -263,7 +286,7 @@ namespace UnitTests.DataManager
             infoMock.Setup(o => o.ArchiveFiles())
                 .Throws(new FileNotFoundException());
             var scheduler = new UploadScheduler(uploader, config, file,
-                dir, zip, path, thread);
+                dir, zip, path, thread, factory);
             scheduler.FinishedEvent +=
                 new UploadFinishedEventHandler(SignalFinished);
             scheduler.UploadMagneticData(info);
@@ -284,7 +307,7 @@ namespace UnitTests.DataManager
             uploaderMock.Setup(o => o.Upload(It.IsAny<string>(),
                 It.IsAny<string>())).Throws(new FileUploadException());
             var scheduler = new UploadScheduler(uploader, config, file,
-                dir, zip, path, thread);
+                dir, zip, path, thread, factory);
             var sleepMs = Convert.ToInt32(
                 settings["WaitBetweenRetriesSeconds"]) * 1000;
             scheduler.FinishedEvent +=
@@ -303,6 +326,16 @@ namespace UnitTests.DataManager
             fileMock.Verify(o => o.Move("data0.zip", @"failed\data0.zip"),
                 Times.Once());
             Assert.AreEqual(info.ArchivePath, @"failed\data0.zip");
+        }
+
+        [TestMethod]
+        public void Flush()
+        {
+            settings["MaxActiveUploads"] = "1";
+            var scheduler = new UploadScheduler(uploader, config, file,
+                dir, zip, path, thread, factory);
+            scheduler.Flush();
+            factory.myEvent.Verify(o => o.Set());
         }
     }
 }

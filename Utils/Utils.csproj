@@ -129,9 +129,11 @@
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="DataManager\DatasetInfo.cs" />
     <Compile Include="Fixtures\AutoResetEventWrapper.cs" />
-    <Compile Include="Fixtures\BinaryReaderFactor.cs" />
+    <Compile Include="Fixtures\AutoResetEventWrapperFactory.cs" />
+    <Compile Include="Fixtures\BinaryReaderFactory.cs" />
     <Compile Include="Fixtures\FileInfoFactory.cs" />
     <Compile Include="Fixtures\IAutoResetEvent.cs" />
+    <Compile Include="Fixtures\IAutoResetEventFactory.cs" />
     <Compile Include="Fixtures\IBinaryReaderFactory.cs" />
     <Compile Include="Fixtures\IFileInfoFactory.cs" />
     <Compile Include="Fixtures\IZipFile.cs" />

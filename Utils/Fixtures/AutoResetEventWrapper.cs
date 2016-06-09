@@ -6,7 +6,7 @@ namespace Utils.Fixtures
     public class AutoResetEventWrapper : IAutoResetEvent
     {
         AutoResetEvent myEvent;
-        AutoResetEventWrapper(bool initialState)
+        public AutoResetEventWrapper(bool initialState)
         {
             myEvent = new AutoResetEvent(initialState);
         }
