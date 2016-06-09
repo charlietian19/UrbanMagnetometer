@@ -11,11 +11,12 @@ namespace DataGrabber
             InitializeComponent();
         }
 
+        /* Called when the form is initialized */
         protected override void InitializeResources()
         {
             base.InitializeResources();
             name.Text = Settings.StationName;
-            storage = new LegacySampleStorage(scheduler);
+            storage = new LegacyStorage(scheduler);
             storage.UploadOnClose = true;            
         }
 
@@ -23,6 +24,17 @@ namespace DataGrabber
         protected void name_TextChanged(object sender, EventArgs e)
         {
             Settings.StationName = name.Text;
+        }
+
+        /* Called when user closes the form */
+        private void DataGrabberForm_FormClosing(object sender, System.Windows.Forms.FormClosingEventArgs e)
+        {
+            StopRecording();
+            if (storage.HasCachedData)
+            {
+                storage.Close();
+                e.Cancel = true;
+            }            
         }
     }
 }

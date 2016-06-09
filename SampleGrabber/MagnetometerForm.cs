@@ -249,10 +249,15 @@ namespace SampleGrabber
         /* Called when record button is clicked */
         protected void recordButton_Click(object sender, EventArgs e)
         {
+            StartRecording();
+        }
+
+        protected void StartRecording()
+        {
             if (sensor == null)
             {
                 SetUI(UiStateMagnetometer.NoSensorFound);
-                toolStripStatusLabel.Text 
+                toolStripStatusLabel.Text
                     = "Magnetic sensor is not initialized.";
             }
 
@@ -312,10 +317,15 @@ namespace SampleGrabber
         /* Called when user clicks cancel recording button */
         protected void cancelButton_Click(object sender, EventArgs e)
         {
+            StopRecording();
+        }
+
+        protected void StopRecording()
+        {
             if (sensor == null)
             {
                 SetUI(UiStateMagnetometer.NoSensorFound);
-                toolStripStatusLabel.Text 
+                toolStripStatusLabel.Text
                     = "Magnetic sensor is not initialized.";
             }
 
@@ -345,7 +355,7 @@ namespace SampleGrabber
             but this shouldn't really matter */
             if (scheduler.ActiveUploads + scheduler.QueuedUploads > 0)
             {
-                statusStrip.Text = "Please wait until the files are uploaded.";
+                toolStripStatusLabel.Text = "Please wait until the files are uploaded.";
                 scheduler.Flush();
                 e.Cancel = true;
             }

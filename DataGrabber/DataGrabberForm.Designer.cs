@@ -89,6 +89,7 @@
             this.ClientSize = new System.Drawing.Size(1436, 703);
             this.Name = "DataGrabberForm";
             this.Text = "Magnetic Data Logger";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DataGrabberForm_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.dataGraph)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.averagingPeriodMs)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.displayPoints)).EndInit();
