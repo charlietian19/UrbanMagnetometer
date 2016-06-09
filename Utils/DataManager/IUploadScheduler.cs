@@ -14,6 +14,9 @@ namespace Utils.DataManager
         /* Returns the number of active uploads */
         int ActiveUploads { get; }
 
+        /* Returns the number of queued uploads */
+        int QueuedUploads { get; }
+
         /* Retry failed uploads*/
         void RetryFailed();
 

@@ -405,6 +405,12 @@ namespace Utils.DataManager
             queue.Add(info);
         }
 
+        /* Returns the number of queued uploads */
+        public int QueuedUploads
+        {
+            get { return queue.Count; }
+        }
+
         /* Invoke the event when an upload starts. */
         protected virtual void OnStarted(IDatasetInfo info)
         {

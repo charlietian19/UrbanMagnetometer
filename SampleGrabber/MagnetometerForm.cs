@@ -31,6 +31,9 @@ namespace SampleGrabber
         protected IUploader google;
         protected IUploadScheduler scheduler;
 
+        protected System.Timers.Timer gpsTimeoutTimer;
+
+
         /* Magnetometer UI status list */
         protected enum UiStateMagnetometer
         {
@@ -59,6 +62,8 @@ namespace SampleGrabber
                 scheduler = new UploadScheduler(google);
                 scheduler.StartedEvent += Scheduler_StartedEvent;
                 scheduler.FinishedEvent += Scheduler_FinishedEvent;
+                gpsTimeoutTimer = new System.Timers.Timer(5000);
+                gpsTimeoutTimer.Elapsed += GpsTimeoutTimer_Elapsed;
                 storage = new LegacySampleStorage(scheduler,
                     (start, now) => false);                
                 RefreshGpsList();
@@ -336,6 +341,15 @@ namespace SampleGrabber
         /* Called when the form is being closed */
         protected void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            /* This condition will sometimes fail because of racing,
+            but this shouldn't really matter */
+            if (scheduler.ActiveUploads + scheduler.QueuedUploads > 0)
+            {
+                statusStrip.Text = "Please wait until the files are uploaded.";
+                scheduler.Flush();
+                e.Cancel = true;
+            }
+
             if (sensor != null)
             {
                 sensor.DAQStop();
@@ -399,7 +413,7 @@ namespace SampleGrabber
                 gps.TimestampReceived += Gps_TimestampReceived;
 
                 gps.Open();
-                gpsTimeoutTimer.Start();
+                gpsTimeoutTimer.Enabled = true;
                 SetUiGps(UiStateGps.Opened);
             }
             catch (Exception exception)
@@ -411,45 +425,65 @@ namespace SampleGrabber
         /* Called when new GPS data is received */
         private void Gps_TimestampReceived(GpsData data)
         {
-            gpsTimeoutTimer.Stop();
-            gpsTimeoutTimer.Start();
+            gpsTimeoutTimer.Enabled = false;
+            gpsTimeoutTimer.Enabled = true;
             interpolator.PutTimestamp(data);
-            UpdateGpsStatusThreadSafe(data);
+            var msg = BuildGpsStatusMessage(data);
+            var color = GetGpsStatusColor(data);
+            UpdateGpsStatusThreadSafe(msg, color);
+        }
+
+        /* Returns GPS status message given the GPS data */
+        private string BuildGpsStatusMessage(GpsData data)
+        {
+            string active;
+            if (data.valid)
+            {
+                active = "ACTIVE";
+            }
+            else
+            {
+                active = "No PPS or VOID";
+            }
+            return string.Format("UTC: {0} ({1})",
+                data.timestamp, active);
+        }
+
+        /* Returns GPS status message color given the data */
+        System.Drawing.Color GetGpsStatusColor(GpsData data)
+        {
+            if (data.valid)
+            {
+                return System.Drawing.Color.LightGreen;
+            }
+            else
+            {
+                return System.Drawing.Color.Red;
+            }
         }
 
         /* Called when the GPS data hasn't been received for too long */
-        private void gpsTimeoutTimer_Tick(object sender, EventArgs e)
+        private void GpsTimeoutTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            gpsStatusLabel.Text = "No data";
-            gpsStatusLabel.BackColor = System.Drawing.Color.Red;
+            UpdateGpsStatusThreadSafe("No data", System.Drawing.Color.Red);
         }
 
         /* Thread-safe function to update GPS status */
-        delegate void UpdateGpsStatusCallback(GpsData data);
-        protected void UpdateGpsStatusThreadSafe(GpsData data)
+        delegate void UpdateGpsStatusCallback(string msg, 
+            System.Drawing.Color color);
+        protected void UpdateGpsStatusThreadSafe(string msg,
+            System.Drawing.Color color)
         {           
             if (InvokeRequired)
             {
                 UpdateGpsStatusCallback f = new UpdateGpsStatusCallback(
                     UpdateGpsStatusThreadSafe);
-                Invoke(f, new object[] { data });
+                Invoke(f, new object[] { msg, color });
             }
             else
             {
-                string active;
-                if (data.valid)
-                {
-                    active = "ACTIVE";
-                    gpsStatusLabel.BackColor = System.Drawing.Color.LightGreen;
-                }
-                else
-                {
-                    active = "No PPS or VOID";
-                    gpsStatusLabel.BackColor = System.Drawing.Color.Red;
-                }
-                var msg = string.Format("UTC: {0} ({1})",
-                    data.timestamp, active);
                 gpsStatusLabel.Text = msg;
+                gpsStatusLabel.BackColor = color;
             }
         }
 
@@ -457,8 +491,8 @@ namespace SampleGrabber
         protected void gpsCloseButton_Click(object sender, EventArgs e)
         {
             try
-            {                
-                gpsTimeoutTimer.Stop();
+            {
+                gpsTimeoutTimer.Enabled = false;
                 SetUiGps(UiStateGps.Closed);
                 gps.Close();
             }

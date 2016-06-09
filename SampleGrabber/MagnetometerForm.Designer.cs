@@ -60,7 +60,6 @@
             this.gpsRefreshButton = new System.Windows.Forms.Button();
             this.gpsList = new System.Windows.Forms.ComboBox();
             this.gpsLabel = new System.Windows.Forms.Label();
-            this.gpsTimeoutTimer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dataGraph)).BeginInit();
             this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.averagingPeriodMs)).BeginInit();
@@ -372,11 +371,6 @@
             this.gpsLabel.TabIndex = 18;
             this.gpsLabel.Text = "GPS";
             // 
-            // gpsTimeoutTimer
-            // 
-            this.gpsTimeoutTimer.Interval = 5000;
-            this.gpsTimeoutTimer.Tick += new System.EventHandler(this.gpsTimeoutTimer_Tick);
-            // 
             // MagnetometerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
@@ -440,7 +434,6 @@
         protected System.Windows.Forms.Button gpsRefreshButton;
         protected System.Windows.Forms.ComboBox gpsList;
         protected System.Windows.Forms.Label gpsLabel;
-        protected System.Windows.Forms.Timer gpsTimeoutTimer;
     }
 }
 

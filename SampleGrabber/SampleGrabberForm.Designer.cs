@@ -49,6 +49,14 @@
             // 
             this.name.TextChanged += new System.EventHandler(this.name_TextChanged);
             // 
+            // dataGraph
+            // 
+            this.dataGraph.Size = new System.Drawing.Size(1369, 411);
+            // 
+            // previewBox
+            // 
+            this.previewBox.Size = new System.Drawing.Size(1392, 533);
+            // 
             // gpsCloseButton
             // 
             this.gpsCloseButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.DimGray;
@@ -91,7 +99,7 @@
             // SampleGrabberForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
-            this.ClientSize = new System.Drawing.Size(1436, 1028);
+            this.ClientSize = new System.Drawing.Size(1436, 768);
             this.Controls.Add(this.comment);
             this.Controls.Add(this.commentLabel);
             this.Controls.Add(this.discardButton);
