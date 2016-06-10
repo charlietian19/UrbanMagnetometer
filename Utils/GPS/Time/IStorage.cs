@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Utils.GPS
 {
-    public interface IStorage<T> : IEnumerable<T>
+    public interface IStorage<T> : IList<T>
     {
         /* Maximum number of objects the collection can 
         contain before they are pushed out */

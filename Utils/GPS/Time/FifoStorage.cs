@@ -1,46 +1,43 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Utils.GPS
 {
     /* List of data that stores a given maximum number of elements.
     Old elements are pushed */
-    public class FifoStorage<T> : IStorage<T>
+    public class FifoStorage<T> : List<T>, IStorage<T>
     {
         public int MaxCount { get; set; } = 0;
-        protected List<T> data;
 
         public event Action<T> OnPop;
 
-        public FifoStorage(int maxSize)
-        {
+        public FifoStorage(int maxSize) : base(maxSize)
+        {            
             MaxCount = maxSize;
-            data = new List<T>(maxSize + 1);
         }        
 
-        public void Add(T obj)
+        public new void Add(T obj)
         {
-            if (data.Count < MaxCount)
+            if (Count < MaxCount)
             {
-                data.Add(obj);
+                base.Add(obj);
             }
             else
             {
-                Pop(data[0]);
+                var res = this[0];                
                 Push(obj);
+                Pop(res);
             }
         }
 
         /* Called to add a new object to the queue */
         void Push(T obj)
         {
-            for (int i = 0; i < data.Count - 1; i++)
+            for (int i = 0; i < Count - 1; i++)
             {
-                data[i] = data[i + 1];
+                this[i] = this[i + 1];
             }
-            data[data.Count - 1] = obj;
+            this[Count - 1] = obj;
         }
 
         /* Called to push an object out of the queue */
@@ -55,34 +52,11 @@ namespace Utils.GPS
         /* Called to push all the objects out of the queue */
         public void Flush()
         {
-            for (int i = 0; i < data.Count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                Pop(data[i]);
+                Pop(this[i]);
             }
-            data.Clear();
-        }
-
-        public int Count { get { return data.Count; } }
-
-        public T[] ToArray()
-        {
-            return data.ToArray();
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return data.GetEnumerator(); 
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public T this[int index]
-        {
-            get { return data[index]; }
-            set { data[index] = value; }
-        }
+            Clear();
+        }        
     }
 }
