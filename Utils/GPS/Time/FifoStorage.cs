@@ -9,7 +9,7 @@ namespace Utils.GPS.Time
     {
         public int MaxCount { get; set; } = 0;
 
-        public event Action<T> OnPop;
+        public event Action<T> AfterPop, BeforePush;
 
         public FifoStorage(int maxSize) : base(maxSize)
         {            
@@ -18,6 +18,11 @@ namespace Utils.GPS.Time
 
         public new void Add(T obj)
         {
+            if (BeforePush != null)
+            {
+                BeforePush(obj);
+            }
+
             if (Count < MaxCount)
             {
                 base.Add(obj);
@@ -43,9 +48,9 @@ namespace Utils.GPS.Time
         /* Called to push an object out of the queue */
         protected virtual void Pop(T obj)
         {
-            if (OnPop != null)
+            if (AfterPop != null)
             {
-                OnPop(obj);
+                AfterPop(obj);
             }
         }
 

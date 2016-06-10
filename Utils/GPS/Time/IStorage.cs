@@ -11,7 +11,10 @@ namespace Utils.GPS.Time
 
         /* Called when the collection is overflowed and 
         one object is pushed out */
-        event Action<T> OnPop;
+        event Action<T> AfterPop;
+
+        /* Called when a new item is added to the collection */
+        event Action<T> BeforePush;
 
         /* Returns the data in the collection as an array */
         T[] ToArray();

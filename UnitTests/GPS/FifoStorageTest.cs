@@ -100,11 +100,11 @@ namespace UnitTests.GPS
         }
 
         [TestMethod]
-        public void RaisesOnPop()
+        public void RaiseOnPop()
         {
             int raisedWith = 0;
             var storage = new FifoStorage<int>(3);
-            storage.OnPop += o => raisedWith = o;
+            storage.AfterPop += o => raisedWith = o;
             storage.Add(5);
             Assert.AreEqual(0, raisedWith);
             storage.Add(10);
@@ -115,6 +115,20 @@ namespace UnitTests.GPS
             Assert.AreEqual(5, raisedWith);
             storage.Add(655);
             Assert.AreEqual(10, raisedWith);
+        }
+
+        [TestMethod]
+        public void RaiseOnPush()
+        {
+            int raisedWith = 0;
+            var storage = new FifoStorage<int>(3);
+            storage.BeforePush += o => raisedWith = o;
+            storage.Add(5);
+            Assert.AreEqual(5, raisedWith);
+            storage.Add(10);
+            Assert.AreEqual(10, raisedWith);
+            storage.Add(20);
+            Assert.AreEqual(20, raisedWith);
         }
 
         [TestMethod]
