@@ -1,4 +1,4 @@
-﻿namespace Utils.GPS
+﻿namespace Utils.GPS.Time
 {
     public interface ITimeEstimator
     {

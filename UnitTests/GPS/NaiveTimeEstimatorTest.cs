@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Utils.GPS;
+using Utils.GPS.Time;
 
 namespace UnitTests.GPS
 {

@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading;
 using Utils.Fixtures;
+using Utils.GPS.Time;
 
 namespace Utils.GPS.SerialGPS
 {

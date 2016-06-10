@@ -1,7 +1,7 @@
 ﻿/* Determines if each given timestamp/tick counter combination
    corresponds to a valid or delayed PPS signal  */
 
-namespace Utils.GPS
+namespace Utils.GPS.Time
 {
     public interface ITimeValidator
     {

@@ -9,7 +9,7 @@ using Utils.Fixtures;
     observed data.
 */
 
-namespace Utils.GPS
+namespace Utils.GPS.Time
 {    
     public class NaiveTimeValidator : ITimeValidator
     {
@@ -33,9 +33,10 @@ namespace Utils.GPS
             get; private set;
         }
 
+        /* Stores the GPS data history */
         protected FifoStorage<GpsData> data;
 
-        /* Stores the GPS data history */
+        /* Exposes the GPS data history (for legacy tests) */
         public GpsData[] history
         {
             get
@@ -243,39 +244,24 @@ namespace Utils.GPS
             }
             else
             {
-                valid = IsWithinThresholdAllPoints(point);
+                valid = IsWithinThreshold(point);
             }
             return valid;
         }
 
         /* Checks the data point against the history within lookback */
-        private bool IsWithinThresholdAllPoints(GpsData point)
+        private bool IsWithinThreshold(GpsData point)
         {
             lock (data)
             {
-                var data = history;
-                for (int i = 0; i < lookback; i++)
+                return ValidateLast<GpsData>.And(point, data, lookback, (newPoint, oldPoint) => 
                 {
                     int secondsDifference = Convert.ToInt32(Math.Round(
-                        (point.timestamp - data[i].timestamp)
-                        .TotalSeconds));
-                    if (!IsWithinThresholdThisPoint(point, data[i], 
-                        secondsDifference))
-                    {
-                        return false;
-                    }
-                }
+                        (newPoint.timestamp - oldPoint.timestamp).TotalSeconds));
+                    long delta = newPoint.ticks - oldPoint.ticks;
+                    return delta - frequency * secondsDifference <= threshold;
+                });
             }
-            return true;
-        }
-
-        /* Returns true if the point from dt seconds ago is within 
-           the threshold */
-        private bool IsWithinThresholdThisPoint(GpsData newPoint, 
-            GpsData oldPoint, int secondsDifference)
-        {
-            long delta = newPoint.ticks - oldPoint.ticks;
-            return delta - frequency * secondsDifference <= threshold;
         }
 
         /* Stores the given GPS data into the buffer. */

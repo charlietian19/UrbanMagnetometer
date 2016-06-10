@@ -12,7 +12,7 @@ using Accord.Statistics.Models.Regression.Linear;
 
 */
 
-namespace Utils.GPS
+namespace Utils.GPS.Time
 {
     public class NaiveTimeEstimator : ITimeEstimator
     {

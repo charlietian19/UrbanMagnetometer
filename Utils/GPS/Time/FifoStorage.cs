@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Utils.GPS
+namespace Utils.GPS.Time
 {
     /* List of data that stores a given maximum number of elements.
     Old elements are pushed */

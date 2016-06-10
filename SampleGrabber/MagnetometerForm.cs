@@ -9,6 +9,7 @@ using Biomed_eMains_eFMx;
 using System.IO;
 using System.Diagnostics;
 using Utils.GPS.SerialGPS;
+using Utils.GPS.Time;
 
 namespace SampleGrabber
 {

@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Text;
-using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Utils.GPS;
 using System.Diagnostics;
 using Moq;
 using Utils.Fixtures;
+using Utils.GPS.Time;
 
 namespace UnitTests.GPS
 {

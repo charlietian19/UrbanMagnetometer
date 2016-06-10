@@ -5,6 +5,7 @@ using Moq;
 using Utils.GPS.SerialGPS;
 using Utils.GPS;
 using Utils.Fixtures;
+using Utils.GPS.Time;
 
 namespace UnitTests.GPS
 {

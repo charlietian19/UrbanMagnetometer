@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Utils.GPS;
+using Utils.GPS.Time;
 
 namespace UnitTests.GPS
 {
