@@ -305,10 +305,9 @@ namespace SampleGrabber
 
         /* Called when new magnetic data arrives */
         protected void Sensor_NewDataHandler(double[] dataX, double[] dataY,
-            double[] dataZ, double systemSeconds, DateTime time)
+            double[] dataZ, long ticks, DateTime time)
         {
-            var gpsData = interpolator.GetTimeStamp(Convert.ToInt64(
-                systemSeconds * Stopwatch.Frequency));
+            var gpsData = interpolator.GetTimeStamp(ticks);
             storage.Store(dataX, dataY, dataZ, gpsData);
             averages[0].InputData(dataX);
             averages[1].InputData(dataY);
