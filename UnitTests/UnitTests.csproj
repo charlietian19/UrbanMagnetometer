@@ -100,8 +100,10 @@
     <Compile Include="DataManager\StorageTest.cs" />
     <Compile Include="DataManager\DatasetInfoTest.cs" />
     <Compile Include="DataManager\SampleDatasetInfoTest.cs" />
+    <Compile Include="DataReader\DatasetChunkTest.cs" />
     <Compile Include="DataReader\DatasetReaderTest.cs" />
     <Compile Include="DataManager\UploadSchedulerTest.cs" />
+    <Compile Include="DataReader\GpsDatasetChunkTest.cs" />
     <Compile Include="Filters\AbstractSimpleFilterTest.cs" />
     <Compile Include="Filters\SubsampleTest.cs" />
     <Compile Include="Filters\MovingAverageTest.cs" />

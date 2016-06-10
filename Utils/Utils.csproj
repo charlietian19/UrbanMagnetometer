@@ -128,6 +128,7 @@
   <ItemGroup>
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="DataManager\DatasetInfo.cs" />
+    <Compile Include="DataReader\GpsDatasetChunk.cs" />
     <Compile Include="Fixtures\AutoResetEventWrapper.cs" />
     <Compile Include="Fixtures\AutoResetEventWrapperFactory.cs" />
     <Compile Include="Fixtures\BinaryReaderFactory.cs" />
