@@ -7,9 +7,9 @@ using Utils.Filters;
 using Utils.GPS;
 using Biomed_eMains_eFMx;
 using System.IO;
-using System.Diagnostics;
 using Utils.GPS.SerialGPS;
 using Utils.GPS.Time;
+using Utils.DataReader;
 
 namespace SampleGrabber
 {
@@ -25,6 +25,7 @@ namespace SampleGrabber
         protected IFilter[] averages = new MovingAverage[3];
         protected IFilter[] subsamples = new Subsample[3];
         protected RollingBuffer[] buffers = new RollingBuffer[3];
+        protected DataChunkJitterFilter lagFilter = new DataChunkJitterFilter(200);
 
         protected ITimeSource gps;
         protected ITimeEstimator interpolator = new NaiveTimeEstimator();
@@ -65,6 +66,7 @@ namespace SampleGrabber
                 scheduler.FinishedEvent += Scheduler_FinishedEvent;
                 gpsTimeoutTimer = new System.Timers.Timer(5000);
                 gpsTimeoutTimer.Elapsed += GpsTimeoutTimer_Elapsed;
+                lagFilter.OnPop += LagFilter_OnPop;
                 storage = new LegacySampleStorage(scheduler,
                     (start, now) => false);                
                 RefreshGpsList();
@@ -268,6 +270,7 @@ namespace SampleGrabber
                 sensor.NewDataHandler -= Sensor_NewDataHandler;
                 sensor.NewDataHandler += Sensor_NewDataHandler;
                 UpdateFilters();
+                lagFilter.Clear();
                 sensor.DAQStart(convertToMicroTesla);
                 SetUI(UiStateMagnetometer.Recording);
             }
@@ -308,11 +311,20 @@ namespace SampleGrabber
             double[] dataZ, long ticks, DateTime time)
         {
             var gpsData = interpolator.GetTimeStamp(ticks);
-            storage.Store(dataX, dataY, dataZ, gpsData);
+            var chunk = new GpsDatasetChunk(gpsData, interpolator, 0, 
+                dataX, dataY, dataZ);
+            lagFilter.InputData(chunk);
             averages[0].InputData(dataX);
             averages[1].InputData(dataY);
             averages[2].InputData(dataZ);
-        }        
+        }
+
+        /* Called when filtered data pops out of the spike filter */
+        private void LagFilter_OnPop(GpsDatasetChunk chunk)
+        {
+            storage.Store(chunk.XData, chunk.YData, chunk.ZData, 
+                chunk.Gps);
+        }
 
         /* Called when user clicks cancel recording button */
         protected void cancelButton_Click(object sender, EventArgs e)
@@ -334,6 +346,7 @@ namespace SampleGrabber
                 sensor.DAQStop();
                 sensor.NewDataHandler -= Sensor_NewDataHandler;
                 SetUI(UiStateMagnetometer.Ready);
+                lagFilter.Flush();
             }
             catch (Exception exception)
             {
@@ -351,20 +364,24 @@ namespace SampleGrabber
         /* Called when the form is being closed */
         protected void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            e.Cancel = FinalizeUploads();
+            CloseGps();
+            StopRecording();
+        }
+
+        /* Returns true if there are uploads to be finished.
+        Tells the scheduler to hurry up is that's the case. */
+        private bool FinalizeUploads()
+        {
             /* This condition will sometimes fail because of racing,
             but this shouldn't really matter */
             if (scheduler.ActiveUploads + scheduler.QueuedUploads > 0)
             {
                 toolStripStatusLabel.Text = "Please wait until the files are uploaded.";
                 scheduler.Flush();
-                e.Cancel = true;
+                return true;
             }
-
-            if (sensor != null)
-            {
-                sensor.DAQStop();
-                SetUI(UiStateMagnetometer.Ready);
-            }
+            return false;
         }
 
         /* Called when user selects a new time constant for the display 
@@ -499,6 +516,11 @@ namespace SampleGrabber
 
         /* Called when user clicks close GPS button */
         protected void gpsCloseButton_Click(object sender, EventArgs e)
+        {
+            CloseGps();
+        }
+
+        protected void CloseGps()
         {
             try
             {

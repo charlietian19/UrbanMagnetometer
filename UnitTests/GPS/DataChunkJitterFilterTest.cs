@@ -83,6 +83,19 @@ namespace UnitTests.GPS
         }
 
         [TestMethod]
+        public void ClearCausesStorageClear()
+        {
+            var storageMock = new Mock<IStorage<GpsDatasetChunk>>();
+
+            storageMock.SetupAllProperties();
+            storageMock.Setup(o => o.Clear());
+            var filter = new DataChunkJitterFilter(storageMock.Object,
+                stopwatchMock.Object);
+            filter.Clear();
+            storageMock.Verify(o => o.Clear(), Times.Once());
+        }
+
+        [TestMethod]
         public void PushCausesStorageAdd()
         {
             var storageMock = new Mock<IStorage<GpsDatasetChunk>>();
@@ -92,7 +105,7 @@ namespace UnitTests.GPS
             storageMock.Setup(o => o.Add(It.IsAny<GpsDatasetChunk>()));
             var filter = new DataChunkJitterFilter(storageMock.Object,
                 stopwatchMock.Object);
-            filter.Push(chunk);
+            filter.InputData(chunk);
             storageMock.Verify(o => o.Add(It.IsAny<GpsDatasetChunk>()),
                 Times.Once());
         }
@@ -118,9 +131,9 @@ namespace UnitTests.GPS
             var storage = MakeStorage(data);
             var filter = new DataChunkJitterFilter(storage, stopwatchMock.Object);
             GpsDatasetChunk returnChunk = null;
-            filter.Tolerance = 10 * 1e-3;
+            filter.ToleranceLow = 10 * 1e-3;
             filter.OnPop += o => returnChunk = o;
-            filter.Push(MakeChunk(6000));            
+            filter.InputData(MakeChunk(6000));            
             Assert.AreEqual(data[0], returnChunk.Gps.ticks);
         }
 
@@ -131,9 +144,9 @@ namespace UnitTests.GPS
             var storage = MakeStorage(data);
             var filter = new DataChunkJitterFilter(storage, stopwatchMock.Object);
             GpsDatasetChunk returnChunk = null;
-            filter.Tolerance = 10 * 1e-3;
+            filter.ToleranceLow = 10 * 1e-3;
             filter.OnPop += o => returnChunk = o;
-            filter.Push(MakeChunk(6000));
+            filter.InputData(MakeChunk(6000));
             Assert.AreEqual(data[0], returnChunk.Gps.ticks);
         }
 
@@ -144,9 +157,9 @@ namespace UnitTests.GPS
             var storage = MakeStorage(data);
             var filter = new DataChunkJitterFilter(storage, stopwatchMock.Object);
             GpsDatasetChunk returnChunk = null;
-            filter.Tolerance = 10 * 1e-3;
+            filter.ToleranceLow = 10 * 1e-3;
             filter.OnPop += o => returnChunk = o;
-            filter.Push(MakeChunk(8000));
+            filter.InputData(MakeChunk(8000));
             Assert.AreEqual(data[0], returnChunk.Gps.ticks);
         }
 
@@ -157,9 +170,9 @@ namespace UnitTests.GPS
             var storage = MakeStorage(data);
             var filter = new DataChunkJitterFilter(storage, stopwatchMock.Object);
             GpsDatasetChunk returnChunk = null;
-            filter.Tolerance = 10 * 1e-3;
+            filter.ToleranceLow = 10 * 1e-3;
             filter.OnPop += o => returnChunk = o;
-            filter.Push(MakeChunk(6000));
+            filter.InputData(MakeChunk(6000));
             Assert.AreEqual(1003, returnChunk.Gps.ticks);
             Assert.AreEqual(updatedGps.timestamp, returnChunk.Gps.timestamp);
         }

@@ -156,12 +156,15 @@ namespace Utils.DataManager
         private void Append(double[] dataX, double[] dataY, double[] dataZ,
             GpsData gps)
         {
-            int length = dataX.Length;
-            WriteArray(x, dataX);
-            WriteArray(y, dataY);
-            WriteArray(z, dataZ);
-            WriteTime(t, gps, index, length);
-            index += length;
+            lock (this)
+            {
+                int length = dataX.Length;
+                WriteArray(x, dataX);
+                WriteArray(y, dataY);
+                WriteArray(z, dataZ);
+                WriteTime(t, gps, index, length);
+                index += length;
+            }
         }
 
         /* Writes an array of doubles into a binary file. */
@@ -203,17 +206,20 @@ namespace Utils.DataManager
         /* Creates the data files in cache folder. */
         private void CreateFiles(DateTime time)
         {
-            info = NewDatasetInfo(time, ConfigurationManager);
-            x = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.XFileName),
-                FileMode.Append, FileAccess.Write));
-            y = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.YFileName),
-                FileMode.Append, FileAccess.Write));
-            z = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.ZFileName),
-                FileMode.Append, FileAccess.Write));
-            t = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.TFileName),
-                FileMode.Append, FileAccess.Write));
-            index = 0;
-            isWriting = true;
+            lock (this)
+            {
+                info = NewDatasetInfo(time, ConfigurationManager);
+                x = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.XFileName),
+                    FileMode.Append, FileAccess.Write));
+                y = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.YFileName),
+                    FileMode.Append, FileAccess.Write));
+                z = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.ZFileName),
+                    FileMode.Append, FileAccess.Write));
+                t = _BinaryWriterFactory.Create(IFile.Open(info.FullPath(info.TFileName),
+                    FileMode.Append, FileAccess.Write));
+                index = 0;
+                isWriting = true;
+            }
         }
 
         /* Closes the data files and sends them to the Google Drive.
@@ -231,16 +237,20 @@ namespace Utils.DataManager
         /* Closes the data files. */
         private void CloseDataFiles()
         {
+
             if (!isWriting)
             {
                 return;
             }
 
-            x.Close();
-            y.Close();
-            z.Close();
-            t.Close();
-            isWriting = false;
+            lock (this)
+            {
+                x.Close();
+                y.Close();
+                z.Close();
+                t.Close();
+                isWriting = false;
+            }
         }
         
         /* Closes the data files (eg. when the application exits).

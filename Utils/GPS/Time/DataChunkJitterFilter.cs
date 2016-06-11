@@ -12,7 +12,14 @@ namespace Utils.GPS.Time
         protected IStorage<GpsDatasetChunk> data;
         private IStopwatch stopwatch;
         public event Action<GpsDatasetChunk> OnPop;
-        public double Tolerance = 200 * 1e-6;
+
+        /* Fix the data points that are further than this from the 
+        expected value */
+        public double ToleranceLow = 200 * 1e-6; // 200 microseconds
+
+        /* Leave alone the data points that are further than this from
+        the expected value because maybe the fit has blown up */
+        public double ToleranceHigh = 20 * 1e-3; // 20 milliseconds
 
         /* Create the filter with the default storage given size */
         public DataChunkJitterFilter(int size)
@@ -43,12 +50,21 @@ namespace Utils.GPS.Time
         }
 
         /* Adds the data into the filter */
-        public void Push(GpsDatasetChunk chunk)
+        public void InputData(GpsDatasetChunk chunk)
         {
             lock (data)
             {
                 data.Add(chunk);
             }            
+        }
+
+        /* Clear the data points */
+        public void Clear()
+        {
+            lock (data)
+            {
+                data.Clear();
+            }
         }
 
         /* Flushes the data out of the filter */
@@ -69,12 +85,14 @@ namespace Utils.GPS.Time
             try
             {
                 var expected = ExpectedTicks(ticks, differences, period);
-                if (ToSeconds(Math.Abs(chunk.Gps.ticks - expected)) > Tolerance)
+                var delta = ToSeconds(Math.Abs(chunk.Gps.ticks - expected));
+                if ((delta > ToleranceLow) && (delta < ToleranceHigh))
                 {
                     var gps = chunk.Gps;                    
                     var expectedGps = chunk.estimator.GetTimeStamp(expected);
                     gps.ticks = expected;
                     gps.timestamp = expectedGps.timestamp;
+                    gps.valid = expectedGps.valid;
                     chunk.Gps = gps;
                 }
             }
@@ -135,7 +153,7 @@ namespace Utils.GPS.Time
             int j = 0;
             for (int i = 0; i < dt.Length; i++)
             {
-                if (Math.Abs(dt[i] - median) < Tolerance)
+                if (Math.Abs(dt[i] - median) < ToleranceLow)
                 {
                     x[j] = Convert.ToDouble(i);
                     y[j] = Convert.ToDouble(ticks[i] - ticks[0]);
@@ -163,7 +181,7 @@ namespace Utils.GPS.Time
             int count = 0;
             foreach (var dt in differences)
             {
-                if (Math.Abs(dt - median) < Tolerance)
+                if (Math.Abs(dt - median) < ToleranceLow)
                 {
                     count++;
                 }
