@@ -112,7 +112,7 @@
     <Compile Include="GDrive\GDrivePathHelperTest.cs" />
     <Compile Include="GDrive\GDriveTest.cs" />
     <Compile Include="GDrive\GDriveTestHelper.cs" />
-    <Compile Include="GPS\DataChunkJitterFilterTest.cs" />
+    <Compile Include="GPS\LagSpikeFilterTest.cs" />
     <Compile Include="GPS\FifoStorageTest.cs" />
     <Compile Include="GPS\HelpersTest.cs" />
     <Compile Include="GPS\NaiveTimeValidatorTest.cs" />

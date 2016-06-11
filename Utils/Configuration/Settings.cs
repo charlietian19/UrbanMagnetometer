@@ -119,5 +119,37 @@ namespace Utils.Configuration
         /* Comment for the signal sample files */
         public static string SampleComment = "";
 
+        /* Low tolerance settings for the lag spike filter */
+        public static double LagFilterToleranceLow
+        {
+            get
+            {
+                return Convert.ToDouble(
+                    ConfigurationManager.AppSettings["LagFilterToleranceLow"]);
+            }
         }
+
+        /* High tolerance settings for the lag spike filter */
+        public static double LagFilterToleranceHigh
+        {
+            get
+            {
+                return Convert.ToDouble(
+                    ConfigurationManager.AppSettings["LagFilterToleranceHigh"]);
+            }
+        }
+
+        /* High tolerance settings for the lag spike filter */
+        public static int LagFilterFitPoints
+        {
+            get
+            {
+                return Convert.ToInt32(
+                    ConfigurationManager.AppSettings["LagFilterFitPoints"]);
+            }
+        }
+
+
+
+    }
 }

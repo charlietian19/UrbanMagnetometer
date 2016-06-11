@@ -14,9 +14,9 @@ namespace UnitTests.GPS
     /// Summary description for DataChunkJitterFilterTest
     /// </summary>
     [TestClass]
-    public class DataChunkJitterFilterTest
+    public class LagSpikeFilterTest
     {
-        public DataChunkJitterFilterTest()
+        public LagSpikeFilterTest()
         {
             //
             // TODO: Add constructor logic here
@@ -59,27 +59,29 @@ namespace UnitTests.GPS
         [TestMethod]
         public void ConstructorNormal()
         {
-            var filter = new DataChunkJitterFilter(20);
+            var filter = new LagSpikeFilter(20);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ConstructorSizeTooSmall()
         {
-            var filter = new DataChunkJitterFilter(1);
+            var filter = new LagSpikeFilter(1);
         }
 
         [TestMethod]
-        public void FlushCausesStorageFlush()
+        public void FlushCausesStorageClear()
         {
             var storageMock = new Mock<IStorage<GpsDatasetChunk>>();
 
             storageMock.SetupAllProperties();
+            storageMock.Setup(o => o.Clear());
             storageMock.Setup(o => o.Flush());
-            var filter = new DataChunkJitterFilter(storageMock.Object,
+            var filter = new LagSpikeFilter(storageMock.Object,
                 stopwatchMock.Object);
             filter.Flush();
-            storageMock.Verify(o => o.Flush(), Times.Once());
+            storageMock.Verify(o => o.Clear(), Times.Once());
+            storageMock.Verify(o => o.Flush(), Times.Never());
         }
 
         [TestMethod]
@@ -89,7 +91,7 @@ namespace UnitTests.GPS
 
             storageMock.SetupAllProperties();
             storageMock.Setup(o => o.Clear());
-            var filter = new DataChunkJitterFilter(storageMock.Object,
+            var filter = new LagSpikeFilter(storageMock.Object,
                 stopwatchMock.Object);
             filter.Clear();
             storageMock.Verify(o => o.Clear(), Times.Once());
@@ -103,7 +105,7 @@ namespace UnitTests.GPS
 
             storageMock.SetupAllProperties();
             storageMock.Setup(o => o.Add(It.IsAny<GpsDatasetChunk>()));
-            var filter = new DataChunkJitterFilter(storageMock.Object,
+            var filter = new LagSpikeFilter(storageMock.Object,
                 stopwatchMock.Object);
             filter.InputData(chunk);
             storageMock.Verify(o => o.Add(It.IsAny<GpsDatasetChunk>()),
@@ -115,7 +117,7 @@ namespace UnitTests.GPS
         {
             var storage = new FifoStorage<GpsDatasetChunk>(2);
             var chunk = MakeChunk(123);
-            var filter = new DataChunkJitterFilter(storage, stopwatchMock.Object);
+            var filter = new LagSpikeFilter(storage, stopwatchMock.Object);
             GpsDatasetChunk calledWith = null;
             filter.OnPop += (data) => calledWith = data;
             storage.Add(chunk);
@@ -129,7 +131,7 @@ namespace UnitTests.GPS
         {
             var data = new long[] { 1000, 2003, 3001, 3998, 5000 };
             var storage = MakeStorage(data);
-            var filter = new DataChunkJitterFilter(storage, stopwatchMock.Object);
+            var filter = new LagSpikeFilter(storage, stopwatchMock.Object);
             GpsDatasetChunk returnChunk = null;
             filter.ToleranceLow = 10 * 1e-3;
             filter.OnPop += o => returnChunk = o;
@@ -142,7 +144,7 @@ namespace UnitTests.GPS
         {
             var data = new long[] { 1000, 2003, 3501, 3998, 5000 };
             var storage = MakeStorage(data);
-            var filter = new DataChunkJitterFilter(storage, stopwatchMock.Object);
+            var filter = new LagSpikeFilter(storage, stopwatchMock.Object);
             GpsDatasetChunk returnChunk = null;
             filter.ToleranceLow = 10 * 1e-3;
             filter.OnPop += o => returnChunk = o;
@@ -155,7 +157,7 @@ namespace UnitTests.GPS
         {
             var data = new long[] { 1000, 2003, 3501, 3998, 5000 };
             var storage = MakeStorage(data);
-            var filter = new DataChunkJitterFilter(storage, stopwatchMock.Object);
+            var filter = new LagSpikeFilter(storage, stopwatchMock.Object);
             GpsDatasetChunk returnChunk = null;
             filter.ToleranceLow = 10 * 1e-3;
             filter.OnPop += o => returnChunk = o;
@@ -166,9 +168,9 @@ namespace UnitTests.GPS
         [TestMethod]
         public void SampleDataOldestLag()
         {
-            var data = new long[] { 1500, 2003, 3001, 3998, 5000 };
+            var data = new long[] { 1030, 2003, 3001, 3998, 5000 };
             var storage = MakeStorage(data);
-            var filter = new DataChunkJitterFilter(storage, stopwatchMock.Object);
+            var filter = new LagSpikeFilter(storage, stopwatchMock.Object);
             GpsDatasetChunk returnChunk = null;
             filter.ToleranceLow = 10 * 1e-3;
             filter.OnPop += o => returnChunk = o;

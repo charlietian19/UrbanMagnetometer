@@ -7,11 +7,14 @@ using Utils.Fixtures;
 namespace Utils.GPS.Time
 {
     /* Interpolates jittered time on magnetometer data chunks */
-    public class DataChunkJitterFilter
+    public class LagSpikeFilter
     {
         protected IStorage<GpsDatasetChunk> data;
         private IStopwatch stopwatch;
         public event Action<GpsDatasetChunk> OnPop;
+
+        private SimpleLinearRegression regression = null;
+        private long t0;
 
         /* Fix the data points that are further than this from the 
         expected value */
@@ -19,10 +22,10 @@ namespace Utils.GPS.Time
 
         /* Leave alone the data points that are further than this from
         the expected value because maybe the fit has blown up */
-        public double ToleranceHigh = 20 * 1e-3; // 20 milliseconds
+        public double ToleranceHigh = 50 * 1e-3; // 20 milliseconds
 
         /* Create the filter with the default storage given size */
-        public DataChunkJitterFilter(int size)
+        public LagSpikeFilter(int size)
         {
             if (size < 5)
             {
@@ -35,7 +38,7 @@ namespace Utils.GPS.Time
         }
 
         /* Create the filter given a storage */
-        public DataChunkJitterFilter(IStorage<GpsDatasetChunk> storage,
+        public LagSpikeFilter(IStorage<GpsDatasetChunk> storage,
             IStopwatch stopwatch)
         {
             data = storage;
@@ -64,6 +67,7 @@ namespace Utils.GPS.Time
             lock (data)
             {
                 data.Clear();
+                regression = null;
             }
         }
 
@@ -72,8 +76,35 @@ namespace Utils.GPS.Time
         {
             lock (data)
             {
-                data.Flush();
+                InterpolateAndPopAll();
+                data.Clear();
             }
+        }
+
+        /* Interpolate and pop all points using the current model */
+        private void InterpolateAndPopAll()
+        {
+            if (regression == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < data.Count; i++)
+            {
+                var chunk = data[i];
+                var expected = Convert.ToInt64(regression.Compute(i)) + t0;
+                var delta = ToSeconds(Math.Abs(chunk.Gps.ticks - expected));
+
+                if ((delta > ToleranceLow) && (delta < ToleranceHigh))
+                {
+                    chunk.Gps = CorrectedGps(chunk, expected);
+                }
+
+                if (OnPop != null)
+                {
+                    OnPop(chunk);
+                }
+            }            
         }
 
         /* Fix the timing in this chunk of magnetometer data */
@@ -88,12 +119,7 @@ namespace Utils.GPS.Time
                 var delta = ToSeconds(Math.Abs(chunk.Gps.ticks - expected));
                 if ((delta > ToleranceLow) && (delta < ToleranceHigh))
                 {
-                    var gps = chunk.Gps;                    
-                    var expectedGps = chunk.estimator.GetTimeStamp(expected);
-                    gps.ticks = expected;
-                    gps.timestamp = expectedGps.timestamp;
-                    gps.valid = expectedGps.valid;
-                    chunk.Gps = gps;
+                    chunk.Gps = CorrectedGps(chunk, expected);
                 }
             }
             catch { }
@@ -102,6 +128,18 @@ namespace Utils.GPS.Time
             {
                 OnPop(chunk);
             }
+        }
+
+        /* Returns corrected GpsData given expected ticks and data chunk */
+        private static GpsData CorrectedGps(GpsDatasetChunk chunk, 
+            long expected)
+        {
+            var gps = chunk.Gps;
+            var expectedGps = chunk.estimator.GetTimeStamp(expected);
+            gps.ticks = expected;
+            gps.timestamp = expectedGps.timestamp;
+            gps.valid = expectedGps.valid;
+            return gps;
         }
 
         /* Returns the array of the ticks from the GPS arrival data */
@@ -151,12 +189,13 @@ namespace Utils.GPS.Time
             var y = new double[validPoints];
 
             int j = 0;
+            t0 = ticks[0];
             for (int i = 0; i < dt.Length; i++)
             {
                 if (Math.Abs(dt[i] - median) < ToleranceLow)
                 {
                     x[j] = Convert.ToDouble(i);
-                    y[j] = Convert.ToDouble(ticks[i] - ticks[0]);
+                    y[j] = Convert.ToDouble(ticks[i] - t0);
                     j++;
                 }
             }
@@ -167,9 +206,9 @@ namespace Utils.GPS.Time
                     "Number of valid data points is inconsistent");
             }
 
-            var regression = new SimpleLinearRegression();
+            regression = new SimpleLinearRegression();
             regression.Regress(x, y);
-            var result = Convert.ToInt64(regression.Compute(-1)) + ticks[0];
+            var result = Convert.ToInt64(regression.Compute(-1)) + t0;
             return result;
         }
 
