@@ -5,6 +5,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Utils.DataReader;
 using Utils.GPS;
 using System.Diagnostics;
+using Moq;
+using Utils.GPS.Time;
 
 namespace UnitTests.DataReader
 {
@@ -67,6 +69,7 @@ namespace UnitTests.DataReader
             var time = DateTime.Now;
             long index = 8712638;
             double counter = 221367.33;
+            var estimatorMock = new Mock<ITimeEstimator>();
             var gps = new GpsData
             {
                 timestamp = time,
@@ -75,7 +78,8 @@ namespace UnitTests.DataReader
             var xdata = new double[] { 1.2, 5.0, 2.1 };
             var ydata = new double[] { 3.2, 12.31, 532.1 };
             var zdata = new double[] { 62.3, 532.3, 123.2 };
-            var chunk = new GpsDatasetChunk(gps, index, xdata, ydata, zdata);
+            var chunk = new GpsDatasetChunk(gps, estimatorMock.Object, index, 
+                xdata, ydata, zdata);
             Assert.AreEqual(time, chunk.Time);
             Assert.AreEqual(index, chunk.Index);
             Assert.AreEqual(counter, chunk.PerformanceCounter, 0.01);
@@ -83,6 +87,14 @@ namespace UnitTests.DataReader
             Assert.AreEqual(ydata, chunk.YData);
             Assert.AreEqual(zdata, chunk.ZData);
             Assert.AreEqual(gps, chunk.Gps);
+
+            var gps2 = new GpsData
+            {
+                timestamp = time,
+                ticks = Convert.ToInt64(counter * Stopwatch.Frequency),
+            };
+            chunk.Gps = gps2;
+            Assert.AreEqual(gps2, chunk.Gps);
         }
     }
 }

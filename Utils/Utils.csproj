@@ -160,6 +160,7 @@
     <Compile Include="GPS\Helpers.cs" />
     <Compile Include="GPS\GpsData.cs" />
     <Compile Include="Fixtures\ITImer.cs" />
+    <Compile Include="GPS\Time\DataChunkJitterFilter.cs" />
     <Compile Include="GPS\Time\ValidateAll.cs" />
     <Compile Include="GPS\Time\FifoStorage.cs" />
     <Compile Include="GPS\Time\IStorage.cs" />

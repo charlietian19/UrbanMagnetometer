@@ -9,7 +9,7 @@ namespace Utils.GPS.Time
     {
         public int MaxCount { get; set; } = 0;
 
-        public event Action<T> AfterPop, BeforePush;
+        public event Action<T> AfterPop, BeforePush, AfterPush;
 
         public FifoStorage(int maxSize) : base(maxSize)
         {            
@@ -32,6 +32,11 @@ namespace Utils.GPS.Time
                 var res = this[0];                
                 Push(obj);
                 Pop(res);
+            }
+
+            if (AfterPush != null)
+            {
+                AfterPush(obj);
             }
         }
 

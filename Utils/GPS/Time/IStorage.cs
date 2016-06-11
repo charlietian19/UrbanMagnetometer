@@ -15,6 +15,7 @@ namespace Utils.GPS.Time
 
         /* Called when a new item is added to the collection */
         event Action<T> BeforePush;
+        event Action<T> AfterPush;
 
         /* Returns the data in the collection as an array */
         T[] ToArray();
