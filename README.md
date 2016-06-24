@@ -7,8 +7,11 @@ and uploads it to the Google Drive for further processing.
 ## System requirements
 
 This program was developed using .NET framework v4.5.2, and was running properly on Windows 8 and Windows 10 systems.
+
 System requirements for .NET framework 4.5 can be found here - https://msdn.microsoft.com/en-us/library/8z6watww(v=vs.110).aspx
+
 If you don't have 4.5 redistributable, you can download one from Microsoft website - https://www.microsoft.com/en-us/download/details.aspx?id=42642
+
 I've been using these ASUS X551 laptop to operate four synchronized stations - https://www.amazon.com/15-6-inch-Celeron-2-16GHz-Processor-Windows/dp/B00L49X8E6
 
 ## Hardware
