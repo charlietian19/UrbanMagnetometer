@@ -60,17 +60,17 @@ The ``raw_x``, ``raw_y`` and ``raw_z`` files are arrays of double precision floa
 The time data files describes when each chunk of data was acquired. It is structured as an array of records describing the sequence of chunks as they arrive. Each chunk description has the following structure with fields in this order (63 bytes per record):
 
 ```c
-int64_t start;			 // index of the chunk data start in X, Y, Z arrays
-int32_t length; 		// number of points in the chunk in X, Y, Z arrays
-byte valid;				 	// 1 if time is valid, 0 otherwise
-int64_t ticks;	 		 	// performance counter value in ticks
-double timestamp;	 	// interpolated Unix timestamp (UTC)
-double latitude;	 	// GPS latitude
-char ew;				 	// ASCII “E” if East, “W” if West
-double longitude;	 	// GPS longitude
-char ns;				 	// ASCII “S” if South, “N” if North
-double speed_knots;	 	// GPS speed in knots
-double angle_degrees; 	// GPS heading in degrees
+int64_t start;   // index of the chunk data start in X, Y, Z arrays
+int32_t length;   // number of points in the chunk in X, Y, Z arrays
+byte valid;   // 1 if time is valid, 0 otherwise
+int64_t ticks;   // performance counter value in ticks
+double timestamp;   // interpolated Unix timestamp (UTC)
+double latitude;   // GPS latitude
+char ew;   // ASCII “E” if East, “W” if West
+double longitude;   // GPS longitude
+char ns;   // ASCII “S” if South, “N” if North
+double speed_knots;   // GPS speed in knots
+double angle_degrees;   // GPS heading in degrees
 ```
 
 The start field is the index of where the chunk data begins in ``raw_x``, ``raw_y`` and ``raw_z`` files (so 8 * start is the offset in bytes of the chunk start in each file). length is the number of sequential values in each X, Y, and Z arrays that arrived within this chunk. ``valid`` is set to 1 when enough data is available to interpolate the GPS time, and 0 when it’s not (for example, if GPS receiver hasn’t sent any data in the last several minutes). ``ticks`` is the value of the performance counter of the system (ticks since the system start). Typical counter frequency for the sensor stations is ``2533200 Hz``. ``timestamp`` is the interpolated GPS time stamp recorded at the time of the chunk arrival recorded as Unix time in UTC timezone. ``latitude`` and ``longitude`` are the sensor coordinates recorded as a floating point number. For example, 12311.12 translates into 123 degrees 11.12 minutes. ``speed_knots`` is the speed of the sensor in knots, and ``angle_degrees`` is the heading of the sensor in degrees with respect to the north. The coordinates, speed, and heading are updated once per second and are not interpolated. 
