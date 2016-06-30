@@ -60,16 +60,16 @@ The ``raw_x``, ``raw_y`` and ``raw_z`` files are arrays of double precision floa
 The time data files describes when each chunk of data was acquired. It is structured as an array of records describing the sequence of chunks as they arrive. Each chunk description has the following structure with fields in this order (63 bytes per record):
 
 ```c
-int64_t start;   // index of the chunk data start in X, Y, Z arrays
-int32_t length;   // number of points in the chunk in X, Y, Z arrays
-byte valid;   // 1 if time is valid, 0 otherwise
-int64_t ticks;   // performance counter value in ticks
-double timestamp;   // interpolated Unix timestamp (UTC)
-double latitude;   // GPS latitude
-char ew;   // ASCII “E” if East, “W” if West
-double longitude;   // GPS longitude
-char ns;   // ASCII “S” if South, “N” if North
-double speed_knots;   // GPS speed in knots
+int64_t start;          // index of the chunk data start in X, Y, Z arrays
+int32_t length;         // number of points in the chunk in X, Y, Z arrays
+byte valid;             // 1 if time is valid, 0 otherwise
+int64_t ticks;          // performance counter value in ticks
+double timestamp;       // interpolated Unix timestamp (UTC)
+double latitude;        // GPS latitude
+char ew;                // ASCII “E” if East, “W” if West
+double longitude;       // GPS longitude
+char ns;                // ASCII “S” if South, “N” if North
+double speed_knots;     // GPS speed in knots
 double angle_degrees;   // GPS heading in degrees
 ```
 
