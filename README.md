@@ -37,7 +37,9 @@ How to obtain the secret key:
 
 After the Google authorization credentials are obtained, build the sample logger project. Run sample logger, which will open the browser and prompt you to log into your Google account (where the data will be uploaded). Keep in  mind that by default the logger records the magnetic field at 4ksps, so the data can add up quickly.
 
-After logging in, build the installer project. This will add the authentication information into the installer, so you won't have to log in on target machines. Run the output on the computers that will be logging the data. You will be prompted to enter the station name and the cache folder. This folder is used to store temporary files and the data that couldn't be uploaded until the internet connection is available. The installer will create two shortcuts - Data Grabber and Sample Grabber.
+After logging in, build the installer project. This will add the authentication information into the installer, so you won't have to log in on target machines. It will also create the registry keys that the application needs to run. 
+
+Install the application with the installer on the computers that will be logging the data. You will be prompted to enter the station name and the cache folder. This folder is used to store temporary files and the data that couldn't be uploaded until the internet connection is available. The installer will create two shortcuts - Data Grabber and Sample Grabber.
 
 Data Grabber is useful for long-term magnetic data recording. Sample Grabber is useful for obtaining short magnetic data samples.
 
