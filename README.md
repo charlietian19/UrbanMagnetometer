@@ -76,9 +76,42 @@ double angle_degrees; 	// GPS heading in degrees
 The start field is the index of where the chunk data begins in ``raw_x``, ``raw_y`` and ``raw_z`` files (so 8 * start is the offset in bytes of the chunk start in each file). length is the number of sequential values in each X, Y, and Z arrays that arrived within this chunk. ``valid`` is set to 1 when enough data is available to interpolate the GPS time, and 0 when it’s not (for example, if GPS receiver hasn’t sent any data in the last several minutes). ``ticks`` is the value of the performance counter of the system (ticks since the system start). Typical counter frequency for the sensor stations is ``2533200 Hz``. ``timestamp`` is the interpolated GPS time stamp recorded at the time of the chunk arrival recorded as Unix time in UTC timezone. ``latitude`` and ``longitude`` are the sensor coordinates recorded as a floating point number. For example, 12311.12 translates into 123 degrees 11.12 minutes. ``speed_knots`` is the speed of the sensor in knots, and ``angle_degrees`` is the heading of the sensor in degrees with respect to the north. The coordinates, speed, and heading are updated once per second and are not interpolated. 
 
 
-## Technical documentation
+## Structure of the program
 
   * DataGrabber - logs the data continuously for long periods of time
+    * DataGrabberForm - form logic of DataGrabber (inherits from MagnetometerForm)
   * SampleGrabber - records short magnetic data samples
+    * SampleGrabberForm - form logic of SampleGrabber (inherits from MagnetometerForm)
+    * MagnetometerForm - common magnetometer form logic
   * GDriveFolderMerge - merges folders with the same name in Google drive folder (should they appear)
+  * NURI_Station_Installer - creates installation packages for the application
   * Utils - library containting the logic
+    * Configuration - manages global configuration parameters for the application  
+      * Settings - class storing the global configuration parameters
+    * DataManager - data storage
+      * DatasetInfo - metadata associated with the magnetic data sets
+      * SampleDatasetInfo - metadata associated with the magnetic data sets that store short data samples (inherits from DatasetInfo)
+      * LegacyStorage - writes the magnetic data sets to the drive in a legacy format. The format is described in Output Data **Structure secion**. Future versions should implement some common structured data format instead.
+      * LegacySampleStorage - writes the magnetic data sets that correspond to short data samples to the drive (inherits from LegacyStorage)
+      * UploadScheduler - schedules dataset uploads, schedules re-tries for failed uploads
+    *  DataReader - reads magnetic data files  (obsolete, do not use)
+      * DatasetChunk - represents a single chunk of data  
+      * GpsDatasetChunk - represents a single chunk of data with a GPS timestamp (inherits from DatasetChunk)
+    *  Filters - transform the magnetic field data to make the real-time field preview feasible
+      * AbstractSimpleFilter - represents a filter with one input and one output that outputs the data by raising an event
+      * MovingAverage - running average filter with exponential decay on the input data (inherits from AbstractSimpleFilter)
+      * Subsample - subsamples the data from the input  (inherits from AbstractSimpleFilter)
+      * RollingBuffer - stores a preset maximum number of points from the input, like an oscilloscope (inherits from AbstractSimpleFilter)
+    *  Fixtures - wrappers and factories to make unit testing feasible
+    *  GDrive - classes that work with Google Drive API
+      * FileUploadException - the exception to raise when a file upload failed for whatever reason
+      * GDrive - provides functions to access Google Drive files. This class is not well tested because I couldn't stub out Google.Apis properly.
+      * GDrivePathHelper - converts between Google hash ID's and paths like ``\foo\bar``
+    * GPS - classes that work with the GPS
+      * SerialGps - represents a serial GPS with 1 PPS signal
+      * SerialPortWrapper - wrapper to make SerialPort from PInvokeSerialPort library implement ISerial interface
+    * Time - time estimation and interpolation classes
+      * FifoStorage - stores a list of the last N input values
+      * NaiveTimeValidator - decides whether the received GPS data arrived on time or was delayed due to the operating system being busy
+      * NaiveTimeEstimator - returns absolute Unix timestamp of the event given its absolute Stopwatch counter value
+      * LagSpikeFilter - infers whether a magnetic data chunk arrived on time or delayed due to the operating system being busy. If the chunk was delayed, replaces the actual arrival time with interpolated arrival time.
