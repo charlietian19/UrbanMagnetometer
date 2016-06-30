@@ -15,6 +15,15 @@ If you don't have 4.5 redistributable, you can download one from Microsoft websi
 I've been using these ASUS X551 laptop to operate four synchronized stations - https://www.amazon.com/15-6-inch-Celeron-2-16GHz-Processor-Windows/dp/B00L49X8E6
 
 ## Hardware
+Each station was built with the following devices:
+
+  * ASUS X551 laptop (any computer satisfying the system requirements).
+  * Biomed eFM3A Fluxgate magnetometer
+  * Garmin 18x LVC GPS (any NMEA GPS with 1 PPS output)
+  * SerialIO SIO-U232-59 (RS232 to USB converter with +5V on DB9 pin 9)
+
+## Biomed-eMains-eFM-x.dll
+In toder to to inteface the magnetometer, the project uses a .NET wrapper that can be found here https://github.com/lenazh/Biomed-eMains-eFM-x . The wrapper encapsulates the eFM-x API.dll functions into an object. **The wrapper uses customized version of eFM-x API.dll that behaves differently from the one coming with the device (as of 01/2016).**
 
 ## Obtaining Google authorization credentials
 This program stores data in Google Drive to make collaboration easy, and ensure the computer doesn't run out of space. In order to function properly, you need to first obtain the authorization credential that the program will use to log in to Google Drive.
