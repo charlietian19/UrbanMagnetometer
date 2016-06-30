@@ -49,7 +49,7 @@ Use Data Grabber for a long-term magnetic field recording. Once the recording st
 
 ## Using Sample Grabber
 
-## Output data structure
+# Output data structure
 The stream of data from each station is partitioned into one-hour-long portions and uploaded to the Google Drive. Each portion contains X, Y and Z magnetic field data, and precision timing information in separate files. The files are put into a zip archive, and uploaded into a folder corresponding to when the data was recorded: 
 ``/MagneticFieldData/(year)/(month)/(day)/(hour)/(station name)/(data file)``
 
@@ -76,7 +76,7 @@ double angle_degrees; 	// GPS heading in degrees
 The start field is the index of where the chunk data begins in ``raw_x``, ``raw_y`` and ``raw_z`` files (so 8 * start is the offset in bytes of the chunk start in each file). length is the number of sequential values in each X, Y, and Z arrays that arrived within this chunk. ``valid`` is set to 1 when enough data is available to interpolate the GPS time, and 0 when it’s not (for example, if GPS receiver hasn’t sent any data in the last several minutes). ``ticks`` is the value of the performance counter of the system (ticks since the system start). Typical counter frequency for the sensor stations is ``2533200 Hz``. ``timestamp`` is the interpolated GPS time stamp recorded at the time of the chunk arrival recorded as Unix time in UTC timezone. ``latitude`` and ``longitude`` are the sensor coordinates recorded as a floating point number. For example, 12311.12 translates into 123 degrees 11.12 minutes. ``speed_knots`` is the speed of the sensor in knots, and ``angle_degrees`` is the heading of the sensor in degrees with respect to the north. The coordinates, speed, and heading are updated once per second and are not interpolated. 
 
 
-## Structure of the application
+# Structure of the application
 
   * ``DataGrabber`` - logs the data continuously for long periods of time
     * ``DataGrabberForm`` - form logic of ``DataGrabber`` (inherits from ``MagnetometerForm``)
