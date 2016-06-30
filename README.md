@@ -134,7 +134,7 @@ The start field is the index of where the chunk data begins in ``raw_x``, ``raw_
       * ``NaiveTimeEstimator`` - returns absolute Unix timestamp of the event given its absolute Stopwatch counter value
       * ``LagSpikeFilter`` - infers whether a magnetic data chunk arrived on time or delayed due to the operating system being busy. If the chunk was delayed, replaces the actual arrival time with interpolated arrival time.
 
-# Application configuration
+# Application config.
 The configuration files ``DataGrabber.exe.config`` (Data Grabber) and ``DogeStation2.exe.config`` (Sample Recorder) can be found in the application installation directory. The contain the default configuration for each application. The parameters are:
 
   * ``DataCacheFolder`` - where the cached magnetic data and failed uploads are stored
