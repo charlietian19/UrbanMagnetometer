@@ -25,8 +25,7 @@ namespace SampleGrabber
         protected IFilter[] averages = new MovingAverage[3];
         protected IFilter[] subsamples = new Subsample[3];
         protected RollingBuffer[] buffers = new RollingBuffer[3];
-        protected LagSpikeFilter lagFilter = 
-            new LagSpikeFilter(Settings.LagFilterFitPoints);
+        protected LagSpikeFilter lagFilter;
 
         protected ITimeSource gps;
         protected ITimeEstimator interpolator = new NaiveTimeEstimator();
@@ -67,6 +66,7 @@ namespace SampleGrabber
                 scheduler.FinishedEvent += Scheduler_FinishedEvent;
                 gpsTimeoutTimer = new System.Timers.Timer(5000);
                 gpsTimeoutTimer.Elapsed += GpsTimeoutTimer_Elapsed;
+                lagFilter = new LagSpikeFilter(Settings.LagFilterFitPoints);
                 lagFilter.OnPop += LagFilter_OnPop;
                 lagFilter.ToleranceHigh = Settings.LagFilterToleranceHigh;
                 lagFilter.ToleranceLow = Settings.LagFilterToleranceLow;
