@@ -15,7 +15,7 @@ If you don't have 4.5 redistributable, you can download one from Microsoft websi
 I've been using these ASUS X551 laptop to operate four synchronized stations - https://www.amazon.com/15-6-inch-Celeron-2-16GHz-Processor-Windows/dp/B00L49X8E6
 
 ## Hardware
-Each station was built with the following devices:
+Each station was built with the following:
 
   * ASUS X551 laptop (any computer satisfying the system requirements).
   * Biomed eFM3A Fluxgate magnetometer
@@ -44,13 +44,39 @@ After logging in, build the installer project. This will add the authentication 
 
 Data Grabber is useful for long-term magnetic data recording. Sample Grabber is useful for obtaining short magnetic data samples.
 
-## Powering Biomed magnetometer with a battery pack
-
 ## Using Data Grabber
+Use Data Grabber for a long-term magnetic field recording. Once the recording starts, it will upload the magnetic field data into the Google Drive in hour by hour chunks. All timestamps are in UTC timezone.
 
 ## Using Sample Grabber
 
-# Technical documantation
+## Output data structure
+The stream of data from each station is partitioned into one-hour-long portions and uploaded to the Google Drive. Each portion contains X, Y and Z magnetic field data, and precision timing information in separate files. The files are put into a zip archive, and uploaded into a folder corresponding to when the data was recorded: 
+``/MagneticFieldData/(year)/(month)/(day)/(hour)/(station name)/(data file)``
+
+The data arrives from Biomed sensors in chunks of ~300-1000 points (see the diagram). Each sensor has a single ADC that switches between X, Y, and Z channels at three times the sampling rate. Upon arrival the data from three channels is separated into ``raw_x``, ``raw_y``, and ``raw_z`` files, correspondingly.
+
+The ``raw_x``, ``raw_y`` and ``raw_z`` files are arrays of double precision floating point, separated in time by the sampling period. The X, Y, Z values with the same array index correspond to X, Y, Z components of a single vector field measurement. Because of how the device works, the vector field components are not recorded at exactly the same time. All field values are in microtesla.
+
+The time data files describes when each chunk of data was acquired. It is structured as an array of records describing the sequence of chunks as they arrive. Each chunk description has the following structure with fields in this order (63 bytes per record):
+
+```c
+int64_t start;		// index of the chunk data start in X, Y, Z arrays
+int32_t length; 		// number of points in the chunk in X, Y, Z arrays
+byte valid;			// 1 if time is valid, 0 otherwise
+int64_t ticks;	 	// performance counter value in ticks
+double timestamp;	 	// interpolated Unix timestamp (UTC)
+double latitude;	 	// GPS latitude
+char ew;			// ASCII “E” if East, “W” if West
+double longitude;	 	// GPS longitude
+char ns;			// ASCII “S” if South, “N” if North
+double speed_knots;	 	// GPS speed in knots
+double angle_degrees; 	// GPS heading in degrees
+```
+
+The start field is the index of where the chunk data begins in ``raw_x``, ``raw_y`` and ``raw_z`` files (so 8 * start is the offset in bytes of the chunk start in each file). length is the number of sequential values in each X, Y, and Z arrays that arrived within this chunk. ``valid`` is set to 1 when enough data is available to interpolate the GPS time, and 0 when it’s not (for example, if GPS receiver hasn’t sent any data in the last several minutes). ``ticks`` is the value of the performance counter of the system (ticks since the system start). Typical counter frequency for the sensor stations is ``2533200 Hz``. ``timestamp`` is the interpolated GPS time stamp recorded at the time of the chunk arrival recorded as Unix time in UTC timezone. ``latitude`` and ``longitude`` are the sensor coordinates recorded as a floating point number. For example, 12311.12 translates into 123 degrees 11.12 minutes. ``speed_knots`` is the speed of the sensor in knots, and ``angle_degrees`` is the heading of the sensor in degrees with respect to the north. The coordinates, speed, and heading are updated once per second and are not interpolated. 
+
+
+## Technical documentation
 
   * DataGrabber - logs the data continuously for long periods of time
   * SampleGrabber - records short magnetic data samples
