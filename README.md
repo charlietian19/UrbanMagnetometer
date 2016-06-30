@@ -6,13 +6,10 @@ and uploads it to the Google Drive for further processing.
 
 ## System requirements
 
-This program was developed using .NET framework v4.5.2, and was running properly on Windows 8 and Windows 10 systems.
-
-System requirements for .NET framework 4.5 can be found here - https://msdn.microsoft.com/en-us/library/8z6watww(v=vs.110).aspx
-
-If you don't have 4.5 redistributable, you can download one from Microsoft website - https://www.microsoft.com/en-us/download/details.aspx?id=42642
-
-I've been using these ASUS X551 laptop to operate four synchronized stations - https://www.amazon.com/15-6-inch-Celeron-2-16GHz-Processor-Windows/dp/B00L49X8E6
+  * This program was developed using .NET framework v4.5.2, and was running properly on Windows 8 and Windows 10 systems.
+  * System requirements for .NET framework 4.5 can be found here - https://msdn.microsoft.com/en-us/library/8z6watww(v=vs.110).aspx
+  * If you don't have 4.5 redistributable, you can download one from Microsoft website - https://www.microsoft.com/en-us/download/details.aspx?id=42642
+  * I've been using these ASUS X551 laptop to operate four synchronized stations - https://www.amazon.com/15-6-inch-Celeron-2-16GHz-Processor-Windows/dp/B00L49X8E6
 
 ## Hardware
 Each station was built with the following:
@@ -55,9 +52,20 @@ Select the magnetic sensor and serial GPS from the corresponding drop-down boxes
 
 After the correct GPS port is selected, click "Open" on the right of the port name. The red "Disconnected" text on the right should become green and display the current UTC time. It might take some time for the GPS to acquire the sattelites. Sometimes you need to click "Close" and "Open" again to receive the signal. If the UTC time is displayed, but the text is red, check if the 1 PPS pulse is routed to DB9 pin 1. The text will turn red if the GPS data does not arrive for over five seconds. Wait for 5-10 timestamps to arrive before recording the magnetic field so that the timestamp interpolation can work correctly.
 
-Set the name of the station how you want it to appear in the Google Drive uploads. The name will persist between the restarts. Set the display and low-pass filter parameters in the Sample Preview box. This only affects the preview, the recorded data is written at the full rate with no filtering. Click "Record" to start recording, and "Cancel" to stop. The magnetic data will upload to Google Drive automatically once per hour. Click "Upload" to upload any cached cached data if you don't want to wait.
+Set the name of the station how you want it to appear in the Google Drive uploads. The name will persist between the restarts. Set the display and low-pass filter parameters in the Sample Preview box. This only affects the preview, the magnetic data is written at full rate with no filtering. Click "Record" to start recording, and "Cancel" to stop. The magnetic data will upload to Google Drive automatically once per hour. Click "Upload" to upload any cached cached data if you don't want to wait.
 
 ## Using Sample Grabber
+Use Sample Grabber for recording magnetic data samples. Once you recird a sample, you can add a title and commentary, and upload (or discard) it. All timestamps are in the UTC timezone.
+
+![Sample Recorder screenshot](https://raw.githubusercontent.com/lenazh/UrbanMagnetometer/master/SampleRecorder.png "Sample Recorder screenshot")
+
+On the first run, a browser window will open with the program requesting the autorization for the Google Drive serivice. Log in with the account where you want the magnetic data to be uploaded.
+
+Select the magnetic sensor and serial GPS from the corresponding drop-down boxes. The first available magnetometer and the serial port will be pre-selected. If the correct option doesn't appear, check if the devices are connected and the drivers are installed and click "Refresh". 
+
+After the correct GPS port is selected, click "Open" on the right of the port name. The red "Disconnected" text on the right should become green and display the current UTC time. It might take some time for the GPS to acquire the sattelites. Sometimes you need to click "Close" and "Open" again to receive the signal. If the UTC time is displayed, but the text is red, check if the 1 PPS pulse is routed to DB9 pin 1. The text will turn red if the GPS data does not arrive for over five seconds. Wait for 5-10 timestamps to arrive before recording the magnetic field so that the timestamp interpolation can work correctly.
+
+Set the sample name and comment of how you want it to appear Google Drive uploads. If the sample name contains ``\``, it will create nested folders and the text after the last ``\`` becomes the file name. You can set the name and commentary before or after the recording is done. The display and low-pass filter parameters in the Sample Preview box only affect the preview, the magnetic data is written at full rate with no filtering. Click "Record" to start recording, and "Cancel" to stop. The data will append to the magnetic data buffer. Click "Discard" to clear the buffer, or "Upload" to upload the data and clear the buffer. Clicking "Record" again without uploading or discarding the data will append the data to the current buffer contents.
 
 
 # Output data structure
@@ -125,3 +133,36 @@ The start field is the index of where the chunk data begins in ``raw_x``, ``raw_
       * ``NaiveTimeValidator`` - decides whether the received GPS data arrived on time or was delayed due to the operating system being busy
       * ``NaiveTimeEstimator`` - returns absolute Unix timestamp of the event given its absolute Stopwatch counter value
       * ``LagSpikeFilter`` - infers whether a magnetic data chunk arrived on time or delayed due to the operating system being busy. If the chunk was delayed, replaces the actual arrival time with interpolated arrival time.
+
+# Application configuration
+The configuration files ``DataGrabber.exe.config`` (Data Grabber) and ``DogeStation2.exe.config`` (Sample Recorder) can be found in the application installation directory. The contain the default configuration for each application. The parameters are:
+
+  * ``DataCacheFolder`` - where the cached magnetic data and failed uploads are stored
+  * ``CredentialDirectory`` - where Google authorization credentials are stored
+  * ``MaxActiveUploads`` - maximum number of simultaneous Google Drive uploads
+  * ``MaxRetryCount`` - maximum number of retries before the upload is considered to be failed
+  * ``MaxListResults`` - maximum number of files returned by Google Api queries
+  * ``FilesMimeType`` - MIME type files are created with
+  * ``FoldersMimeType`` - MIME type directories are created with
+  * ``GoogleAuthUser`` - Google service user
+  * ``GoogleApplicationName`` - Google service application name
+  * ``RemoteRoot`` - Google drive folder where all data will be uploaded
+  * ``WaitBetweenRetriesSeconds`` - time delay between the retries
+  * ``EnableDelayBeforeUpload`` - enables randomized delay before the upload (reduces the race for the directory tree creation between the stations, and the number of 403 errors from Google Drive)
+  * ``MaxDelayBeforeUploadSeconds`` - maximum delay before the upload in seconds
+  * ``EnableFailedRetryWorker`` - enables the thread that retries uploading the failed files
+  * ``MinDelayBetweenFailedRetriesSeconds`` - minimum delay between the failed upload retries
+  * ``MaxDelayBetweenFailedRetriesSeconds`` - maximum delay between the failed upload retries
+  * ``StationName`` - default station name (will be used if the registry entry is missing)
+  * ``SamplingRate`` - data acquisition rate of the magnetometer
+  * ``DataUnits`` - what units the data should be converted to (V or uT)
+  * ``ChannelNameX`` - X channel name
+  * ``ChannelNameY`` - Y channel name
+  * ``ChannelNameZ`` - Z channel name
+  * ``ChannelNameTime`` - time channel name
+  * ``DataFileNameFormat`` - magnetic data file name format
+  * ``TimeFileNameFormat`` - time file name format
+  * ``ZipFileNameFormat`` - compressed file name format
+  * ``LagFilterFitPoints`` - magnetic data lag filter history length
+  * ``LagFilterToleranceLow`` - lag spikes larger than this value (in seconds) will be rejected
+  * ``LagFilterToleranceHigh`` - Lag spikes larger than this value (in seconds) will **not** be rejected
