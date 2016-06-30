@@ -19,7 +19,7 @@ Each station was built with the following:
 
   * ASUS X551 laptop (any computer satisfying the system requirements).
   * Biomed eFM3A Fluxgate magnetometer
-  * Garmin 18x LVC GPS (any NMEA GPS with 1 PPS output)
+  * Garmin 18x LVC GPS (any NMEA GPS with 1 PPS output routed to pin 1, Carrier Detect)
   * SerialIO SIO-U232-59 (RS232 to USB converter with +5V on DB9 pin 9)
 
 ## Biomed-eMains-eFM-x.dll
@@ -45,9 +45,20 @@ After logging in, build the installer project. This will add the authentication 
 Data Grabber is useful for long-term magnetic data recording. Sample Grabber is useful for obtaining short magnetic data samples.
 
 ## Using Data Grabber
-Use Data Grabber for a long-term magnetic field recording. Once the recording starts, it will upload the magnetic field data into the Google Drive in hour by hour chunks. All timestamps are in UTC timezone.
+Use Data Grabber for a long-term magnetic field recording. Once the recording starts, it will upload the magnetic field data into the Google Drive in hour by hour chunks. All timestamps are in the UTC timezone.
+
+![Data Recorder screenshot](https://raw.githubusercontent.com/lenazh/UrbanMagnetometer/master/DataRecorder.png "Data Recorder screenshot")
+
+On the first run, a browser window will open with the program requesting the autorization for the Google Drive serivice. Log in with the account where you want the magnetic data to be uploaded.
+
+Select the magnetic sensor and serial GPS from the corresponding drop-down boxes. The first available magnetometer and the serial port will be pre-selected. If the correct option doesn't appear, check if the devices are connected and the drivers are installed and click "Refresh". 
+
+After the correct GPS port is selected, click "Open" on the right of the port name. The red "Disconnected" text on the right should become green and display the current UTC time. It might take some time for the GPS to acquire the sattelites. Sometimes you need to click "Close" and "Open" again to receive the signal. If the UTC time is displayed, but the text is red, check if the 1 PPS pulse is routed to DB9 pin 1. The text will turn red if the GPS data does not arrive for over five seconds. Wait for 5-10 timestamps to arrive before recording the magnetic field so that the timestamp interpolation can work correctly.
+
+Set the name of the station how you want it to appear in the Google Drive uploads. The name will persist between the restarts. Set the display and low-pass filter parameters in the Sample Preview box. This only affects the preview, the recorded data is written at the full rate with no filtering. Click "Record" to start recording, and "Cancel" to stop. The magnetic data will upload to Google Drive automatically once per hour. Click "Upload" to upload any cached cached data if you don't want to wait.
 
 ## Using Sample Grabber
+
 
 # Output data structure
 The stream of data from each station is partitioned into one-hour-long portions and uploaded to the Google Drive. Each portion contains X, Y and Z magnetic field data, and precision timing information in separate files. The files are put into a zip archive, and uploaded into a folder corresponding to when the data was recorded: 
@@ -76,8 +87,7 @@ double angle_degrees;   // GPS heading in degrees
 The start field is the index of where the chunk data begins in ``raw_x``, ``raw_y`` and ``raw_z`` files (so 8 * start is the offset in bytes of the chunk start in each file). length is the number of sequential values in each X, Y, and Z arrays that arrived within this chunk. ``valid`` is set to 1 when enough data is available to interpolate the GPS time, and 0 when it’s not (for example, if GPS receiver hasn’t sent any data in the last several minutes). ``ticks`` is the value of the performance counter of the system (ticks since the system start). Typical counter frequency for the sensor stations is ``2533200 Hz``. ``timestamp`` is the interpolated GPS time stamp recorded at the time of the chunk arrival recorded as Unix time in UTC timezone. ``latitude`` and ``longitude`` are the sensor coordinates recorded as a floating point number. For example, 12311.12 translates into 123 degrees 11.12 minutes. ``speed_knots`` is the speed of the sensor in knots, and ``angle_degrees`` is the heading of the sensor in degrees with respect to the north. The coordinates, speed, and heading are updated once per second and are not interpolated. 
 
 
-# Structure of the application
-
+# Application structure
   * ``DataGrabber`` - logs the data continuously for long periods of time
     * ``DataGrabberForm`` - form logic of ``DataGrabber`` (inherits from ``MagnetometerForm``)
   * ``SampleGrabber`` - records short magnetic data samples
