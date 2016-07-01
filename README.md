@@ -35,7 +35,9 @@ How to obtain the secret key:
 
 ## Deploying magnetometers
 
-After the Google authorization credentials are obtained, build the sample logger project. Run sample logger, which will open the browser and prompt you to log into your Google account (where the data will be uploaded). Keep in  mind that by default the logger records the magnetic field at 4ksps, so the data can add up quickly.
+After the Google authorization credentials are obtained, build the sample logger project. Open the registry editor, create a key ``HKEY_CURRENT_USER\SOFTWARE\Budker labs\NURI Magnetometer`` and add two string values: ``cache`` and ``StationName``. Set ``StationName`` to any name, and ``cache`` to the full path to an existing folder. This will let the application to start up.
+
+Run the application. It will open the browser and prompt you to log into your Google account (where the data will be uploaded). Keep in  mind that by default the logger records the magnetic field at 4ksps, so the data can add up quickly.
 
 After logging in, build the installer project. This will add the authentication information into the installer, so you won't have to log in on target machines. It will also create the registry keys that the application needs to run. 
 
